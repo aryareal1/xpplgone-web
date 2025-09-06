@@ -1,9 +1,8 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import { FlatCompat } from '@eslint/eslintrc';
 
 const compat = new FlatCompat({
-  // import.meta.dirname is available after Node.js v20.11.0
   baseDirectory: import.meta.dirname,
-})
+});
 
 const eslintConfig = [
   ...compat.config({
@@ -16,22 +15,7 @@ const eslintConfig = [
     ],
     plugins: ['prettier', 'jsx-a11y'],
     rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          trailingComma: 'all',
-          semi: false,
-          tabWidth: 2,
-          singleQuote: true,
-          printWidth: 80,
-          endOfLine: 'auto',
-          arrowParens: 'always',
-          plugins: ['prettier-plugin-tailwindcss'],
-        },
-        {
-          usePrettierrc: false,
-        },
-      ],
+      'prettier/prettier': 'error',
       'react/react-in-jsx-scope': 'off',
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/aria-props': 'warn',
@@ -41,6 +25,9 @@ const eslintConfig = [
       'jsx-a11y/role-supports-aria-props': 'warn',
     },
   }),
-]
+  {
+    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+  },
+];
 
 export default eslintConfig;
