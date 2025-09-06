@@ -1,10 +1,24 @@
 {
-  "trailingComma": "all",
-  "semi": true,
-  "tabWidth": 2,
   "singleQuote": true,
-  "printWidth": 120,
-  "endOfLine": "auto",
+  "trailingComma": "es5",
   "arrowParens": "always",
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "jsxSingleQuote": false,
+  "jsxBracketSameLine": false,
+  "semi": true,
+  "endOfLine": "lf",
+  "importOrder": [
+    "^react$",
+    "^next",
+    "<THIRD_PARTY_MODULES>",
+    "^@/components/(.*)$",
+    "^@/utils/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
   "plugins": ["prettier-plugin-tailwindcss"]
 }
