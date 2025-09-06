@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { pageTitle } from '@/lib/utils';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: pageTitle('Login'),
@@ -31,7 +32,7 @@ export default async function RootLayout({
         className={`antialiased ${robotoSlab.variable} ${outfit.variable} flex h-dvh items-center justify-center`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <Suspense>{children}</Suspense>
         </ThemeProvider>
         <Analytics />
       </body>
