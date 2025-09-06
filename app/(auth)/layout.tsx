@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import '../globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Outfit, Roboto_Slab } from 'next/font/google';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
 import { pageTitle } from '@/lib/utils';
 
@@ -26,9 +24,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  if ((await supabase.auth.getUser()).data.user) return redirect('/');
-
   return (
     <html lang="id" suppressHydrationWarning>
       <head />
