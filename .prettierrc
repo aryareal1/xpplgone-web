@@ -9,7 +9,7 @@
   "jsxSingleQuote": false,
   "jsxBracketSameLine": false,
   "semi": true,
-  "endOfLine": "lf",
+  "endOfLine": "auto",
   "importOrder": [
     "^react$",
     "^next",
