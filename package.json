@@ -4,7 +4,8 @@
   "description": "Website for my school class",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -p 2587 --turbopack",
+    "dev:lan": "next dev -H 0.0.0.0 -p 2587 --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
