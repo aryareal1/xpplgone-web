@@ -96,7 +96,7 @@ export default function AppSidebar() {
               <Link href="/" className="flex items-center gap-2 whitespace-nowrap">
                 <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
                 <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-                  X PPLG 1
+                  {process.env.NEXT_PUBLIC_CLASS_NAME}
                 </h1>
               </Link>
               <Button size="icon" variant="ghost" onClick={toggleSidebar} pointer>

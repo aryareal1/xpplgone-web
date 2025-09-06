@@ -23,7 +23,7 @@ import { useUser } from '@/hooks/use-user';
 import { IUser } from '@/app/api/user/route';
 
 const navigations = [
-  { name: 'Beranda', path: '/' },
+  { name: 'Home', path: '/' },
   { name: 'Tugas', path: '/assigments' },
   { name: 'Jadwal', path: '/schedules' },
   { name: 'Album', path: '/albums' },
@@ -79,7 +79,7 @@ export default function NavBar() {
           <Link href="/" className="flex items-center gap-2">
             <Image src="/favicon.ico" alt="Logo" width={35} height={35} priority />
             <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-              X PPLG 1
+              {process.env.NEXT_PUBLIC_CLASS_NAME}
             </h1>
           </Link>
         </m.div>

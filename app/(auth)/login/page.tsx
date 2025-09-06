@@ -33,31 +33,15 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* <header className="flex gap-2 items-center absolute -translate-y-30 scale-110 lg:scale-120">
-      <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
-      <h1 className="font-bold text-xl bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent font-slab">
-        X PPLG 1
-      </h1>
-    </header>
-    <main className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex flex-col items-center gap-5 lg:scale-110">
-      <h1 className="font-bold text-xl leading-none">Masuk</h1>
-      <Button variant="secondary" className="dark:bg-gray-700 bg-gray-50" pointer onClick={handleLogin}>
-        <Avatar className="size-5">
-          <AvatarImage src="/images/google_icon.webp" />
-        </Avatar>
-        <p className="font-outfit">Login dengan Google</p>
-      </Button>
-      <p className="text-sm text-gray-400 font-outfit text-center">Pastikan kamu adalah murid kelas X PPLG 1 dan <br /> login dengan akun SMK N 1 Kandeman</p>
-    </main> */}
       <header className="absolute top-5 flex scale-110 items-center gap-2 lg:scale-120">
         <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
         <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-          X PPLG 1
+          {process.env.NEXT_PUBLIC_CLASS_NAME}
         </h1>
       </header>
       <Card className="font-outfit w-80 scale-120 bg-gray-100 dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>Login ke X PPLG 1</CardTitle>
+          <CardTitle>Login ke {process.env.NEXT_PUBLIC_CLASS_NAME}</CardTitle>
           <CardDescription>Dapatkan akses fitur khusus kelas.</CardDescription>
         </CardHeader>
         <CardContent>

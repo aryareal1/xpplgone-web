@@ -20,7 +20,7 @@ export default function ClassOnly() {
         FORBIDDEN
       </h1>
       <h2 className={`${funnel.className} text-lg`}>
-        Halaman ini dikhususkan untuk murid kelas X PPLG 1
+        Halaman ini dikhususkan untuk murid kelas {process.env.NEXT_PUBLIC_CLASS_NAME}
       </h2>
       <p className={`${funnel.className} mt-5 text-gray-600 dark:text-gray-400`}>
         Silahkan login untuk melanjutkan!

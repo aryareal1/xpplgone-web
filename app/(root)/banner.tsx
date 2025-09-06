@@ -43,7 +43,7 @@ export default function Banner() {
             variants={variants[1]}
             className="font-slab text-3xl font-bold md:text-5xl lg:text-6xl xl:text-7xl"
           >
-            X PPLG 1
+            {process.env.NEXT_PUBLIC_CLASS_NAME}
           </m.h1>
           <m.p variants={variants[1]} className="text-lg md:text-2xl lg:text-3xl xl:text-4xl">
             of <b>SMK N 1 Kandeman</b>

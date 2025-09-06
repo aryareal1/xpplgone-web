@@ -7,10 +7,11 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
+import { pageTitle } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Home | X PPLG 1',
-  description: 'Website for class X PPLG 1 of SMK N 1 Kandeman',
+  title: pageTitle('Home'),
+  description: `Website for class ${process.env.NEXT_PUBLIC_CLASS_NAME} of SMK N 1 Kandeman`,
 };
 
 const robotoSlab = Roboto_Slab({

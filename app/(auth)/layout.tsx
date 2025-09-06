@@ -5,10 +5,11 @@ import { Outfit, Roboto_Slab } from 'next/font/google';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
+import { pageTitle } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Login | X PPLG 1',
-  description: 'Login to the website of class X PPLG 1 of SMK N 1 Kandeman',
+  title: pageTitle('Login'),
+  description: `Login to the website of class ${process.env.NEXT_PUBLIC_CLASS_NAME} of SMK N 1 Kandeman`,
 };
 
 const robotoSlab = Roboto_Slab({
