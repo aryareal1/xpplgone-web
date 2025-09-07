@@ -19,16 +19,22 @@ export async function GET() {
 export async function POST(req: Request) {
   const supabase = await createClient();
   let o = await req.json();
+  if (!['data', 'dates'].includes(o.table))
+    return Response.json({ error: true, message: 'Invalid table name' }, { status: 400 });
 
   try {
-    if (o.table === 'data') await supabase.schema('funds').from('data').upsert(o.data);
+    let response;
+    const table = supabase.schema('funds').from(o.table);
+    if (o.delete) {
+      let del = table.delete();
+      for (let key in o.value) del.eq(key, o.value[key]);
+      response = await del;
+    } else response = await table.upsert(o.value);
 
-    if (o.table === 'dates')
-      await supabase.schema('funds').from('dates').upsert<Partial<IFundsDate>>({ date: o.date });
-
-    return new Response();
+    if (response.error) return Response.json(response.error, { status: 500 });
+    return new Response('OK');
   } catch {
-    return Response.json({ error: true, message: 'Something went wrong' }, { status: 5000 });
+    return Response.json({ error: true, message: 'Something went wrong' }, { status: 500 });
   }
 }
 
