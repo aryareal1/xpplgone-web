@@ -228,6 +228,11 @@ export default function FundsPage() {
             else if (operation === 'DELETE')
               columns = columns.filter((w) => 'field' in w && w.field !== newColumns.field);
 
+            columns.sort((a, b) =>
+              'field' in a && 'field' in b && a.field && b.field
+                ? new Date(a.field).getTime() - new Date(b.field).getTime()
+                : 0
+            );
             gapi.setGridOption('columnDefs', columns);
           }
         }
