@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { AgGridReact } from 'ag-grid-react';
@@ -8,113 +7,229 @@ import {
   ModuleRegistry,
   themeQuartz,
   INumberCellEditorParams,
+  CellContextMenuEvent,
+  ColumnHeaderContextMenuEvent,
+  GridApi,
 } from 'ag-grid-community';
 import { useUser } from '@/hooks/use-user';
 import SectionHeader from '@/components/section-header';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { IFundsData, IFundsDate } from '@/app/api/funds/route';
 import { useStudents } from '@/hooks/use-students';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusIcon, RotateCcwIcon } from 'lucide-react';
+import {
+  ChartNoAxesColumnIcon,
+  PencilLineIcon,
+  PlusIcon,
+  ReceiptTextIcon,
+  RotateCcwIcon,
+  Trash2Icon,
+  User2Icon,
+} from 'lucide-react';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PopoverArrow } from '@radix-ui/react-popover';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useTheme } from 'next-themes';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-const myTheme = themeQuartz.withParams({
-  backgroundColor: '#1f2836',
-  browserColorScheme: 'dark',
-  chromeBackgroundColor: {
-    ref: 'foregroundColor',
-    mix: 0.07,
-    onto: 'backgroundColor',
-  },
-  columnBorder: true,
-  foregroundColor: '#FFF',
-  headerFontSize: 14,
-  headerColumnBorder: { color: '#ffffff26' },
-  headerColumnBorderHeight: '100%',
-  fontFamily: {
-    googleFont: 'outfit',
-  },
-  pinnedColumnBorder: { color: '#ffffff26', width: 2 },
-  spacing: 6,
-  headerVerticalPaddingScale: 1.5,
-});
+const allowedRoles = [
+  'owner',
+  'admin',
+  'teacher',
+  'homeroom_teacher',
+  'president',
+  'vice_president',
+  'treasurer',
+];
 
 export default function FundsPage() {
   const { user } = useUser();
+  const { resolvedTheme } = useTheme();
+  const isEditor = useMemo(() => user && allowedRoles.includes(user.role), [user]);
+
+  // AG Grid
+  const gridTheme = useMemo(
+    () =>
+      themeQuartz.withParams({
+        backgroundColor: 'var(--color-grid)',
+        headerBackgroundColor: 'var(--color-grid-header)',
+        browserColorScheme: resolvedTheme,
+        chromeBackgroundColor: {
+          ref: 'foregroundColor',
+          mix: 0.07,
+          onto: 'backgroundColor',
+        },
+        columnBorder: true,
+        foregroundColor: 'var(--color-grid-foreground)',
+        headerFontSize: 14,
+        headerColumnBorder: { color: 'var(--color-grid-border)' },
+        headerColumnBorderHeight: '100%',
+        pinnedColumnBorder: { color: 'var(--color-grid-border)', width: 2 },
+        borderColor: 'var(--color-grid-border)',
+        fontFamily: {
+          googleFont: 'outfit',
+        },
+        spacing: 6,
+        headerVerticalPaddingScale: 1.5,
+      }),
+    [resolvedTheme]
+  );
+  const gridRef = useRef<AgGridReact>(null); // eslint-disable-next-line react-hooks/exhaustive-deps
+  const gapi = useMemo(() => gridRef.current?.api, [gridRef.current]);
 
   // Database
   const supabase = createClient();
   const [data, setData] = useState<IFundsData[]>([]);
-  const [dates, setDates] = useState<IFundsDate[]>([]);
   const [students] = useStudents();
 
   useEffect(() => {
-    axios.get('/api/funds').then(({ data }) => {
-      setData(data.data);
-      setDates(data.dates);
+    if (!gapi) return;
+    axios.get<{ data: IFundsData[]; dates: IFundsDate[] }>('/api/funds').then(({ data: r }) => {
+      const { data, dates } = r;
+      setData(data);
+
+      gapi.setGridOption(
+        'rowData',
+        students.map((s, i) => {
+          let row = {
+            no: i + 1,
+            name: s.full_name,
+            uid: s.uid,
+          };
+          data
+            .filter((d) => d.user === s.uid)
+            // @ts-expect-error "`d.date` is valid for index"
+            .forEach((d) => (row[d.date] = d.amount));
+          return row;
+        })
+      );
+
+      gapi.setGridOption('columnDefs', [
+        {
+          field: 'no',
+          width: 42,
+          sortable: false,
+          resizable: false,
+          suppressMovable: true,
+          pinned: 'left',
+          cellClass: 'text-center',
+        },
+        {
+          field: 'name',
+          headerName: 'Nama',
+          width: 220,
+          suppressMovable: true,
+          pinned: 'left',
+        },
+        ...dates.map<ColDef>((d) => ({
+          field: d.date,
+          enableCellChangeFlash: true,
+          valueFormatter: (params) => params.data[d.date]?.toLocaleString('id-ID'),
+          headerComponent: DateDisplay,
+          headerComponentParams: {
+            date: d.date,
+          },
+          width: 82,
+          sortable: false,
+          suppressMovable: true,
+          resizable: false,
+          ...(isEditor
+            ? {
+                editable: true,
+                cellEditor: 'agNumberCellEditor',
+                cellEditorParams: {
+                  precision: 0,
+                } as INumberCellEditorParams,
+              }
+            : {}),
+        })),
+        ...(isEditor
+          ? [
+              {
+                field: 'add',
+                width: 82,
+                resizable: false,
+                suppressMovable: true,
+                headerComponent: AddDateButton,
+              },
+            ]
+          : []),
+      ]);
     });
-
-    // const update = async (
-    //   type?: 'INSERT' | 'UPDATE' | 'DELETE',
-    //   table?: 'data' | 'dates',
-    //   nd?: any
-    // ) => {
-    //   if (!type && !table && !nd) {
-    //     const funds = (await axios.get('/api/funds')).data;
-    //     setData(funds.data);
-    //     setDates(funds.dates);
-    //   } else {
-    //     const f = table === 'data' ? setData : table === 'dates' ? setDates : () => null;
-    //     const k = table === 'data' ? 'id' : table === 'dates' ? 'date' : '';
-
-    //     if (type === 'INSERT') f((data: any[]) => [...data, nd]);
-    //     else if (type === 'UPDATE')
-    //       f((data: any[]) =>
-    //         data.with(
-    //           data.findIndex((v) => v[k] === nd[k]),
-    //           nd
-    //         )
-    //       );
-    //     else if (type === 'DELETE') f((data: any[]) => data.filter((v) => v[k] !== nd[k]));
-    //   }
-    //   if (!table || table === 'dates')
-    //     setDates((data: any[]) =>
-    //       data.toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    //     );
-    // };
 
     const ch = supabase
       .channel('funds', { config: { private: true } })
       .on(
         'broadcast',
         { event: 'postgres_changes' },
-        ({ payload: ev }: { payload: IPostgresChangesEvent }) => {
-          const setFunc = ev.table === 'data' ? setData : setDates,
-            primeKey = ev.table === 'data' ? 'id' : 'date';
+        ({ payload }: { payload: IPostgresChangesEvent }) => {
+          const { table, operation } = payload;
 
-          setFunc((v: any[]) => {
-            if (ev.operation === 'INSERT') return [...v, ev.record];
-            if (ev.operation === 'UPDATE')
-              return v.with(
-                v.findIndex((w) => w[primeKey] === ev.record[primeKey]),
-                ev.record
+          if (table === 'data') {
+            const record = (payload.record || payload.old_record) as IFundsData;
+            let row = gapi.getRowNode(record?.user);
+            row?.setDataValue(record.date, (payload.record as IFundsData | null)?.amount);
+
+            if (operation === 'INSERT') setData((data) => [...data, record]);
+            else if (operation === 'UPDATE')
+              setData((data) =>
+                data.with(
+                  data.findIndex((w) => w.id === record.id),
+                  record
+                )
               );
-            if (ev.operation === 'DELETE')
-              return v.filter((w) => w[primeKey] !== ev.old_record[primeKey]);
+            else if (operation === 'DELETE')
+              setData((data) => data.filter((w) => w.id !== record.id));
+          }
 
-            return v;
-          });
-          if (ev.table === 'dates')
-            setDates((v: any[]) =>
-              v.toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-            );
+          if (table === 'dates') {
+            const record = (payload.record || payload.old_record) as IFundsDate;
+            let columns = gapi.getColumnDefs() || [];
+            let newColumns: ColDef = {
+              field: record.date,
+              enableCellChangeFlash: true,
+              headerComponent: DateDisplay,
+              headerComponentParams: {
+                date: record.date,
+              },
+              width: 82,
+              sortable: false,
+              suppressMovable: true,
+              resizable: false,
+              ...(isEditor
+                ? {
+                    editable: true,
+                    cellEditor: 'agNumberCellEditor',
+                    cellEditorParams: {
+                      precision: 0,
+                    } as INumberCellEditorParams,
+                  }
+                : {}),
+            };
+
+            if (operation === 'INSERT')
+              columns = [...columns.slice(0, -1), newColumns, ...columns.slice(-1)];
+            else if (operation === 'UPDATE')
+              columns = columns.with(
+                columns.findIndex((w) => 'field' in w && w.field === newColumns.field),
+                newColumns
+              );
+            else if (operation === 'DELETE')
+              columns = columns.filter((w) => 'field' in w && w.field !== newColumns.field);
+
+            gapi.setGridOption('columnDefs', columns);
+          }
         }
       );
     supabase.realtime.setAuth().then(() => ch.subscribe());
@@ -122,62 +237,13 @@ export default function FundsPage() {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [supabase]);
+  }, [gapi, isEditor, students, supabase]);
 
-  // AG Grid
-  const [columnsDef, setColumnsDef] = useState<ColDef[]>([]);
-  const [rowData, setRowData] = useState<any[]>([]);
-
-  useEffect(() => {
-    setColumnsDef([
-      {
-        field: 'no',
-        width: 52,
-        sortable: false,
-        resizable: false,
-        suppressMovable: true,
-        pinned: 'left',
-      },
-      {
-        field: 'name',
-        headerName: 'Nama',
-        width: 220,
-        headerClass: 'text-center',
-        suppressMovable: true,
-        pinned: 'left',
-      },
-      ...dates.map<ColDef>((d) => ({
-        field: d.date,
-        headerComponent: DateDisplay,
-        headerComponentParams: {
-          date: d.date,
-        },
-        width: 82,
-        sortable: false,
-        suppressMovable: true,
-        resizable: false,
-        editable: true,
-        cellEditor: 'agNumberCellEditor',
-        cellEditorParams: {
-          precision: 0,
-        } as INumberCellEditorParams,
-      })),
-      {
-        field: 'add',
-        width: 82,
-        resizable: false,
-        suppressMovable: true,
-        headerComponent: AddDateButton,
-      },
-    ]);
-    setRowData(
-      students.map((s, i) => ({
-        no: i + 1,
-        name: s.full_name,
-        ...data.map((d) => ({ [d.date]: d.amount })),
-      }))
-    );
-  }, [data, dates, students]);
+  // State
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState<
+    CellContextMenuEvent | ColumnHeaderContextMenuEvent | null
+  >(null);
 
   return (
     <main className="mx-auto mt-5 flex max-w-[90rem] flex-col gap-5 px-4">
@@ -190,19 +256,137 @@ export default function FundsPage() {
           color="bg-green-500"
         />
 
-        <div className="h-130">
+        <div
+          className="h-130"
+          onContextMenu={(ev) => setContextMenuPos({ x: ev.clientX, y: ev.clientY })}
+        >
           <AgGridReact
-            theme={myTheme}
-            columnDefs={columnsDef}
-            rowData={rowData}
+            ref={gridRef}
+            theme={gridTheme}
+            getRowId={(params) => params.data.uid}
             onCellValueChanged={(ev) => {
+              if (!ev.source) return;
               console.log(ev);
+              let [uid, date] = [ev.data.uid, ev.column.getId()];
+              let record = data.find((d) => d.user === uid && d.date === date);
+              let value = ev.value;
+
+              // INSERT
+              if (!record && value)
+                return axios.post('/api/funds', {
+                  table: 'data',
+                  value: {
+                    user: uid,
+                    date,
+                    amount: parseFloat(value),
+                  },
+                });
+              // DELETE
+              if (record && !value)
+                return axios.post('/api/funds', {
+                  table: 'data',
+                  delete: true,
+                  value: { user: uid, date },
+                });
+
+              // UPDATE
+              return axios.post('/api/funds', {
+                table: 'data',
+                value: {
+                  ...record,
+                  amount: value,
+                  updated_at: new Date().toISOString(),
+                  updated_by: user?.uid || '',
+                },
+              });
             }}
             onCellContextMenu={(ev) => {
-              console.log(ev);
-              ev.event?.preventDefault();
+              if (ev.column.getId() === 'add') return;
+              setContextMenu(ev);
+            }}
+            preventDefaultOnContextMenu
+            onColumnHeaderContextMenu={(ev) => {
+              if (ev.column.getId() === 'add') return;
+              setContextMenu(ev);
+            }}
+            onCellEditingStarted={(params) => {
+              const editor = params.api.getCellEditorInstances({
+                rowNodes: [params.node],
+                columns: [params.column],
+              })[0];
+              if (editor && editor.focusIn) editor.focusIn();
             }}
           />
+
+          {contextMenu && (
+            <DropdownMenu open onOpenChange={() => setContextMenu(null)}>
+              <DropdownMenuTrigger asChild>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: contextMenuPos.y,
+                    left: contextMenuPos.x,
+                  }}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="font-outfit font-light dark:bg-gray-800"
+                side="right"
+                align="start"
+              >
+                {'data' in contextMenu ? (
+                  <>
+                    {!['no', 'name'].includes(contextMenu.column.getId()) && (
+                      <>
+                        {isEditor && (
+                          <DropdownMenuItem
+                            className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700"
+                            onClick={() =>
+                              contextMenu.api.startEditingCell({
+                                colKey: contextMenu.column.getId(),
+                                rowIndex: contextMenu.rowIndex || 0,
+                                rowPinned: contextMenu.rowPinned,
+                                key: 'Enter',
+                              })
+                            }
+                          >
+                            <PencilLineIcon /> Edit
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700">
+                          <ReceiptTextIcon /> Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700">
+                      <ChartNoAxesColumnIcon /> Statistik
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700">
+                      <User2Icon /> Profil
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    {!['no', 'name'].includes(contextMenu.column.getId()) && isEditor && (
+                      <DropdownMenuItem
+                        className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700"
+                        onClick={() => {
+                          axios.post('/api/funds', {
+                            table: 'dates',
+                            delete: true,
+                            value: { date: contextMenu.column.getId() },
+                          });
+                        }}
+                      >
+                        <Trash2Icon /> Hapus
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </section>
     </main>
@@ -265,12 +449,12 @@ function AddDateButton() {
                   variant="secondary"
                   size="icon"
                   pointer
-                  className="bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
+                  className="border bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
                   onClick={() => {
                     setOpen(false);
                     axios.post('/api/funds', {
                       table: 'dates',
-                      date: date.toDateString(),
+                      value: { date: date.toDateString() },
                     });
                   }}
                 >
@@ -301,23 +485,19 @@ function AddDateButton() {
   );
 }
 
-interface IPostgresChangesEvent {
+// interface IPostgresChangesEvent {
+//   id: string;
+//   old_record: any;
+//   operation: 'INSERT' | 'UPDATE' | 'DELETE';
+//   record: any;
+//   schema: string;
+//   table: string;
+// }
+interface IPostgresChangesEvent<T = unknown> {
   id: string;
-  old_record: any;
+  old_record?: T;
   operation: 'INSERT' | 'UPDATE' | 'DELETE';
-  record: any;
+  record: T;
   schema: string;
   table: string;
 }
-// interface IPostgresChangesEvent<T extends string, M extends Record<T, unknown>> {
-//   id: string;
-//   old_record?: M[T];
-//   operation: 'INSERT' | 'UPDATE' | 'DELETE';
-//   record: M[T];
-//   schema: string;
-//   table: T;
-// }
-// type FundsSchemaMap = {
-//   data: IFundsData;
-//   dates: IFundsDate;
-// };
