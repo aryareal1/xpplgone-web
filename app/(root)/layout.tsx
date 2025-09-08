@@ -7,6 +7,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { pageTitle } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -45,6 +46,7 @@ export default async function RootLayout({
           </SidebarProvider>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

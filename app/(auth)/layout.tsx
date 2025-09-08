@@ -3,6 +3,7 @@ import '../globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { pageTitle } from '@/lib/utils';
 import { Suspense } from 'react';
 
@@ -35,6 +36,7 @@ export default async function RootLayout({
           <Suspense>{children}</Suspense>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

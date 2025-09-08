@@ -24,6 +24,7 @@
     "@supabase/supabase-js": "^2.57.2",
     "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^1.1.1",
+    "@vercel/speed-insights": "^1.2.0",
     "ag-grid-community": "^34.1.2",
     "ag-grid-react": "^34.1.2",
     "axios": "^1.11.0",
