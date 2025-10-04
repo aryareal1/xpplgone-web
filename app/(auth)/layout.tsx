@@ -4,12 +4,12 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { pageTitle } from '@/lib/utils';
 import { Suspense } from 'react';
+import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: pageTitle('Login'),
-  description: `Login to the website of class ${process.env.NEXT_PUBLIC_CLASS_NAME} of SMK N 1 Kandeman`,
+  title: `Login | ${SITE_NAME}`,
+  description: `Login to the website of class ${SITE_NAME} of SMK N 1 Kandeman`,
 };
 
 const robotoSlab = Roboto_Slab({

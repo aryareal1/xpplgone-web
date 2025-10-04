@@ -1,8 +1,8 @@
-import { pageTitle } from '@/lib/utils';
+import { SITE_NAME } from '@/lib/constants';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: pageTitle(),
+  title: SITE_NAME,
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

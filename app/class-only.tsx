@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { SITE_NAME } from '@/lib/constants';
 import { LogInIcon } from 'lucide-react';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
@@ -20,7 +21,7 @@ export default function ClassOnly() {
         FORBIDDEN
       </h1>
       <h2 className={`${funnel.className} text-lg`}>
-        Halaman ini dikhususkan untuk murid kelas {process.env.NEXT_PUBLIC_CLASS_NAME}
+        Halaman ini dikhususkan untuk murid kelas {SITE_NAME}
       </h2>
       <p className={`${funnel.className} mt-5 text-gray-600 dark:text-gray-400`}>
         Silahkan login untuk melanjutkan!
