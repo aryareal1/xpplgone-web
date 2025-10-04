@@ -1,5 +1,4 @@
 import type { IUser } from '@/app/api/user/route';
-import axios from 'axios';
 import React from 'react';
 
 export function useUser(id = '') {
@@ -7,13 +6,16 @@ export function useUser(id = '') {
   const [user, setUser] = React.useState<IUser | null>(null);
 
   React.useEffect(() => {
-    axios
-      .get(`/api/user${id ? `/${id}` : ''}`)
-      .then((r) => {
-        setUser(r.data);
+    fetch(`/api/user${id ? `/${id}` : ''}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error && d.message === 'Unauthorized') {
+          setAud('anon');
+          return;
+        }
+        setUser(d);
         setAud('authenticated');
-      })
-      .catch(() => setAud('anon'));
+      });
   }, [id]);
 
   return { user, aud };
