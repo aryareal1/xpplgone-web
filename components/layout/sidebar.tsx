@@ -16,7 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from './ui/sidebar';
+} from '../ui/sidebar';
 import Image from 'next/image';
 import {
   AlbumIcon,
@@ -32,10 +32,11 @@ import {
   UsersRoundIcon,
 } from 'lucide-react';
 import { motion as m } from 'motion/react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { SITE_NAME } from '@/lib/constants';
 
 type Bars = {
   title?: string;
@@ -96,7 +97,7 @@ export default function AppSidebar() {
               <Link href="/" className="flex items-center gap-2 whitespace-nowrap">
                 <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
                 <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-                  {process.env.NEXT_PUBLIC_CLASS_NAME}
+                  {SITE_NAME}
                 </h1>
               </Link>
               <Button size="icon" variant="ghost" onClick={toggleSidebar} pointer>

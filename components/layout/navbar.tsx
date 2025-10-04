@@ -2,25 +2,26 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { AlignLeftIcon, LogOutIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from '../ui/dropdown-menu';
 import { createClient } from '@/lib/supabase/client';
 import { motion as m, stagger, Variants } from 'motion/react';
-import { useSidebar } from './ui/sidebar';
+import { useSidebar } from '../ui/sidebar';
 import { useUser } from '@/hooks/use-user';
 import { IUser } from '@/app/api/user/route';
+import { SITE_NAME } from '@/lib/constants';
 
 const navigations = [
   { name: 'Home', path: '/' },
@@ -79,7 +80,7 @@ export default function NavBar() {
           <Link href="/" className="flex items-center gap-2">
             <Image src="/favicon.ico" alt="Logo" width={35} height={35} priority />
             <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-              {process.env.NEXT_PUBLIC_CLASS_NAME}
+              {SITE_NAME}
             </h1>
           </Link>
         </m.div>
@@ -123,7 +124,7 @@ export default function NavBar() {
             <DropdownMenuTrigger className="ml-2 cursor-pointer self-center">
               <Avatar>
                 <AvatarImage src={user?.avatar_url ?? '/images/profile_picture.jpg'} />
-                <AvatarFallback>{user?.full_name.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{user?.full_name?.charAt(0)}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-0" align="end">
