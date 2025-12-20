@@ -1,11 +1,11 @@
 import ClassOnly from '@/app/class-only';
+import { SITE_NAME } from '@/lib/constants';
 import { createClient } from '@/lib/supabase/server';
-import { pageTitle } from '@/lib/utils';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: pageTitle('Kas'),
-  description: `Class funds of ${process.env.NEXT_PUBLIC_CLASS_NAME} of Skansaka`,
+  title: `Kas | ${SITE_NAME}`,
+  description: `Class funds of ${SITE_NAME} of Skansaka`,
 };
 
 export default async function FundsLayout({ children }: Readonly<{ children: React.ReactNode }>) {

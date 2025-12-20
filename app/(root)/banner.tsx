@@ -1,3 +1,4 @@
+import { SITE_NAME } from '@/lib/constants';
 import { motion as m, stagger, Variants } from 'motion/react';
 import Image from 'next/image';
 
@@ -43,7 +44,7 @@ export default function Banner() {
             variants={variants[1]}
             className="font-slab text-3xl font-bold md:text-5xl lg:text-6xl xl:text-7xl"
           >
-            {process.env.NEXT_PUBLIC_CLASS_NAME}
+            {SITE_NAME}
           </m.h1>
           <m.p variants={variants[1]} className="text-lg md:text-2xl lg:text-3xl xl:text-4xl">
             of <b>SMK N 1 Kandeman</b>

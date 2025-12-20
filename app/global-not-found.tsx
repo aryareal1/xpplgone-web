@@ -5,13 +5,13 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { HomeIcon } from 'lucide-react';
 import Link from 'next/link';
-import { pageTitle } from '@/lib/utils';
+import { SITE_NAME } from '@/lib/constants';
 
 const lexend = Lexend({ subsets: ['latin'] });
 const funnel = Funnel_Display({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: pageTitle('Not Found'),
+  title: `Not Found | ${SITE_NAME}`,
   description: "The page you're looking for doesn't exist.",
 };
 

@@ -9,7 +9,6 @@ import {
   INumberCellEditorParams,
   CellContextMenuEvent,
   ColumnHeaderContextMenuEvent,
-  GridApi,
 } from 'ag-grid-community';
 import { useUser } from '@/hooks/use-user';
 import SectionHeader from '@/components/section-header';
@@ -17,7 +16,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { IFundsData, IFundsDate } from '@/app/api/funds/route';
 import { useStudents } from '@/hooks/use-students';
-import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -95,78 +93,79 @@ export default function FundsPage() {
 
   useEffect(() => {
     if (!gapi) return;
-    axios.get<{ data: IFundsData[]; dates: IFundsDate[] }>('/api/funds').then(({ data: r }) => {
-      const { data, dates } = r;
-      setData(data);
+    fetch('/api/funds')
+      .then((r) => r.json())
+      .then(({ data, dates }: { data: IFundsData[]; dates: IFundsDate[] }) => {
+        setData(data);
 
-      gapi.setGridOption(
-        'rowData',
-        students.map((s, i) => {
-          let row = {
-            no: i + 1,
-            name: s.full_name,
-            uid: s.uid,
-          };
-          data
-            .filter((d) => d.user === s.uid)
-            // @ts-expect-error "`d.date` is valid for index"
-            .forEach((d) => (row[d.date] = d.amount));
-          return row;
-        })
-      );
+        gapi.setGridOption(
+          'rowData',
+          students.map((s, i) => {
+            let row = {
+              no: i + 1,
+              name: s.full_name,
+              uid: s.uid,
+            };
+            data
+              .filter((d) => d.user === s.uid)
+              // @ts-expect-error "`d.date` is valid for index"
+              .forEach((d) => (row[d.date] = d.amount));
+            return row;
+          })
+        );
 
-      gapi.setGridOption('columnDefs', [
-        {
-          field: 'no',
-          width: 42,
-          sortable: false,
-          resizable: false,
-          suppressMovable: true,
-          pinned: 'left',
-          cellClass: 'text-center',
-        },
-        {
-          field: 'name',
-          headerName: 'Nama',
-          width: 220,
-          suppressMovable: true,
-          pinned: 'left',
-        },
-        ...dates.map<ColDef>((d) => ({
-          field: d.date,
-          enableCellChangeFlash: true,
-          valueFormatter: (params) => params.data[d.date]?.toLocaleString('id-ID'),
-          headerComponent: DateDisplay,
-          headerComponentParams: {
-            date: d.date,
+        gapi.setGridOption('columnDefs', [
+          {
+            field: 'no',
+            width: 42,
+            sortable: false,
+            resizable: false,
+            suppressMovable: true,
+            pinned: 'left',
+            cellClass: 'text-center',
           },
-          width: 82,
-          sortable: false,
-          suppressMovable: true,
-          resizable: false,
+          {
+            field: 'name',
+            headerName: 'Nama',
+            width: 220,
+            suppressMovable: true,
+            pinned: 'left',
+          },
+          ...dates.map<ColDef>((d) => ({
+            field: d.date,
+            enableCellChangeFlash: true,
+            valueFormatter: (params) => params.data[d.date]?.toLocaleString('id-ID'),
+            headerComponent: DateDisplay,
+            headerComponentParams: {
+              date: d.date,
+            },
+            width: 82,
+            sortable: false,
+            suppressMovable: true,
+            resizable: false,
+            ...(isEditor
+              ? {
+                  editable: true,
+                  cellEditor: 'agNumberCellEditor',
+                  cellEditorParams: {
+                    precision: 0,
+                  } as INumberCellEditorParams,
+                }
+              : {}),
+          })),
           ...(isEditor
-            ? {
-                editable: true,
-                cellEditor: 'agNumberCellEditor',
-                cellEditorParams: {
-                  precision: 0,
-                } as INumberCellEditorParams,
-              }
-            : {}),
-        })),
-        ...(isEditor
-          ? [
-              {
-                field: 'add',
-                width: 82,
-                resizable: false,
-                suppressMovable: true,
-                headerComponent: AddDateButton,
-              },
-            ]
-          : []),
-      ]);
-    });
+            ? [
+                {
+                  field: 'add',
+                  width: 82,
+                  resizable: false,
+                  suppressMovable: true,
+                  headerComponent: AddDateButton,
+                },
+              ]
+            : []),
+        ]);
+      });
 
     const ch = supabase
       .channel('funds', { config: { private: true } })
@@ -278,31 +277,40 @@ export default function FundsPage() {
 
               // INSERT
               if (!record && value)
-                return axios.post('/api/funds', {
-                  table: 'data',
-                  value: {
-                    user: uid,
-                    date,
-                    amount: parseFloat(value),
-                  },
+                return fetch('/api/funds', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    table: 'data',
+                    value: {
+                      user: uid,
+                      date,
+                      amount: parseFloat(value),
+                    },
+                  }),
                 });
               // DELETE
               if (record && !value)
-                return axios.post('/api/funds', {
-                  table: 'data',
-                  delete: true,
-                  value: { user: uid, date },
+                return fetch('/api/funds', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    table: 'data',
+                    delete: true,
+                    value: { user: uid, date },
+                  }),
                 });
 
               // UPDATE
-              return axios.post('/api/funds', {
-                table: 'data',
-                value: {
-                  ...record,
-                  amount: value,
-                  updated_at: new Date().toISOString(),
-                  updated_by: user?.uid || '',
-                },
+              return fetch('/api/funds', {
+                method: 'POST',
+                body: JSON.stringify({
+                  table: 'data',
+                  value: {
+                    ...record,
+                    amount: value,
+                    updated_at: new Date().toISOString(),
+                    updated_by: user?.uid || '',
+                  },
+                }),
               });
             }}
             onCellContextMenu={(ev) => {
@@ -377,10 +385,13 @@ export default function FundsPage() {
                       <DropdownMenuItem
                         className="focus:bg-gray-125 cursor-pointer text-sm dark:focus:bg-gray-700"
                         onClick={() => {
-                          axios.post('/api/funds', {
-                            table: 'dates',
-                            delete: true,
-                            value: { date: contextMenu.column.getId() },
+                          fetch('/api/funds', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                              table: 'dates',
+                              delete: true,
+                              value: { date: contextMenu.column.getId() },
+                            }),
                           });
                         }}
                       >
@@ -457,9 +468,12 @@ function AddDateButton() {
                   className="border bg-green-500 hover:bg-green-400 dark:bg-green-700 dark:hover:bg-green-600"
                   onClick={() => {
                     setOpen(false);
-                    axios.post('/api/funds', {
-                      table: 'dates',
-                      value: { date: date.toDateString() },
+                    fetch('/api/funds', {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        table: 'dates',
+                        value: { date: date.toDateString() },
+                      }),
                     });
                   }}
                 >

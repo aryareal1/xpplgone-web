@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { SITE_NAME } from '@/lib/constants';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,12 +38,12 @@ export default function LoginPage() {
       <header className="absolute top-5 flex scale-110 items-center gap-2 lg:scale-120">
         <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
         <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-          {process.env.NEXT_PUBLIC_CLASS_NAME}
+          {SITE_NAME}
         </h1>
       </header>
       <Card className="font-outfit w-80 scale-120 bg-gray-100 dark:bg-gray-800">
         <CardHeader>
-          <CardTitle>Login ke {process.env.NEXT_PUBLIC_CLASS_NAME}</CardTitle>
+          <CardTitle>Login ke {SITE_NAME}</CardTitle>
           <CardDescription>Dapatkan akses fitur khusus kelas.</CardDescription>
         </CardHeader>
         <CardContent>
