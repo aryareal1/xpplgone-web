@@ -178,7 +178,7 @@ export default function SchedulePage() {
       <div className="mx-auto max-w-7xl px-5 py-5">
         {/* Header */}
         <header className="animate-in fade-in mb-5 rounded-xl bg-white p-6 shadow-lg duration-500 dark:bg-slate-800">
-          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-5">
+          <div className="grid grid-cols-1 items-end gap-5 md:grid-cols-5">
             <div className="md:col-span-3">
               <div className="mb-4 flex items-center gap-3">
                 <div className="h-20 w-2 rounded bg-gradient-to-b from-blue-600 to-indigo-600"></div>
@@ -206,13 +206,13 @@ export default function SchedulePage() {
 
                 <div className="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
                   <p className="text-sm text-slate-600 dark:text-slate-300">Total Pelajaran</p>
-                  <p className="font-semibold">11 Mata Pelajaran</p>
+                  <p className="font-semibold">13 Mata Pelajaran</p>
                 </div>
               </div>
             </div>
 
             <div className="hidden md:col-span-2 md:block">
-              <div className="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-4 text-center text-white">
+              <div className="rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 p-4 text-center text-white">
                 <div className="text-3xl font-bold">X PPLG 1</div>
                 <div className="mt-2 text-xs opacity-90">Pengembangan Perangkat Lunak dan Gim</div>
               </div>
@@ -225,7 +225,7 @@ export default function SchedulePage() {
           {scheduleData.map((day, dayIndex) => (
             <div key={day.name} className="flex flex-col gap-4">
               {/* Day Header */}
-              <div className="rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 p-5 text-center text-white shadow-lg">
+              <div className="rounded-xl bg-gradient-to-r from-gray-800 via-blue-800 to-blue-600 p-5 text-center text-white shadow-lg">
                 <h3 className="text-xl font-bold">{day.name}</h3>
                 <p className="mt-1 text-sm opacity-90">{day.subtitle}</p>
               </div>
