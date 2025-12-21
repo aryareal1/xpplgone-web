@@ -261,7 +261,7 @@ export default function FundsPage() {
         />
 
         <div
-          className="h-130"
+          className="show-scrollbar h-130"
           onContextMenu={(ev) => setContextMenuPos({ x: ev.clientX, y: ev.clientY })}
         >
           <AgGridReact

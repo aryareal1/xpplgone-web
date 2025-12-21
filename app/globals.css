@@ -139,5 +139,17 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    scrollbar-width: none;
   }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.show-scrollbar {
+  scrollbar-width: auto;
+}
+
+.show-scrollbar::-webkit-scrollbar {
+  display: block;
 }

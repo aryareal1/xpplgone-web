@@ -16,27 +16,24 @@ export default function PicketSchedule() {
   }
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950">
+      <div className="min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-slate-100">
         {/* Header */}
-        <div className="px-4 pt-12 pb-8">
-          <h1 className="mb-2 text-center text-5xl font-black tracking-tight md:text-7xl">
-            <span className="animate-pulse bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent drop-shadow-2xl">
-              JADWAL PIKET
-            </span>
-          </h1>
-          <h2 className="text-center text-4xl font-black tracking-tight md:text-6xl">
-            <span className="animate-pulse bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent drop-shadow-2xl">
-              X PPLG 1
-            </span>
-          </h2>
+        <div className="border-b border-gray-200 bg-white px-4 py-4 shadow-sm backdrop-blur-lg transition-colors duration-300 sm:px-6 lg:px-8 dark:border-gray-800 dark:bg-gray-900/95">
+          <div className="flex items-center gap-4">
+            <div className="h-15 w-2 rounded bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 shadow-lg shadow-blue-500/50"></div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Jadwal Piket</h1>
+              <p className="mt-1 text-gray-600 dark:text-gray-400">X PPLG 1 - SMK N 1 Kandeman</p>
+            </div>
+          </div>
         </div>
 
         {/* Cards Grid */}
-        <div className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="mx-auto max-w-6xl px-4 pt-16 pb-16">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* SENIN */}
             <div
-              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40"
+              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 dark:from-slate-800 dark:to-slate-900"
               style={{ animationDelay: '0ms' }}
             >
               {/* Globe Icon */}
@@ -58,35 +55,35 @@ export default function PicketSchedule() {
 
               {/* Names List */}
               <div className="mb-4 space-y-2">
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Dila</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Intan</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Fadhil</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Vina</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Syifa</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Khansa</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Roichan</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Auliya</span>
                 </div>
@@ -104,7 +101,7 @@ export default function PicketSchedule() {
 
             {/* SELASA */}
             <div
-              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40"
+              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 dark:from-slate-800 dark:to-slate-900"
               style={{ animationDelay: '100ms' }}
             >
               <div className="absolute -top-6 -left-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-800 shadow-xl shadow-blue-500/50">
@@ -123,31 +120,31 @@ export default function PicketSchedule() {
               </div>
 
               <div className="mb-4 space-y-2">
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Talita</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Dwi</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Rizka</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Dita</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Viko</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Raya</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Nafa</span>
                 </div>
@@ -162,7 +159,7 @@ export default function PicketSchedule() {
 
             {/* RABU */}
             <div
-              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40"
+              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 dark:from-slate-800 dark:to-slate-900"
               style={{ animationDelay: '200ms' }}
             >
               <div className="absolute -top-6 -left-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-800 shadow-xl shadow-blue-500/50">
@@ -181,31 +178,31 @@ export default function PicketSchedule() {
               </div>
 
               <div className="mb-4 space-y-2">
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Fayakun</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Nikma</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Iqbal</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Fatimah</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Gading</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Noval</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Vano</span>
                 </div>
@@ -220,7 +217,7 @@ export default function PicketSchedule() {
 
             {/* KAMIS */}
             <div
-              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40"
+              className="animate-in slide-in-from-bottom-4 fade-in relative rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 dark:from-slate-800 dark:to-slate-900"
               style={{ animationDelay: '300ms' }}
             >
               <div className="absolute -top-6 -left-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-800 shadow-xl shadow-blue-500/50">
@@ -239,31 +236,31 @@ export default function PicketSchedule() {
               </div>
 
               <div className="mb-4 space-y-2">
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Bambang</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Salwa</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Arya</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Nadia</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Natasya</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Yunita</span>
                 </div>
-                <div className="flex items-center text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Leny</span>
                 </div>
@@ -278,7 +275,7 @@ export default function PicketSchedule() {
 
             {/* JUM'AT */}
             <div
-              className="animate-in slide-in-from-bottom-4 fade-in relative col-span-1 mx-auto w-full max-w-md rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 md:col-span-2"
+              className="animate-in slide-in-from-bottom-4 fade-in relative col-span-1 mx-auto w-full max-w-md rounded-3xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-2xl shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] transition-all duration-300 duration-700 hover:scale-105 hover:rotate-1 hover:shadow-2xl hover:shadow-blue-500/40 md:col-span-2 dark:from-slate-800 dark:to-slate-900"
               style={{ animationDelay: '400ms' }}
             >
               <div className="absolute -top-6 -left-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-blue-500 bg-gradient-to-br from-blue-600 to-blue-800 shadow-xl shadow-blue-500/50">
@@ -297,31 +294,31 @@ export default function PicketSchedule() {
               </div>
 
               <div className="mb-4 space-y-2">
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Bunga</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Akmal</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Tyas</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Adit</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Siti</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Fajri</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-100">
+                <div className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></div>
                   <span className="flex-1 text-center text-lg font-bold">Nanda</span>
                 </div>
@@ -340,7 +337,7 @@ export default function PicketSchedule() {
             className="animate-in slide-in-from-bottom-4 fade-in mt-8 text-center duration-700"
             style={{ animationDelay: '500ms' }}
           >
-            <div className="inline-block rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-slate-800 to-slate-900 p-6 shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] shadow-xl shadow-blue-500/20">
+            <div className="inline-block rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] shadow-xl shadow-blue-500/20 dark:from-slate-800 dark:to-slate-900">
               <p className="text-lg font-bold text-cyan-400">📋 Jadwal Piket Kelas X PPLG 1</p>
               <p className="mt-2 text-sm text-blue-300">
                 Pastikan untuk mengikuti jadwal piket dengan baik! 🧹✨

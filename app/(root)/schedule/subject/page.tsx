@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MapPin } from 'lucide-react';
 
 interface Lesson {
   time: string;
@@ -246,7 +247,7 @@ export default function SchedulePage() {
                     </div>
                     {lesson.room && (
                       <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium dark:bg-slate-700">
-                        <i className="fas fa-map-marker-alt text-xs"></i>
+                        <MapPin className="mr-1 h-4 w-4" />
                         <span>{lesson.room}</span>
                       </div>
                     )}
