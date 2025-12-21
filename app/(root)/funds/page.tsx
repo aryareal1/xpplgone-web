@@ -165,6 +165,9 @@ export default function FundsPage() {
               ]
             : []),
         ]);
+
+        gapi.setGridOption('alwaysShowHorizontalScroll', true);
+        gapi.setGridOption('alwaysShowVerticalScroll', true);
       });
 
     const ch = supabase
