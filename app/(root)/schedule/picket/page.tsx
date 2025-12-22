@@ -9,7 +9,6 @@ export default function PicketSchedule() {
   useEffect(() => {
     setMounted(true);
   }, []);
-  0;
 
   if (!mounted) {
     return null;

@@ -7,7 +7,19 @@ export function useUser(id = '') {
 
   React.useEffect(() => {
     fetch(`/api/user${id ? `/${id}` : ''}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        // Check if response is ok
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        // Check if response is JSON
+        const contentType = r.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await r.text();
+          throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+        }
+        return r.json();
+      })
       .then((d) => {
         if (d.error && d.message === 'Unauthorized') {
           setAud('anon');
@@ -15,6 +27,11 @@ export function useUser(id = '') {
         }
         setUser(d);
         setAud('authenticated');
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user:', error);
+        setAud('anon'); // Treat errors as unauthorized
+        setUser(null);
       });
   }, [id]);
 

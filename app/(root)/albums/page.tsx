@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, MapPin, X } from 'lucide-react';
+import Image from 'next/image';
 
 interface Album {
   id: number;
@@ -20,6 +21,7 @@ export default function AlbumLayout() {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 
   const albums = [
     {
@@ -161,17 +163,18 @@ export default function AlbumLayout() {
     if (zoom > 1) {
       setIsDragging(true);
       setDragStart({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
+        x: e.clientX,
+        y: e.clientY,
       });
+      setInitialPosition(position);
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging && zoom > 1) {
       setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: initialPosition.x + (e.clientX - dragStart.x),
+        y: initialPosition.y + (e.clientY - dragStart.y),
       });
     }
   };
@@ -232,14 +235,22 @@ export default function AlbumLayout() {
             <div
               key={album.id}
               onClick={() => openAlbum(album)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  openAlbum(album);
+                }
+              }}
+              role="button"
+              tabIndex={0}
               className="group transform cursor-pointer overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl dark:bg-gray-800"
             >
               {/* Cover Image */}
               <div className="relative aspect-video overflow-hidden">
-                <img
+                <Image
+                  fill
                   src={album.cover}
                   alt={album.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -272,7 +283,7 @@ export default function AlbumLayout() {
                   <div className="mt-4 flex gap-2 overflow-hidden">
                     {album.photos.slice(0, 4).map((photo, idx) => (
                       <div key={idx} className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                        <Image width={48} height={48} src={photo} alt="" className="object-cover" />
                       </div>
                     ))}
                     {album.photos.length > 4 && (
@@ -320,15 +331,7 @@ export default function AlbumLayout() {
             </div>
 
             {/* Main Image Display */}
-            <div
-              className="relative flex flex-1 items-center justify-center overflow-hidden p-4"
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-            >
+            <div className="relative flex flex-1 items-center justify-center overflow-hidden">
               {/* Previous Button */}
               <button
                 onClick={prevImage}
@@ -339,17 +342,27 @@ export default function AlbumLayout() {
                 <ChevronLeft className="h-8 w-8" />
               </button>
 
-              {/* Image */}
+              {/* Image Container */}
               <div
-                className={`flex max-h-full max-w-5xl items-center justify-center transition-all duration-700 ${
+                className={`relative flex h-full w-full max-w-5xl items-center justify-center transition-all duration-700 ${
                   isOpening ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
                 } delay-100`}
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
                 onDoubleClick={handleDoubleClick}
+                style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+                role="button"
+                tabIndex={0}
               >
-                <img
+                <Image
+                  fill
                   src={selectedAlbum.photos[currentImageIndex]}
                   alt={`${selectedAlbum.title} - ${currentImageIndex + 1}`}
-                  className="max-h-[70vh] max-w-full rounded-lg object-contain shadow-2xl select-none"
+                  className="rounded-lg object-contain shadow-2xl select-none"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                   style={{
                     transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
                     transition: isDragging ? 'none' : 'transform 0.2s ease-out',
@@ -385,16 +398,26 @@ export default function AlbumLayout() {
                         setZoom(1);
                         setPosition({ x: 0, y: 0 });
                       }}
-                      className={`relative h-13 w-13 flex-shrink-0 overflow-hidden rounded-lg transition-all ${
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setCurrentImageIndex(idx);
+                          setZoom(1);
+                          setPosition({ x: 0, y: 0 });
+                        }
+                      }}
+                      tabIndex={0}
+                      className={`relative h-13 w-13 shrink-0 overflow-hidden rounded-lg transition-all ${
                         idx === currentImageIndex
                           ? 'scale-90 border-2 ring-4 ring-indigo-500'
                           : 'opacity-60 hover:opacity-100'
                       }`}
                     >
-                      <img
+                      <Image
+                        fill
                         src={photo}
                         alt={`Thumbnail ${idx + 1}`}
-                        className="h-full w-full object-cover"
+                        sizes="52px"
+                        className="object-cover"
                       />
                       {idx === currentImageIndex && (
                         <div className="absolute inset-0 bg-indigo-500/20" />

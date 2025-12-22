@@ -47,7 +47,7 @@ const item: Variants = {
 export default function NavBar() {
   const { resolvedTheme: theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { user, aud } = useUser();
+  const { user } = useUser();
   const pathname = usePathname();
   const sb = useSidebar();
 

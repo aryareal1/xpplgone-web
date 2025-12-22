@@ -167,7 +167,6 @@ export default function SchedulePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
-  0;
 
   if (!mounted) {
     return null;
