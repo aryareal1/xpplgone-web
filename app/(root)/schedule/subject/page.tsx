@@ -7,7 +7,7 @@ interface TimeSlot {
   period: string;
   start: string;
   end: string;
-  type?: 'class' | 'break' | 'rest';
+  type?: 'class' | 'break';
 }
 
 interface Lesson {
@@ -26,7 +26,7 @@ interface Day {
   lessons: Lesson[];
 }
 
-const timeSchedule: TimeSlot[] = [
+const mondaySchedule: TimeSlot[] = [
   { period: 'Upacara/Apel', start: '07:00', end: '07:40', type: 'class' },
   { period: 'Jam 1', start: '07:40', end: '08:20', type: 'class' },
   { period: 'Jam 2', start: '08:20', end: '09:00', type: 'class' },
@@ -34,12 +34,29 @@ const timeSchedule: TimeSlot[] = [
   { period: 'Jam 3', start: '09:30', end: '10:10', type: 'class' },
   { period: 'Jam 4', start: '10:10', end: '10:50', type: 'class' },
   { period: 'Jam 5', start: '10:50', end: '11:30', type: 'class' },
-  { period: 'Istirahat 2', start: '11:30', end: '12:30', type: 'rest' },
+  { period: 'Istirahat 2', start: '11:30', end: '12:30', type: 'break' },
   { period: 'Jam 6', start: '12:30', end: '13:05', type: 'class' },
   { period: 'Jam 7', start: '13:05', end: '13:40', type: 'class' },
   { period: 'Jam 8', start: '13:40', end: '14:15', type: 'class' },
   { period: 'Jam 9', start: '14:15', end: '14:50', type: 'class' },
   { period: 'Jam 10', start: '14:50', end: '15:25', type: 'class' },
+  { period: 'Check', start: '15:25', end: '15:30', type: 'class' },
+];
+
+const timeSchedule: TimeSlot[] = [
+  { period: 'Jam 1', start: '07:00', end: '07:40', type: 'class' },
+  { period: 'Jam 2', start: '07:40', end: '08:20', type: 'class' },
+  { period: 'Jam 3', start: '08:20', end: '09:00', type: 'class' },
+  { period: 'Istirahat', start: '09:00', end: '09:30', type: 'break' },
+  { period: 'Jam 4', start: '09:30', end: '10:10', type: 'class' },
+  { period: 'Jam 5', start: '10:10', end: '10:50', type: 'class' },
+  { period: 'Jam 6', start: '10:50', end: '11:30', type: 'class' },
+  { period: 'Istirahat 2', start: '11:30', end: '12:30', type: 'break' },
+  { period: 'Jam 7', start: '12:30', end: '13:05', type: 'class' },
+  { period: 'Jam 8', start: '13:05', end: '13:40', type: 'class' },
+  { period: 'Jam 9', start: '13:40', end: '14:15', type: 'class' },
+  { period: 'Jam 10', start: '14:15', end: '14:50', type: 'class' },
+  { period: 'Jam 11', start: '14:50', end: '15:25', type: 'class' },
   { period: 'Check', start: '15:25', end: '15:30', type: 'class' },
 ];
 
@@ -51,7 +68,7 @@ const fridaySchedule: TimeSlot[] = [
   { period: 'Jam 3', start: '09:25', end: '10:05', type: 'class' },
   { period: 'Jam 4', start: '10:05', end: '10:45', type: 'class' },
   { period: 'Jam 5', start: '10:45', end: '11:15', type: 'class' },
-  { period: 'Istirahat 2', start: '11:15', end: '12:30', type: 'rest' },
+  { period: 'Istirahat 2', start: '11:15', end: '12:30', type: 'break' },
   { period: 'Jam 6', start: '12:30', end: '13:15', type: 'class' },
   { period: 'Jam 7', start: '13:15', end: '13:55', type: 'class' },
   { period: 'Check', start: '13:55', end: '14:00', type: 'class' },
@@ -83,39 +100,39 @@ const scheduleData: Day[] = [
         teacher: 'Mukti Widodo, S.T',
         room: 'RPL-GV',
         color: 'border-amber-500',
-        startTime: '07:40',
-        endTime: '09:00',
+        startTime: '07:00',
+        endTime: '08:20',
       },
       {
         time: 'Jam 3-4',
         subject: 'Bahasa Inggris',
         teacher: 'Yuli Rahayu, S.Pd',
         color: 'border-orange-400',
-        startTime: '09:30',
-        endTime: '10:50',
+        startTime: '08:20',
+        endTime: '10:10',
       },
       {
         time: 'Jam 5-6',
         subject: 'Sejarah',
         teacher: 'Wahyu Dwi Yulianti, S.Pd',
         color: 'border-sky-400',
-        startTime: '10:50',
-        endTime: '13:05',
+        startTime: '10:10',
+        endTime: '11:30',
       },
       {
         time: 'Jam 7-8',
         subject: 'Matematika',
         teacher: 'Dwi Herni Noviyanti S.Pd',
         color: 'border-emerald-400',
-        startTime: '13:05',
-        endTime: '14:15',
+        startTime: '12:30',
+        endTime: '13:40',
       },
       {
         time: 'Jam 9-11',
         subject: 'PIPAS',
         teacher: 'Satria Nur Karim Amrullah, S.Pd',
         color: 'border-fuchsia-500',
-        startTime: '14:15',
+        startTime: '13:40',
         endTime: '15:25',
       },
     ],
@@ -129,32 +146,32 @@ const scheduleData: Day[] = [
         subject: 'PJOK',
         teacher: 'Drs. Budi Setiyadi',
         color: 'border-green-400',
-        startTime: '07:40',
-        endTime: '10:10',
+        startTime: '07:00',
+        endTime: '09:00',
       },
       {
         time: 'Jam 4-5',
         subject: 'Seni Budaya',
         teacher: 'Sigit Purnomo, S.Pd',
         color: 'border-indigo-400',
-        startTime: '10:10',
-        endTime: '11:30',
+        startTime: '09:30',
+        endTime: '10:50',
       },
       {
         time: 'Jam 6-7',
         subject: 'Bahasa Jawa',
         teacher: 'Rinta Dwi Jayanti, S.Pd',
         color: 'border-orange-500',
-        startTime: '12:30',
-        endTime: '13:40',
+        startTime: '10:50',
+        endTime: '13:05',
       },
       {
         time: 'Jam 8-9',
         subject: 'Bahasa Indonesia',
         teacher: 'Chanifah Ulfah, S.Pd',
         color: 'border-blue-500',
-        startTime: '13:40',
-        endTime: '14:50',
+        startTime: '13:05',
+        endTime: '14:15',
       },
       {
         time: 'Jam 10-11',
@@ -162,7 +179,7 @@ const scheduleData: Day[] = [
         teacher: 'Riris Yuniaratri, S.Pd',
         color: 'border-purple-500',
         room: 'Lab Kom 3',
-        startTime: '14:50',
+        startTime: '14:15',
         endTime: '15:25',
       },
     ],
@@ -176,8 +193,8 @@ const scheduleData: Day[] = [
         subject: 'PABP',
         teacher: 'Laely Hilalliyah, S.Fil.I, M.Pd',
         color: 'border-pink-400',
-        startTime: '07:40',
-        endTime: '10:10',
+        startTime: '07:00',
+        endTime: '09:00',
       },
       {
         time: 'Jam 4-7',
@@ -185,23 +202,23 @@ const scheduleData: Day[] = [
         teacher: 'Riris Yuniaratri, S.Pd',
         color: 'border-blue-500',
         room: 'RPL-Lab RPL',
-        startTime: '10:10',
-        endTime: '13:40',
+        startTime: '09:30',
+        endTime: '13:05',
       },
       {
         time: 'Jam 8-9',
         subject: 'Matematika',
         teacher: 'Dwi Herni Noviyanti S.Pd',
         color: 'border-emerald-400',
-        startTime: '13:40',
-        endTime: '14:50',
+        startTime: '13:05',
+        endTime: '14:15',
       },
       {
         time: 'Jam 10-11',
         subject: 'Pendidikan Pancasila',
         teacher: 'Maria Ulfa, S.Pd',
         color: 'border-sky-400',
-        startTime: '14:50',
+        startTime: '14:15',
         endTime: '15:25',
       },
     ],
@@ -270,71 +287,130 @@ export default function TimelineSchedule() {
     return getCurrentTimeString() > end;
   };
 
+  const getCountdown = (endTime: string) => {
+    const [hours, minutes] = endTime.split(':').map(Number);
+    const now = currentTime;
+    const end = new Date(now);
+    end.setHours(hours, minutes, 0, 0);
+
+    const diff = end.getTime() - now.getTime();
+    if (diff <= 0) return null;
+
+    const totalMinutes = Math.floor(diff / 60000);
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const secs = Math.floor((diff % 60000) / 1000);
+
+    if (hrs > 0) {
+      return `${hrs}j ${mins}m ${secs}d`;
+    } else if (mins > 0) {
+      return `${mins}m ${secs}d`;
+    } else {
+      return `${secs}d`;
+    }
+  };
+
   const todaySchedule = scheduleData[currentDay];
   const dayName = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'][currentDay];
   const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
-  const currentSchedule = dayName === 'Jumat' ? fridaySchedule : timeSchedule;
 
-  // Combine lessons and breaks for timeline view
+  const getCurrentSchedule = () => {
+    if (dayName === 'Senin') return mondaySchedule;
+    if (dayName === 'Jumat') return fridaySchedule;
+    return timeSchedule;
+  };
+
+  const currentSchedule = getCurrentSchedule();
+
   const getTimelineItems = () => {
-    const items: Array<Lesson | (TimeSlot & { isBreak?: boolean })> = [];
+    if (!todaySchedule) return [];
 
-    if (!todaySchedule) return items;
+    const breaks = currentSchedule.filter((slot) => slot.type === 'break');
+    const finalItems: Array<{
+      type: 'lesson' | 'break';
+      data: Lesson | TimeSlot;
+      startTime: string;
+    }> = [];
 
-    // Get all breaks and rest periods
-    const breaks = currentSchedule.filter((slot) => slot.type === 'break' || slot.type === 'rest');
-
-    // Split lessons that span across break times
+    // Process each lesson and check for breaks
     todaySchedule.lessons.forEach((lesson) => {
-      let currentStart = lesson.startTime;
-      const lessonEnd = lesson.endTime;
+      // Find breaks that overlap with this lesson
+      const overlappingBreaks = breaks.filter(
+        (b) => b.start < lesson.endTime && b.end > lesson.startTime
+      );
 
-      // Check if this lesson spans across any breaks
-      const affectingBreaks = breaks
-        .filter((b) => b.start >= currentStart && b.end <= lessonEnd)
-        .sort((a, b) => a.start.localeCompare(b.start));
-
-      if (affectingBreaks.length === 0) {
-        // No breaks during this lesson, add it as is
-        items.push(lesson);
+      if (overlappingBreaks.length === 0) {
+        // No overlapping breaks, add lesson as is
+        finalItems.push({
+          type: 'lesson',
+          data: lesson,
+          startTime: lesson.startTime,
+        });
       } else {
-        // Split lesson into segments around breaks
-        affectingBreaks.forEach((breakSlot, index) => {
-          // Add lesson segment before break
+        // Sort breaks by start time
+        overlappingBreaks.sort((a, b) => a.start.localeCompare(b.start));
+
+        let currentStart = lesson.startTime;
+
+        overlappingBreaks.forEach((breakSlot) => {
+          // Add lesson part before break (if exists)
           if (currentStart < breakSlot.start) {
-            items.push({
-              ...lesson,
+            finalItems.push({
+              type: 'lesson',
+              data: {
+                ...lesson,
+                startTime: currentStart,
+                endTime: breakSlot.start,
+              },
               startTime: currentStart,
-              endTime: breakSlot.start,
             });
           }
 
           // Add the break
-          items.push({ ...breakSlot, isBreak: true });
+          finalItems.push({
+            type: 'break',
+            data: breakSlot,
+            startTime: breakSlot.start,
+          });
 
-          // Update current start for next segment
+          // Move current start to after this break
           currentStart = breakSlot.end;
         });
 
-        // Add remaining lesson segment after last break
-        if (currentStart < lessonEnd) {
-          items.push({
-            ...lesson,
+        // Add lesson part after last break (if exists)
+        if (currentStart < lesson.endTime) {
+          finalItems.push({
+            type: 'lesson',
+            data: {
+              ...lesson,
+              startTime: currentStart,
+              endTime: lesson.endTime,
+            },
             startTime: currentStart,
-            endTime: lessonEnd,
           });
         }
       }
     });
 
-    // Sort all items by start time
-    items.sort((a, b) => {
-      const timeA = 'startTime' in a ? a.startTime : a.start;
-      const timeB = 'startTime' in b ? b.startTime : b.start;
-      return timeA.localeCompare(timeB);
+    // Add breaks that don't overlap with any lesson (standalone breaks)
+    breaks.forEach((breakSlot) => {
+      const isOverlapping = todaySchedule.lessons.some(
+        (lesson) => breakSlot.start < lesson.endTime && breakSlot.end > lesson.startTime
+      );
+
+      if (!isOverlapping) {
+        finalItems.push({
+          type: 'break',
+          data: breakSlot,
+          startTime: breakSlot.start,
+        });
+      }
     });
 
-    return items;
+    // Sort all items by start time
+    finalItems.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    return finalItems;
   };
 
   if (viewMode === 'grid') {
@@ -477,7 +553,7 @@ export default function TimelineSchedule() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-900 dark:text-slate-100">
       <div className="mx-auto max-w-5xl px-4 py-6">
         <header className="mb-6 rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-800/80">
           <div className="mb-4 flex items-center justify-between">
@@ -536,7 +612,7 @@ export default function TimelineSchedule() {
               <Calendar className="h-12 w-12 text-white" />
             </div>
             <h2 className="mb-2 text-2xl font-bold">Hari Libur</h2>
-            <p className="text-slate-600 dark:text-slate-300">Selamat menikmati akhir pekan! 🎉</p>
+            <p className="text-slate-600 dark:text-slate-300">Selamat menikmati akhir pekan!</p>
           </div>
         ) : (
           <div className="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-800/80">
@@ -547,16 +623,13 @@ export default function TimelineSchedule() {
 
             <div className="space-y-6">
               {getTimelineItems().map((item, index) => {
-                const isLesson = 'subject' in item;
-                const isActive = isLesson
-                  ? isTimeInRange(item.startTime, item.endTime)
-                  : isTimeInRange(item.start, item.end);
-                const isPassed = isLesson ? isTimePassed(item.endTime) : isTimePassed(item.end);
+                if (item.type === 'break') {
+                  const breakItem = item.data as TimeSlot;
+                  const isActive = isTimeInRange(breakItem.start, breakItem.end);
+                  const isPassed = isTimePassed(breakItem.end);
 
-                if (!isLesson) {
-                  // Render break/rest period
                   return (
-                    <div key={index} className="relative pl-12">
+                    <div key={`break-${index}`} className="relative pl-12">
                       {index < getTimelineItems().length - 1 && (
                         <div
                           className={`absolute top-12 bottom-0 left-5 w-0.5 ${
@@ -584,7 +657,7 @@ export default function TimelineSchedule() {
                       <div
                         className={`rounded-xl p-4 transition-all ${
                           isActive
-                            ? 'border-2 border-yellow-400 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900/20'
+                            ? 'border-2 border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20'
                             : isPassed
                               ? 'bg-slate-50 opacity-75 dark:bg-slate-800/50'
                               : 'bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20'
@@ -593,10 +666,10 @@ export default function TimelineSchedule() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="mb-1 text-sm font-semibold text-slate-600 dark:text-slate-400">
-                              {item.start} - {item.end}
+                              {breakItem.start} - {breakItem.end}
                             </div>
                             <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
-                              {item.period}
+                              {breakItem.period}
                             </h3>
                           </div>
                           {isActive && (
@@ -611,13 +684,19 @@ export default function TimelineSchedule() {
                 }
 
                 // Render lesson
-                const lesson = item as Lesson;
+                const lesson = item.data as Lesson;
+                const isActive = isTimeInRange(lesson.startTime, lesson.endTime);
+                const isPassed = isTimePassed(lesson.endTime);
+                const countdown = isActive ? getCountdown(lesson.endTime) : null;
+
                 return (
-                  <div key={index} className="relative pl-12">
+                  <div key={`lesson-${index}`} className="relative pl-12">
                     {index < getTimelineItems().length - 1 && (
                       <div
-                        className={`absolute top-12 bottom-0 left-5 w-0.5 ${
-                          isPassed ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+                        className={`absolute top-12 bottom-0 left-5 w-0.5 transition-colors duration-300 ${
+                          isPassed
+                            ? 'bg-green-500'
+                            : 'bg-slate-300 group-hover:bg-indigo-400 dark:bg-slate-600 dark:group-hover:bg-indigo-500'
                         }`}
                       ></div>
                     )}
@@ -641,12 +720,12 @@ export default function TimelineSchedule() {
                     </div>
 
                     <div
-                      className={`rounded-xl p-5 transition-all ${
+                      className={`group rounded-xl border-l-4 p-5 transition-all duration-300 ${lesson.color} ${
                         isActive
-                          ? `bg-opacity-20 scale-105 border-2 ${lesson.color} shadow-lg`
+                          ? `scale-105 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-xl dark:from-blue-900/20 dark:to-indigo-900/20`
                           : isPassed
                             ? 'bg-slate-50 opacity-75 dark:bg-slate-800/50'
-                            : 'bg-white shadow-md hover:shadow-lg dark:bg-slate-800'
+                            : 'bg-white shadow-md hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800'
                       }`}
                     >
                       <div className="mb-3 flex items-start justify-between">
@@ -659,10 +738,13 @@ export default function TimelineSchedule() {
                             {lesson.teacher}
                           </p>
                         </div>
-                        {isActive && (
-                          <span className="animate-pulse rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
-                            LIVE
-                          </span>
+                        {countdown && (
+                          <div className="rounded-full bg-red-500 px-4 py-2 text-center">
+                            <div className="text-xs font-semibold text-white opacity-90">
+                              Berakhir dalam
+                            </div>
+                            <div className="text-sm font-bold text-white">{countdown}</div>
+                          </div>
                         )}
                       </div>
 
