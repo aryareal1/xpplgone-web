@@ -335,7 +335,7 @@ export default function AlbumLayout() {
               {/* Previous Button */}
               <button
                 onClick={prevImage}
-                className={`absolute left-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/20 ${
+                className={`absolute left-4 z-10 rounded-full p-3 text-white transition-all hover:scale-110 hover:bg-white/20 ${
                   isOpening ? 'translate-x-0 opacity-100' : '-translate-x-20 opacity-0'
                 } delay-200 duration-500`}
               >
@@ -374,7 +374,7 @@ export default function AlbumLayout() {
               {/* Next Button */}
               <button
                 onClick={nextImage}
-                className={`absolute right-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/20 ${
+                className={`absolute right-4 z-10 rounded-full p-3 text-white transition-all hover:scale-110 hover:bg-white/20 ${
                   isOpening ? 'translate-x-0 opacity-100' : 'translate-x-20 opacity-0'
                 } delay-200 duration-500`}
               >
