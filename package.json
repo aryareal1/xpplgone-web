@@ -1,6 +1,6 @@
 {
   "name": "class-site",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Website for my school class",
   "private": true,
   "scripts": {
