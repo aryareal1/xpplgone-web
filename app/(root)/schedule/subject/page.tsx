@@ -346,17 +346,17 @@ export default function TimelineSchedule() {
 
   // Fungsi untuk mendapatkan jam pelajaran dari rentang waktu
   const getClassPeriodsInRange = (startTime: string, endTime: string) => {
-    const classPeriods = currentSchedule.filter((slot) => slot.type === 'class' && slot.period.startsWith('Jam'));
-    return classPeriods.filter(
-      (period) => period.start >= startTime && period.end <= endTime
+    const classPeriods = currentSchedule.filter(
+      (slot) => slot.type === 'class' && slot.period.startsWith('Jam')
     );
+    return classPeriods.filter((period) => period.start >= startTime && period.end <= endTime);
   };
 
   // Fungsi untuk format label jam pelajaran
   const formatClassPeriods = (periods: TimeSlot[]) => {
     if (periods.length === 0) return '';
     if (periods.length === 1) return periods[0].period;
-    
+
     const firstNum = periods[0].period.replace('Jam ', '');
     const lastNum = periods[periods.length - 1].period.replace('Jam ', '');
     return `Jam ${firstNum}-${lastNum}`;
@@ -392,7 +392,7 @@ export default function TimelineSchedule() {
 
         let currentStart = lesson.startTime;
 
-        overlappingBreaks.forEach((breakSlot, breakIndex) => {
+        overlappingBreaks.forEach((breakSlot) => {
           // Tambahkan bagian pelajaran sebelum istirahat
           if (currentStart < breakSlot.start) {
             const periods = getClassPeriodsInRange(currentStart, breakSlot.start);
