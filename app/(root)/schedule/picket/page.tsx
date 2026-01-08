@@ -330,19 +330,6 @@ export default function PicketSchedule() {
               <div className="absolute bottom-8 left-4 h-2 w-2 rounded-full bg-blue-400/50 shadow-sm shadow-blue-400/50"></div>
             </div>
           </div>
-
-          {/* Info Footer */}
-          <div
-            className="animate-in slide-in-from-bottom-4 fade-in mt-8 text-center duration-700"
-            style={{ animationDelay: '500ms' }}
-          >
-            <div className="inline-block rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-white to-gray-50 p-6 shadow-[0_0_5px_rgba(59,130,246,0.5),0_0_10px_rgba(59,130,246,0.3),inset_0_0_5px_rgba(59,130,246,0.2)] shadow-xl shadow-blue-500/20 dark:from-slate-800 dark:to-slate-900">
-              <p className="text-lg font-bold text-cyan-400">📋 Jadwal Piket Kelas X PPLG 1</p>
-              <p className="mt-2 text-sm text-blue-300">
-                Pastikan untuk mengikuti jadwal piket dengan baik! 🧹✨
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </>

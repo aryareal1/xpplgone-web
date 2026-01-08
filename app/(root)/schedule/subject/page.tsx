@@ -1,7 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, Clock, MapPin, Calendar, Grid3x3 } from 'lucide-react';
+import {
+  Check,
+  Clock,
+  MapPin,
+  Calendar,
+  Grid3x3,
+  LayoutList,
+  GraduationCap,
+  Users,
+  BookOpen,
+} from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 interface TimeSlot {
   period: string;
@@ -177,7 +188,7 @@ const scheduleData: Day[] = [
         time: 'Jam 10-11',
         subject: 'Koding dan Kecerdasan Artifisial',
         teacher: 'Riris Yuniaratri, S.Pd',
-        color: 'border-purple-500',
+        color: 'border-blue-500',
         room: 'Lab Kom 3',
         startTime: '14:15',
         endTime: '15:25',
@@ -231,7 +242,7 @@ const scheduleData: Day[] = [
         time: 'Jam 1-2',
         subject: 'Bahasa Indonesia',
         teacher: 'Chanifah Ulfah, S.Pd',
-        color: 'border-sky-400',
+        color: 'border-blue-500',
         startTime: '07:45',
         endTime: '09:05',
       },
@@ -259,7 +270,7 @@ export default function TimelineSchedule() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentDay, setCurrentDay] = useState(0);
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
-  const [showModal, setShowModal] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -310,9 +321,20 @@ export default function TimelineSchedule() {
     }
   };
 
+  const handleViewChange = (checked: boolean) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setViewMode(checked ? 'grid' : 'timeline');
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 300);
+  };
+
   const todaySchedule = scheduleData[currentDay];
   const dayName = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'][currentDay];
   const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+  const isGrid = viewMode === 'grid';
 
   const getCurrentSchedule = () => {
     if (dayName === 'Senin') return mondaySchedule;
@@ -322,6 +344,24 @@ export default function TimelineSchedule() {
 
   const currentSchedule = getCurrentSchedule();
 
+  // Fungsi untuk mendapatkan jam pelajaran dari rentang waktu
+  const getClassPeriodsInRange = (startTime: string, endTime: string) => {
+    const classPeriods = currentSchedule.filter((slot) => slot.type === 'class' && slot.period.startsWith('Jam'));
+    return classPeriods.filter(
+      (period) => period.start >= startTime && period.end <= endTime
+    );
+  };
+
+  // Fungsi untuk format label jam pelajaran
+  const formatClassPeriods = (periods: TimeSlot[]) => {
+    if (periods.length === 0) return '';
+    if (periods.length === 1) return periods[0].period;
+    
+    const firstNum = periods[0].period.replace('Jam ', '');
+    const lastNum = periods[periods.length - 1].period.replace('Jam ', '');
+    return `Jam ${firstNum}-${lastNum}`;
+  };
+
   const getTimelineItems = () => {
     if (!todaySchedule) return [];
 
@@ -330,31 +370,32 @@ export default function TimelineSchedule() {
       type: 'lesson' | 'break';
       data: Lesson | TimeSlot;
       startTime: string;
+      displayTime?: string;
     }> = [];
 
-    // Process each lesson and check for breaks
     todaySchedule.lessons.forEach((lesson) => {
-      // Find breaks that overlap with this lesson
       const overlappingBreaks = breaks.filter(
         (b) => b.start < lesson.endTime && b.end > lesson.startTime
       );
 
       if (overlappingBreaks.length === 0) {
-        // No overlapping breaks, add lesson as is
+        // Tidak ada istirahat yang memotong
+        const periods = getClassPeriodsInRange(lesson.startTime, lesson.endTime);
         finalItems.push({
           type: 'lesson',
           data: lesson,
           startTime: lesson.startTime,
+          displayTime: formatClassPeriods(periods),
         });
       } else {
-        // Sort breaks by start time
         overlappingBreaks.sort((a, b) => a.start.localeCompare(b.start));
 
         let currentStart = lesson.startTime;
 
-        overlappingBreaks.forEach((breakSlot) => {
-          // Add lesson part before break (if exists)
+        overlappingBreaks.forEach((breakSlot, breakIndex) => {
+          // Tambahkan bagian pelajaran sebelum istirahat
           if (currentStart < breakSlot.start) {
+            const periods = getClassPeriodsInRange(currentStart, breakSlot.start);
             finalItems.push({
               type: 'lesson',
               data: {
@@ -363,22 +404,23 @@ export default function TimelineSchedule() {
                 endTime: breakSlot.start,
               },
               startTime: currentStart,
+              displayTime: formatClassPeriods(periods),
             });
           }
 
-          // Add the break
+          // Tambahkan istirahat
           finalItems.push({
             type: 'break',
             data: breakSlot,
             startTime: breakSlot.start,
           });
 
-          // Move current start to after this break
           currentStart = breakSlot.end;
         });
 
-        // Add lesson part after last break (if exists)
+        // Tambahkan sisa pelajaran setelah istirahat terakhir
         if (currentStart < lesson.endTime) {
+          const periods = getClassPeriodsInRange(currentStart, lesson.endTime);
           finalItems.push({
             type: 'lesson',
             data: {
@@ -387,12 +429,13 @@ export default function TimelineSchedule() {
               endTime: lesson.endTime,
             },
             startTime: currentStart,
+            displayTime: formatClassPeriods(periods),
           });
         }
       }
     });
 
-    // Add breaks that don't overlap with any lesson (standalone breaks)
+    // Tambahkan istirahat yang tidak overlap dengan pelajaran
     breaks.forEach((breakSlot) => {
       const isOverlapping = todaySchedule.lessons.some(
         (lesson) => breakSlot.start < lesson.endTime && breakSlot.end > lesson.startTime
@@ -407,7 +450,6 @@ export default function TimelineSchedule() {
       }
     });
 
-    // Sort all items by start time
     finalItems.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return finalItems;
@@ -416,7 +458,11 @@ export default function TimelineSchedule() {
   if (viewMode === 'grid') {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-900 dark:text-slate-100">
-        <div className="mx-auto max-w-7xl px-5 py-5">
+        <div
+          className={`mx-auto max-w-7xl px-5 py-5 transition-all duration-500 ${
+            isTransitioning ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+          }`}
+        >
           {/* Header */}
           <header className="animate-in fade-in mb-5 rounded-xl bg-white p-6 shadow-lg duration-500 dark:bg-slate-800">
             <div className="grid grid-cols-1 items-end gap-5 md:grid-cols-5">
@@ -429,39 +475,60 @@ export default function TimelineSchedule() {
                       Kelas X PPLG 1 - SMKN 1 Kandeman
                     </p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Semester Gasal Tahun Ajaran 2025/2026
+                      Semester Genap Tahun Ajaran 2025/2026
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-                    <p className="text-sm text-slate-600 dark:text-slate-300">Wali Kelas</p>
+                    <div className="mb-1 flex items-center gap-2">
+                      <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Wali Kelas</p>
+                    </div>
                     <p className="font-semibold">Satria Nur Karim Amrullah, S.Pd</p>
                   </div>
 
                   <div className="rounded-lg bg-indigo-50 p-3 dark:bg-indigo-900/20">
-                    <p className="text-sm text-slate-600 dark:text-slate-300">Jam Pelajaran</p>
+                    <div className="mb-1 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Jam Pelajaran</p>
+                    </div>
                     <p className="font-semibold">07:00 - 15:30 WIB</p>
                   </div>
 
                   <div className="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
-                    <p className="text-sm text-slate-600 dark:text-slate-300">Total Pelajaran</p>
+                    <div className="mb-1 flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Total Pelajaran</p>
+                    </div>
                     <p className="font-semibold">13 Mata Pelajaran</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-end md:col-span-2">
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="rounded-lg bg-slate-200 px-6 py-3 text-slate-700 shadow-md transition-all hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    <span className="font-medium">Timeline View</span>
+                <div className="flex flex-col gap-2">
+                  <p className="text-right text-xs text-slate-500 dark:text-slate-400">
+                    <span className="font-medium text-slate-600 dark:text-slate-300">
+                      Timeline:
+                    </span>{' '}
+                    Lihat jadwal hari ini berurutan |{' '}
+                    <span className="font-medium text-blue-600 dark:text-blue-400">Grid:</span>{' '}
+                    Lihat semua hari sekaligus
+                  </p>
+                  <div className="flex justify-center gap-3 rounded-lg bg-slate-100 px-4 py-3 shadow-md dark:bg-slate-700">
+                    <LayoutList className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Timeline
+                    </span>
+                    <Switch checked={isGrid} onCheckedChange={handleViewChange} />
+                    <Grid3x3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Grid
+                    </span>
                   </div>
-                </button>
+                </div>
               </div>
             </div>
           </header>
@@ -484,7 +551,7 @@ export default function TimelineSchedule() {
                       className={`mb-4 rounded-lg border-l-4 bg-white p-4 shadow-sm dark:bg-slate-800 ${lesson.color} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg`}
                       style={{ animationDelay: `${(dayIndex * 5 + lessonIndex) * 50}ms` }}
                     >
-                      <div className="mb-2 inline-block rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white dark:bg-slate-600">
+                      <div className="mb-2 inline-block items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold dark:bg-slate-700">
                         {lesson.time}
                       </div>
                       <div className="mb-1 text-sm leading-tight font-semibold">
@@ -506,108 +573,88 @@ export default function TimelineSchedule() {
             ))}
           </div>
         </div>
-
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800">
-              <h3 className="mb-4 text-xl font-bold">Ubah Tampilan</h3>
-              <p className="mb-6 text-slate-600 dark:text-slate-300">
-                Pilih tampilan yang Anda inginkan untuk melihat jadwal pelajaran.
-              </p>
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    setViewMode('timeline');
-                    setShowModal(false);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl bg-slate-200 p-4 text-slate-700 transition-all hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                >
-                  <Clock className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Timeline View</div>
-                    <div className="text-sm opacity-75">Lihat jadwal per hari dengan waktu</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="flex w-full items-center gap-3 rounded-xl bg-blue-100 p-4 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200"
-                >
-                  <Grid3x3 className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Grid View (Aktif)</div>
-                    <div className="text-sm opacity-75">Lihat semua jadwal dalam grid</div>
-                  </div>
-                </button>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="mt-4 w-full rounded-xl border border-slate-300 p-3 transition-all hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
-              >
-                Batal
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-900 dark:text-slate-100">
-      <div className="mx-auto max-w-5xl px-4 py-6">
-        <header className="mb-6 rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-800/80">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-1.5 rounded-full bg-gradient-to-b from-blue-500 to-indigo-600"></div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                  Jadwal Hari Ini
-                </h1>
-                <p className="text-slate-600 dark:text-slate-300">
-                  Kelas X PPLG 1 - SMKN 1 Kandeman
-                </p>
+      <div
+        className={`mx-auto max-w-7xl px-5 py-5 transition-all duration-500 ${
+          isTransitioning ? '-translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+        }`}
+      >
+        <header className="animate-in fade-in mb-5 rounded-xl bg-white p-6 shadow-lg duration-500 dark:bg-slate-800">
+          <div className="grid grid-cols-1 items-end gap-5 md:grid-cols-5">
+            <div className="md:col-span-3">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="h-20 w-2 rounded bg-gradient-to-b from-blue-600 to-indigo-600"></div>
+                <div>
+                  <h1 className="text-2xl font-bold md:text-3xl">Jadwal Hari Ini</h1>
+                  <p className="mt-1 text-slate-600 dark:text-slate-300">
+                    Kelas X PPLG 1 - SMKN 1 Kandeman
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {isWeekend ? 'Hari Libur' : `${dayName} - Semester Genap 2025/2026`}
+                  </p>
+                </div>
               </div>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="rounded-lg bg-slate-200 px-6 py-3 text-slate-700 shadow-md transition-all hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-            >
-              <div className="flex items-center gap-2">
-                <Grid3x3 className="h-5 w-5" />
-                <span className="font-medium">Grid View</span>
-              </div>
-            </button>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 text-white">
-              <div className="mb-2 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span className="text-sm opacity-90">Hari</span>
+              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <p className="text-sm text-slate-600 dark:text-slate-300">Hari</p>
+                  </div>
+                  <p className="font-semibold">{isWeekend ? 'Libur' : dayName}</p>
+                </div>
+
+                <div className="rounded-lg bg-indigo-50 p-3 dark:bg-indigo-900/20">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    <p className="text-sm text-slate-600 dark:text-slate-300">Waktu Sekarang</p>
+                  </div>
+                  <p className="font-semibold">{getCurrentTimeString()} WIB</p>
+                </div>
+
+                <div className="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
+                  <div className="mb-1 flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <p className="text-sm text-slate-600 dark:text-slate-300">Total Pelajaran</p>
+                  </div>
+                  <p className="font-semibold">
+                    {isWeekend ? '0' : todaySchedule?.lessons.length || 0} Mapel
+                  </p>
+                </div>
               </div>
-              <div className="text-2xl font-bold">{isWeekend ? 'Libur' : dayName}</div>
             </div>
-            <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-4 text-white">
-              <div className="mb-2 flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                <span className="text-sm opacity-90">Waktu Sekarang</span>
-              </div>
-              <div className="text-2xl font-bold">{getCurrentTimeString()}</div>
-            </div>
-            <div className="rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-4 text-white">
-              <div className="mb-2 flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span className="text-sm opacity-90">Total Pelajaran</span>
-              </div>
-              <div className="text-2xl font-bold">
-                {isWeekend ? '0' : todaySchedule?.lessons.length || 0} Mapel
+
+            <div className="flex items-center justify-end md:col-span-2">
+              <div className="flex flex-col gap-2">
+                <p className="text-right text-xs text-slate-500 dark:text-slate-400">
+                  <span className="font-medium text-blue-600 dark:text-blue-400">Timeline:</span>{' '}
+                  Lihat jadwal hari ini berurutan |{' '}
+                  <span className="font-medium text-slate-600 dark:text-slate-300">Grid:</span>{' '}
+                  Lihat semua hari sekaligus
+                </p>
+                <div className="flex justify-center gap-3 rounded-lg bg-slate-100 px-4 py-3 shadow-md dark:bg-slate-700">
+                  <LayoutList className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                    Timeline
+                  </span>
+                  <Switch checked={isGrid} onCheckedChange={handleViewChange} />
+                  <Grid3x3 className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                    Grid
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
         {isWeekend ? (
-          <div className="rounded-2xl bg-white/80 p-12 text-center shadow-xl backdrop-blur-sm dark:bg-slate-800/80">
+          <div className="rounded-xl bg-white p-12 text-center shadow-lg dark:bg-slate-800">
             <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-500">
               <Calendar className="h-12 w-12 text-white" />
             </div>
@@ -615,7 +662,7 @@ export default function TimelineSchedule() {
             <p className="text-slate-600 dark:text-slate-300">Selamat menikmati akhir pekan!</p>
           </div>
         ) : (
-          <div className="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-800/80">
+          <div className="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
             <h2 className="mb-6 flex items-center gap-2 text-xl font-bold">
               <div className="h-8 w-1 rounded-full bg-gradient-to-b from-blue-500 to-indigo-600"></div>
               {todaySchedule?.name} - {todaySchedule?.subtitle}
@@ -655,12 +702,12 @@ export default function TimelineSchedule() {
                       </div>
 
                       <div
-                        className={`rounded-xl p-4 transition-all ${
+                        className={`rounded-xl border-l-4 p-4 transition-all ${
                           isActive
-                            ? 'border-2 border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20'
+                            ? 'border-yellow-400 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20'
                             : isPassed
-                              ? 'bg-slate-50 opacity-75 dark:bg-slate-800/50'
-                              : 'bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20'
+                              ? 'border-slate-300 bg-slate-50 opacity-75 dark:border-slate-600 dark:bg-slate-800/50'
+                              : 'border-emerald-400 bg-gradient-to-r from-emerald-50 to-green-50 dark:border-emerald-600 dark:from-emerald-900/20 dark:to-green-900/20'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -683,7 +730,6 @@ export default function TimelineSchedule() {
                   );
                 }
 
-                // Render lesson
                 const lesson = item.data as Lesson;
                 const isActive = isTimeInRange(lesson.startTime, lesson.endTime);
                 const isPassed = isTimePassed(lesson.endTime);
@@ -722,7 +768,7 @@ export default function TimelineSchedule() {
                     <div
                       className={`group rounded-xl border-l-4 p-5 transition-all duration-300 ${lesson.color} ${
                         isActive
-                          ? `scale-105 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-xl dark:from-blue-900/20 dark:to-indigo-900/20`
+                          ? `scale-100 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-xl dark:from-blue-900/20 dark:to-indigo-900/20`
                           : isPassed
                             ? 'bg-slate-50 opacity-75 dark:bg-slate-800/50'
                             : 'bg-white shadow-md hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800'
@@ -750,7 +796,7 @@ export default function TimelineSchedule() {
 
                       <div className="flex items-center gap-3">
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium dark:bg-slate-700">
-                          {lesson.time}
+                          {item.displayTime || lesson.time}
                         </span>
                         {lesson.room && (
                           <div className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium dark:bg-slate-700">
@@ -763,48 +809,6 @@ export default function TimelineSchedule() {
                   </div>
                 );
               })}
-            </div>
-          </div>
-        )}
-
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800">
-              <h3 className="mb-4 text-xl font-bold">Ubah Tampilan</h3>
-              <p className="mb-6 text-slate-600 dark:text-slate-300">
-                Pilih tampilan yang Anda inginkan untuk melihat jadwal pelajaran.
-              </p>
-              <div className="space-y-3">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="flex w-full items-center gap-3 rounded-xl bg-blue-100 p-4 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200"
-                >
-                  <Clock className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Timeline View (Aktif)</div>
-                    <div className="text-sm opacity-75">Lihat jadwal per hari dengan waktu</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => {
-                    setViewMode('grid');
-                    setShowModal(false);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl bg-slate-200 p-4 text-slate-700 transition-all hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                >
-                  <Grid3x3 className="h-6 w-6" />
-                  <div className="text-left">
-                    <div className="font-semibold">Grid View</div>
-                    <div className="text-sm opacity-75">Lihat semua jadwal dalam grid</div>
-                  </div>
-                </button>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="mt-4 w-full rounded-xl border border-slate-300 p-3 transition-all hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
-              >
-                Batal
-              </button>
             </div>
           </div>
         )}
