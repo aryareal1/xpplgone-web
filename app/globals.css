@@ -15,6 +15,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-roboto-slab);
   --font-slab: var(--font-roboto-slab);
   --font-outfit: var(--font-outfit);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -138,7 +140,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
     scrollbar-width: none;
   }
   ::-webkit-scrollbar {

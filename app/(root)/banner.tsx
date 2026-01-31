@@ -22,7 +22,7 @@ export default function Banner() {
   return (
     <section id="banner">
       <div className="relative h-60 sm:h-70 md:h-85 lg:h-100">
-        <div className="from-background absolute z-10 h-full w-full bg-gradient-to-t to-white/50 to-60% dark:to-black/50" />
+        <div className="from-background absolute z-10 h-full w-full bg-linear-to-t to-white/50 to-60% dark:to-black/50" />
         <Image
           src="/images/banner-1.jpg"
           alt="Banner"
