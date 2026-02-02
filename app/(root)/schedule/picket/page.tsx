@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import SectionHeader from '@/components/section-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { User2Icon, Sparkles, CalendarDays, ShieldCheck } from 'lucide-react';
+import { User2Icon, CalendarDays, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -131,7 +131,7 @@ export default function PicketSchedule() {
 
                       <CardContent className="p-0">
                         <div className="grid grid-cols-1 gap-2.5">
-                          {item.members.map((member, mIdx) => (
+                          {item.members.map((member) => (
                             <motion.div
                               key={member}
                               initial={{ opacity: 0, x: -10 }}
@@ -149,12 +149,10 @@ export default function PicketSchedule() {
                             >
                               <div
                                 className={cn(
-                                  'flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold shadow-sm',
-                                  'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                                  'h-2 w-2 shrink-0 rounded-full bg-current',
+                                  item.iconColor
                                 )}
-                              >
-                                {mIdx + 1}
-                              </div>
+                              />
                               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                                 {member}
                               </span>
@@ -172,23 +170,6 @@ export default function PicketSchedule() {
             })}
           </AnimatePresence>
         </div>
-
-        {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className="mt-12 flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-800"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-            <Sparkles className="h-6 w-6 text-slate-400" />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 dark:text-slate-100">Quotes</h4>
-            <p className="mx-auto max-w-md text-sm text-slate-500 dark:text-slate-400">
-              &quot;Minimal piket rasah kakean alasan, piket we gur seminggu sekali o tok&quot;
-            </p>
-          </div>
-        </motion.div>
       </div>
     </div>
   );
