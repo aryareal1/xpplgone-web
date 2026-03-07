@@ -26,6 +26,7 @@ import {
   ClipboardClockIcon,
   Code2Icon,
   HomeIcon,
+  BookOpenCheckIcon,
   NewspaperIcon,
   NotepadTextIcon,
   PiggyBankIcon,
@@ -54,6 +55,7 @@ const bars: Bars = [
       { name: 'Home', icon: HomeIcon, path: '/' },
       { name: 'Feed', icon: NewspaperIcon, path: '/feed' },
       { name: 'Album', icon: AlbumIcon, path: '/albums' },
+      { name: 'Jurnal Ramadhan', icon: BookOpenCheckIcon, path: '/ramadhan' },
     ],
   },
   {
@@ -96,7 +98,7 @@ export default function AppSidebar() {
             >
               <Link href="/" className="flex items-center gap-2 whitespace-nowrap">
                 <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
-                <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
+                <h1 className="font-slab bg-linear-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
                   {SITE_NAME}
                 </h1>
               </Link>
@@ -112,7 +114,7 @@ export default function AppSidebar() {
               className="mt-2 items-center justify-center"
             >
               <SidebarMenuButton
-                className="cursor-pointer bg-gradient-to-r from-cyan-500 to-sky-600 dark:from-violet-600 dark:to-indigo-600"
+                className="cursor-pointer bg-linear-to-r from-cyan-500 to-sky-600 dark:from-violet-600 dark:to-indigo-600"
                 onClick={toggleSidebar}
               >
                 <AlignLeftIcon />

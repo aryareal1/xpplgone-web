@@ -30,7 +30,7 @@ export default function PicketSchedule() {
           <SectionHeader
             title="Jadwal Piket"
             desc={['Kelas X PPLG 1 - SMKN 1 Kandeman']}
-            color="h-16 w-2 bg-linear-to-b from-blue-600 to-indigo-600"
+            color="bg-violet-500"
           />
         </motion.div>
 

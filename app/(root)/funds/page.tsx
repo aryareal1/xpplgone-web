@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from 'next-themes';
+import { motion } from 'motion/react';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -253,17 +254,32 @@ export default function FundsPage() {
   >(null);
 
   return (
-    <main className="mx-auto mt-5 flex max-w-[90rem] flex-col gap-5 px-4">
-      <h1 className="font-outfit text-center text-4xl font-bold">Kas Kelas</h1>
+    <main className="mx-auto mt-5 flex max-w-360 flex-col gap-5 px-4">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <h1 className="font-outfit mb-8 text-center text-4xl font-bold italic">Kas Kelas</h1>
+      </motion.header>
 
       <section id="table" className="font-outfit">
-        <SectionHeader
-          title="Buku Kas"
-          desc="Track daftar pembayaran kas kelas."
-          color="bg-green-500"
-        />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <SectionHeader
+            title="Buku Kas"
+            desc="Track daftar pembayaran kas kelas."
+            color="bg-green-500"
+          />
+        </motion.div>
 
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="show-scrollbar h-130"
           onContextMenu={(ev) => setContextMenuPos({ x: ev.clientX, y: ev.clientY })}
         >
@@ -406,7 +422,7 @@ export default function FundsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-        </div>
+        </motion.div>
       </section>
     </main>
   );

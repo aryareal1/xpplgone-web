@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { Album, albums } from '@/data/albums';
 import { AlbumCard } from './album-card';
 import { AlbumModal } from './album-modal';
+import SectionHeader from '@/components/section-header';
 
 export default function AlbumLayout() {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -114,22 +115,11 @@ export default function AlbumLayout() {
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
       >
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-2 rounded-full bg-linear-to-b from-blue-600 to-indigo-600"></div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white">
-                Album
-              </h1>
-              <div className="flex flex-col">
-                <p className="text-sm font-medium text-slate-600 md:text-base dark:text-slate-400">
-                  Kelas X PPLG 1 - SMKN 1 Kandeman
-                </p>
-                <p className="text-sm font-medium text-slate-500 md:text-base dark:text-slate-500">
-                  Galeri Momen & Kenangan
-                </p>
-              </div>
-            </div>
-          </div>
+          <SectionHeader
+            title="Album"
+            desc={['Kelas X PPLG 1 - SMKN 1 Kandeman', 'Galeri Momen & Kenangan']}
+            color="bg-blue-600"
+          />
 
           <div className="flex items-center gap-4">
             <motion.div

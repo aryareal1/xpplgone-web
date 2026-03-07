@@ -12,14 +12,8 @@ interface StatCardProps {
   color: string;
 }
 
-export function StatCard({ icon: Icon, label, value, color }: StatCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-    indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
-    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
-  };
-
-  const colorClass = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
+export function StatCard({ icon: Icon, label, value }: Omit<StatCardProps, 'color'>) {
+  const colorClass = 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
 
   return (
     <motion.div

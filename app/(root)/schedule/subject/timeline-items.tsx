@@ -59,7 +59,7 @@ export function TimelineLessonItem({
         className={cn(
           'group rounded-2xl border bg-white p-5 shadow-sm transition-all md:p-6 dark:bg-slate-900',
           isActive
-            ? `scale-[1.02] ${lesson.color} shadow-xl ring-4 ${lesson.color.replace('border-', 'ring-')}/10`
+            ? 'scale-[1.02] border-white shadow-xl ring-4 ring-white/10 dark:border-slate-800'
             : 'border-slate-100 hover:border-slate-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-slate-700',
           isPassed && 'opacity-40 grayscale-[0.5]'
         )}
@@ -243,7 +243,7 @@ export function TimelineEventItem({
         className={cn(
           'group rounded-2xl border bg-white p-5 shadow-sm transition-all md:p-6 dark:bg-slate-900',
           isActive
-            ? `scale-[1.02] border-blue-500 shadow-xl ring-4 ring-blue-500/10`
+            ? 'scale-[1.02] border-white shadow-xl ring-4 ring-white/10 dark:border-slate-800'
             : 'border-slate-100 hover:border-slate-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-slate-700',
           isPassed && 'opacity-40 grayscale-[0.5]'
         )}

@@ -7,20 +7,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   TimeSlot,
   Lesson,
-  scheduleData,
   scheduleDataRamadhan,
   mondayRamadhanSchedule,
   fridayRamadhanSchedule,
   timeRamadhanSchedule,
-  mondaySchedule,
-  fridaySchedule,
-  timeSchedule,
   nameRamadhanSchedule,
 } from '@/data/subject-schedule';
 import { StatCard } from './stat-card';
 import { SubjectGridView } from './grid-view';
 import { TimelineLessonItem, TimelineBreakItem, TimelineEventItem } from './timeline-items';
 import { WeekendView } from './weekend-view';
+import SectionHeader from '@/components/section-header';
 
 export default function TimelineSchedule() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -238,22 +235,11 @@ export default function TimelineSchedule() {
         >
           {/* Schematic Header */}
           <header className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-2 rounded-full bg-linear-to-b from-blue-600 to-indigo-600" />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white">
-                  Jadwal Pelajaran {nameRamadhanSchedule}
-                </h1>
-                <div className="flex flex-col">
-                  <p className="text-sm font-medium text-slate-600 md:text-base dark:text-slate-400">
-                    Kelas X PPLG 1 - SMKN 1 Kandeman
-                  </p>
-                  <p className="text-sm font-medium text-slate-500 md:text-base dark:text-slate-500">
-                    Semester Genap Tahun Ajaran 2025/2026
-                  </p>
-                </div>
-              </div>
-            </div>
+            <SectionHeader
+              title={`Jadwal Pelajaran ${nameRamadhanSchedule}`}
+              desc={['Kelas X PPLG 1 - SMKN 1 Kandeman', 'Semester Genap Tahun Ajaran 2025/2026']}
+              color="bg-sky-500"
+            />
 
             <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800">
               {[
@@ -294,19 +280,9 @@ export default function TimelineSchedule() {
           </header>
 
           <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard
-              icon={Users}
-              label="Wali Kelas"
-              value="Satria Nur Karim A, S.Pd"
-              color="blue"
-            />
-            <StatCard icon={Clock} label="Jam Pelajaran" value="07:30 - 14:45 WIB" color="indigo" />
-            <StatCard
-              icon={BookOpen}
-              label="Total Pelajaran"
-              value="13 Mata Pelajaran"
-              color="purple"
-            />
+            <StatCard icon={Users} label="Wali Kelas" value="Satria Nur Karim A, S.Pd" />
+            <StatCard icon={Clock} label="Jam Pelajaran" value="07:30 - 14:45 WIB" />
+            <StatCard icon={BookOpen} label="Total Pelajaran" value="13 Mata Pelajaran" />
           </div>
 
           <SubjectGridView scheduleData={scheduleDataRamadhan} />
@@ -329,22 +305,11 @@ export default function TimelineSchedule() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
         >
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-2 rounded-full bg-linear-to-b from-blue-600 to-indigo-600" />
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white">
-                Jadwal Hari Ini
-              </h1>
-              <div className="flex flex-col">
-                <p className="text-sm font-medium text-slate-600 md:text-base dark:text-slate-400">
-                  Kelas X PPLG 1 - SMKN 1 Kandeman
-                </p>
-                <p className="text-sm font-medium text-slate-500 md:text-base dark:text-slate-500">
-                  Semester Genap Tahun Ajaran 2025/2026
-                </p>
-              </div>
-            </div>
-          </div>
+          <SectionHeader
+            title="Jadwal Hari Ini"
+            desc={['Kelas X PPLG 1 - SMKN 1 Kandeman', 'Semester Genap Tahun Ajaran 2025/2026']}
+            color="bg-sky-500"
+          />
 
           <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800">
             {[

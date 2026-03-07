@@ -45,8 +45,7 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
               <div
                 key={lessonIndex}
                 className={cn(
-                  'relative rounded-xl border-l-[3px] bg-slate-50 p-4 transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/50 dark:hover:bg-slate-800',
-                  lesson.color
+                  'relative rounded-xl border-l-[3px] border-slate-200 bg-slate-50 p-4 transition-all hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800'
                 )}
               >
                 <div className="mb-2 flex items-center justify-between">
