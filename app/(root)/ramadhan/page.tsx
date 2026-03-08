@@ -2,7 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, ClipboardCheck, Users, Plus } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCheck,
+  Users,
+  Plus,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,10 +40,16 @@ export default function RamadhanPage() {
   const today = React.useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = React.useState(today);
   const [org, setOrg] = React.useState<'MU' | 'NU' | null>(null);
+  const [cellSize, setCellSize] = React.useState(176);
 
   React.useEffect(() => {
     const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
     setOrg(savedOrg || 'MU');
+
+    const savedSize = localStorage.getItem('ramadhan_calendar_size');
+    if (savedSize) {
+      setCellSize(parseInt(savedSize, 10));
+    }
   }, []);
 
   const monthStart = startOfMonth(currentDate);
@@ -49,6 +63,19 @@ export default function RamadhanPage() {
   });
 
   const weekDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+  const zoomIn = () =>
+    setCellSize((p) => {
+      const newSize = Math.min(p + 20, 300);
+      localStorage.setItem('ramadhan_calendar_size', newSize.toString());
+      return newSize;
+    });
+  const zoomOut = () =>
+    setCellSize((p) => {
+      const newSize = Math.max(p - 20, 80);
+      localStorage.setItem('ramadhan_calendar_size', newSize.toString());
+      return newSize;
+    });
 
   const prevMonth = () => {
     const prev = subMonths(currentDate, 1);
@@ -120,7 +147,29 @@ export default function RamadhanPage() {
                 </Tabs>
               </div>
 
-              <div className="-mb-4 flex items-center justify-end px-6 py-4">
+              <div className="-mb-4 flex items-center justify-between px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomOut}
+                    disabled={cellSize <= 80}
+                    className="h-8 w-8 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-900"
+                    title="Perkecil kalender"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomIn}
+                    disabled={cellSize >= 300}
+                    className="h-8 w-8 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-900"
+                    title="Perbesar kalender"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Button
@@ -175,8 +224,9 @@ export default function RamadhanPage() {
                       return (
                         <div
                           key={day.toString()}
+                          style={{ minHeight: `${cellSize}px` }}
                           className={cn(
-                            'group relative h-44 border-r border-b border-neutral-200 p-3 transition-colors last:border-r-0 dark:border-neutral-800',
+                            'group relative border-r border-b border-neutral-200 p-3 transition-all duration-300 last:border-r-0 dark:border-neutral-800',
                             !isCurrentMonth && 'bg-neutral-50/30 dark:bg-neutral-900/30',
                             ramadanDay ? 'bg-orange-50/20 dark:bg-orange-950/10' : ''
                           )}
