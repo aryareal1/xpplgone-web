@@ -144,7 +144,7 @@ export interface FormData {
   ceramah: Ceramah;
 }
 
-export const INITIAL_FORM_DATA: FormData = {
+export const initialFormData: FormData = {
   puasa: false,
   shalat5: {
     subuh: false,
@@ -197,7 +197,7 @@ export interface ExtraSection {
   condition?: (gender: string | null, isFriday: boolean) => boolean;
 }
 
-export const EXTRA_SECTIONS: ExtraSection[] = [
+export const Extra_Section: ExtraSection[] = [
   {
     id: 'jumat',
     title: "Jumat'an",
@@ -216,7 +216,7 @@ export const EXTRA_SECTIONS: ExtraSection[] = [
     color: 'bg-emerald-100 text-emerald-600',
     fields: [
       { id: 'tempat', label: 'Tempat', placeholder: 'Lokasi tadarrus', icon: MapPin },
-      { id: 'juz', label: 'Juz', placeholder: 'Contoh: 1', type: 'number' },
+      { id: 'juz', label: 'Juz', placeholder: 'Pilih Juz:', type: 'text' },
       { id: 'suratAyat', label: 'Surat - Ayat', placeholder: 'Al-Baqarah: 1-10' },
     ],
   },

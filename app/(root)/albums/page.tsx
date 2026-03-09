@@ -111,7 +111,10 @@ export default function AlbumLayout() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{
+          duration: 0.8,
+          ease: [0.16, 1, 0.3, 1],
+        }}
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
       >
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">

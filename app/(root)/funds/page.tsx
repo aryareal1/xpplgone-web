@@ -260,7 +260,7 @@ export default function FundsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <h1 className="font-outfit mb-8 text-center text-4xl font-bold italic">Kas Kelas</h1>
+        <h1 className="font-outfit mb-8 text-center text-4xl font-bold">Kas Kelas</h1>
       </motion.header>
 
       <section id="table" className="font-outfit">

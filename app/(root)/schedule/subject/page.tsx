@@ -234,7 +234,15 @@ export default function TimelineSchedule() {
           }`}
         >
           {/* Schematic Header */}
-          <header className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
+          >
             <SectionHeader
               title={`Jadwal Pelajaran ${nameRamadhanSchedule}`}
               desc={['Kelas X PPLG 1 - SMKN 1 Kandeman', 'Semester Genap Tahun Ajaran 2025/2026']}
@@ -277,12 +285,22 @@ export default function TimelineSchedule() {
                 </button>
               ))}
             </div>
-          </header>
+          </motion.header>
 
           <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard icon={Users} label="Wali Kelas" value="Satria Nur Karim A, S.Pd" />
-            <StatCard icon={Clock} label="Jam Pelajaran" value="07:30 - 14:45 WIB" />
-            <StatCard icon={BookOpen} label="Total Pelajaran" value="13 Mata Pelajaran" />
+            <StatCard
+              icon={Users}
+              label="Wali Kelas"
+              value="Satria Nur Karim A, S.Pd"
+              color="blue"
+            />
+            <StatCard icon={Clock} label="Jam Pelajaran" value="07:30 - 14:45 WIB" color="indigo" />
+            <StatCard
+              icon={BookOpen}
+              label="Total Pelajaran"
+              value="13 Mata Pelajaran"
+              color="purple"
+            />
           </div>
 
           <SubjectGridView scheduleData={scheduleDataRamadhan} />
@@ -302,7 +320,10 @@ export default function TimelineSchedule() {
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1],
+          }}
           className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
         >
           <SectionHeader

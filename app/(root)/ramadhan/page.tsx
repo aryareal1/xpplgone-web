@@ -2,7 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, ClipboardCheck, Users, Plus } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCheck,
+  Users,
+  Plus,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -26,16 +34,23 @@ import SectionHeader from '@/components/section-header';
 import { muCalendar, nuCalendar, RamadanDay } from '@/data/journal-ramadhan';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function RamadhanPage() {
   const today = React.useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = React.useState(today);
   const [org, setOrg] = React.useState<'MU' | 'NU' | null>(null);
+  const [cellSize, setCellSize] = React.useState(176);
 
   React.useEffect(() => {
     const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
     setOrg(savedOrg || 'MU');
+
+    const savedSize = localStorage.getItem('ramadhan_calendar_size');
+    if (savedSize) {
+      setCellSize(parseInt(savedSize, 10));
+    }
   }, []);
 
   const monthStart = startOfMonth(currentDate);
@@ -49,6 +64,19 @@ export default function RamadhanPage() {
   });
 
   const weekDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+  const zoomIn = () =>
+    setCellSize((p) => {
+      const newSize = Math.min(p + 20, 300);
+      localStorage.setItem('ramadhan_calendar_size', newSize.toString());
+      return newSize;
+    });
+  const zoomOut = () =>
+    setCellSize((p) => {
+      const newSize = Math.max(p - 20, 80);
+      localStorage.setItem('ramadhan_calendar_size', newSize.toString());
+      return newSize;
+    });
 
   const prevMonth = () => {
     const prev = subMonths(currentDate, 1);
@@ -76,7 +104,10 @@ export default function RamadhanPage() {
           <motion.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+            }}
           >
             <SectionHeader
               title="Jurnal Ramadhan"
@@ -92,15 +123,15 @@ export default function RamadhanPage() {
           >
             <Card className="overflow-hidden border-none bg-white shadow-sm dark:bg-slate-900">
               {/* Organization Switcher Header */}
-              <div className="-mt-6 -mb-6 flex flex-col items-start gap-4 border-b border-neutral-100 bg-neutral-50/50 p-6 md:flex-row md:items-center md:justify-between dark:border-neutral-800 dark:bg-neutral-900/50">
+              <div className="-mt-6 -mb-6 flex flex-col items-start gap-4 border-b border-slate-100 bg-[#ededee] p-6 md:flex-row md:items-center md:justify-between dark:border-slate-800 dark:bg-[#151f33]">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
-                    <ClipboardCheck className="h-6 w-6 text-neutral-900 dark:text-neutral-50" />
-                    <CardTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-50">
+                    <ClipboardCheck className="h-6 w-6 text-slate-900 dark:text-slate-50" />
+                    <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-50">
                       Daily Check-in
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                  <CardDescription className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     Pilih organisasi untuk menyesuaikan kalender Ramadhan.
                   </CardDescription>
                 </div>
@@ -120,7 +151,29 @@ export default function RamadhanPage() {
                 </Tabs>
               </div>
 
-              <div className="-mb-4 flex items-center justify-end px-6 py-4">
+              <div className="-mb-4 flex items-center justify-between px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomOut}
+                    disabled={cellSize <= 80}
+                    className="h-8 w-8 text-slate-600 hover:bg-slate-100 disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-800"
+                    title="Perkecil kalender"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={zoomIn}
+                    disabled={cellSize >= 300}
+                    className="h-8 w-8 text-slate-600 hover:bg-slate-100 disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-800"
+                    title="Perbesar kalender"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Button
@@ -128,7 +181,7 @@ export default function RamadhanPage() {
                       size="icon"
                       onClick={prevMonth}
                       disabled={currentDate.getMonth() === 1}
-                      className="h-8 w-8 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-900"
+                      className="h-8 w-8 text-slate-600 hover:bg-slate-100 disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-800"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
@@ -137,12 +190,12 @@ export default function RamadhanPage() {
                       size="icon"
                       onClick={nextMonth}
                       disabled={currentDate.getMonth() === 2}
-                      className="h-8 w-8 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-400 dark:hover:bg-neutral-900"
+                      className="h-8 w-8 text-slate-600 hover:bg-slate-100 disabled:opacity-30 dark:text-slate-400 dark:hover:bg-slate-800"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                   </div>
-                  <h2 className="text-lg font-bold text-[#344054] dark:text-neutral-200">
+                  <h2 className="text-lg font-bold text-[#344054] dark:text-slate-200">
                     {format(currentDate, 'MMMM yyyy')}
                   </h2>
                 </div>
@@ -151,11 +204,11 @@ export default function RamadhanPage() {
               {/* Scrollable Calendar Grid */}
               <div className="show-scrollbar overflow-x-auto pb-4">
                 <div className="min-w-[800px] md:min-w-0">
-                  <div className="grid grid-cols-7 border-y border-neutral-200 dark:border-neutral-800">
+                  <div className="grid grid-cols-7 border-y border-slate-200 dark:border-slate-800">
                     {weekDays.map((day) => (
                       <div
                         key={day}
-                        className="py-3 text-center text-sm font-bold text-[#344054] dark:text-neutral-300"
+                        className="py-3 text-center text-sm font-bold text-[#344054] dark:text-slate-300"
                       >
                         {day}
                       </div>
@@ -175,9 +228,10 @@ export default function RamadhanPage() {
                       return (
                         <div
                           key={day.toString()}
+                          style={{ minHeight: `${cellSize}px` }}
                           className={cn(
-                            'group relative h-44 border-r border-b border-neutral-200 p-3 transition-colors last:border-r-0 dark:border-neutral-800',
-                            !isCurrentMonth && 'bg-neutral-50/30 dark:bg-neutral-900/30',
+                            'group relative border-r border-b border-slate-200 p-3 transition-all duration-300 last:border-r-0 dark:border-slate-800',
+                            !isCurrentMonth && 'bg-slate-50/30 dark:bg-slate-900/30',
                             ramadanDay ? 'bg-orange-50/20 dark:bg-orange-950/10' : ''
                           )}
                         >
@@ -186,9 +240,9 @@ export default function RamadhanPage() {
                               className={cn(
                                 'flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium',
                                 isToday
-                                  ? 'border border-neutral-300 bg-neutral-50 text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50'
-                                  : 'text-[#667085] dark:text-neutral-400',
-                                !isCurrentMonth && 'text-neutral-300 dark:text-neutral-700'
+                                  ? 'border border-slate-300 bg-slate-50 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50'
+                                  : 'text-[#667085] dark:text-slate-400',
+                                !isCurrentMonth && 'text-slate-300 dark:text-slate-700'
                               )}
                             >
                               {ramadanDay ? ramadanDay.hijriDay : ''}
@@ -200,7 +254,7 @@ export default function RamadhanPage() {
                               <Button
                                 asChild
                                 size="sm"
-                                className="h-9 w-full border border-neutral-200 bg-white px-2 py-0 text-xs font-bold text-neutral-900 shadow-sm hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 dark:hover:bg-neutral-900"
+                                className="h-9 w-full border border-slate-200 bg-white px-2 py-0 text-xs font-bold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:hover:bg-slate-800"
                               >
                                 <Link href={datePath}>Mulai check-in</Link>
                               </Button>
@@ -215,26 +269,76 @@ export default function RamadhanPage() {
             </Card>
           </motion.div>
         </section>
-
         <SilaturahimSection />
       </main>
     </div>
   );
 }
 
-function SilaturahimSection() {
-  const [entries, setEntries] = React.useState<Array<{ name: string; note: string }>>([
-    { name: '', note: '' },
-  ]);
+const rowVariants = {
+  initial: {
+    opacity: 0,
+    y: -10,
+    scale: 0.98,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.25,
+      ease: [0.32, 0.72, 0, 1] as const,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.98,
+    transition: {
+      duration: 0.2,
+      ease: [0.32, 0.72, 0, 1] as const,
+    },
+  },
+};
 
-  const addEntry = () => {
-    setEntries([...entries, { name: '', note: '' }]);
+function SilaturahimSection() {
+  const generateId = () => {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+      return window.crypto.randomUUID();
+    }
+    return Math.random().toString(36).substring(2, 15);
   };
 
+  const [entries, setEntries] = React.useState<Array<{ id: string; name: string; note: string }>>([
+    { id: generateId(), name: '', note: '' },
+  ]);
+
   const handleInputChange = (index: number, field: 'name' | 'note', value: string) => {
-    const newEntries = [...entries];
-    newEntries[index] = { ...newEntries[index], [field]: value };
-    setEntries(newEntries);
+    setEntries((prev) => {
+      const newEntries = [...prev];
+      newEntries[index] = { ...newEntries[index], [field]: value };
+
+      const entry = newEntries[index];
+
+      const hasName = entry.name?.trim() !== '';
+      const hasNote = entry.note?.trim() !== '';
+      const isComplete = hasName;
+      const isEmpty = !hasName && !hasNote;
+
+      if (isComplete && index === newEntries.length - 1) {
+        newEntries.push({
+          id: generateId(),
+          name: '',
+          note: '',
+        });
+      }
+
+      if (isEmpty && newEntries.length > 1) {
+        return newEntries.filter((_, i) => i !== index);
+      }
+
+      return newEntries;
+    });
   };
 
   return (
@@ -243,7 +347,10 @@ function SilaturahimSection() {
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
+        transition={{
+          duration: 0.8,
+          ease: [0.16, 1, 0.3, 1],
+        }}
         className="mb-5"
       >
         <SectionHeader
@@ -260,81 +367,65 @@ function SilaturahimSection() {
         transition={{ duration: 0.5, delay: 0.1 }}
       >
         <Card className="overflow-hidden border-none bg-white shadow-sm dark:bg-slate-900">
-          <div className="-mt-6 border-b border-neutral-100 bg-neutral-50/50 p-6 dark:border-neutral-800 dark:bg-neutral-900/50">
-            <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-neutral-900 uppercase dark:text-neutral-50">
+          <div className="-mt-6 border-b border-slate-100 bg-[#ededee] p-6 dark:border-slate-800 dark:bg-[#151f33]">
+            <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900 uppercase dark:text-slate-50">
               <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               Daftar Kunjungan Idul Fitri
             </h3>
           </div>
 
           <CardContent className="p-0">
-            <div className="show-scrollbar overflow-x-auto">
-              <table className="w-full min-w-[700px] border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-neutral-100 bg-neutral-50/30 dark:border-neutral-800 dark:bg-neutral-900/30">
-                    <th className="w-16 px-6 py-4 text-xs font-bold tracking-wider text-neutral-500 uppercase">
-                      NO
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold tracking-wider text-neutral-500 uppercase">
-                      NAMA ORANG YANG DIKUNJUNGI
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold tracking-wider text-neutral-500 uppercase">
-                      KETERANGAN
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-                  {entries.map((entry, index) => (
-                    <tr
-                      key={index}
-                      className="group transition-colors hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30"
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <AnimatePresence mode="sync">
+                {entries.map((entry, index) => {
+                  const countFilledAbove = entries
+                    .slice(0, index)
+                    .filter((e) => e.name.trim() !== '').length;
+
+                  const isFilled = entry.name.trim() !== '';
+
+                  return (
+                    <motion.div
+                      key={entry.id}
+                      layout
+                      variants={rowVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{
+                        layout: { duration: 0.25 },
+                      }}
+                      className="flex items-start gap-4 p-4"
                     >
-                      <td className="px-6 py-3 text-sm font-bold text-neutral-400">
-                        {String(index + 1).padStart(2, '0')}
-                      </td>
-                      <td className="px-4 py-3">
+                      {/* Number / Plus */}
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-sm font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-100">
+                        {isFilled ? countFilledAbove + 1 : <Plus className="h-4 w-4" />}
+                      </div>
+
+                      {/* Inputs */}
+                      <div className="flex flex-1 flex-col gap-2">
                         <Input
-                          placeholder="Masukkan nama..."
+                          placeholder="Nama yang dikunjungi"
                           value={entry.name}
                           onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                          className="h-10 border border-neutral-200 bg-white px-4 font-medium dark:border-neutral-800 dark:bg-neutral-950"
+                          className="border-slate-200 bg-[#fcfcfc] text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-50 dark:placeholder:text-slate-600"
                         />
-                      </td>
-                      <td className="px-4 py-3">
-                        <Input
-                          placeholder="Masukkan keterangan..."
-                          value={entry.note}
-                          onChange={(e) => handleInputChange(index, 'note', e.target.value)}
-                          className="h-10 border border-neutral-200 bg-white px-4 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                  {/* Add Row Button Row */}
-                  <tr className="border-t border-neutral-100 bg-neutral-50/10 dark:border-neutral-800">
-                    <td className="px-5 py-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={addEntry}
-                        className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
-                      >
-                        <Plus className="h-5 w-5" />
-                      </Button>
-                    </td>
-                    <td colSpan={2} className="px-4 py-3">
-                      <button
-                        onClick={addEntry}
-                        className="text-sm font-bold text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-                      >
-                        Tambah baris baru
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+                        <div className="flex items-start gap-2">
+                          <Textarea
+                            placeholder="Catatan kunjungan..."
+                            value={entry.note}
+                            onChange={(e) => handleInputChange(index, 'note', e.target.value)}
+                            rows={2}
+                            className="w-full resize-y border-slate-200 bg-[#fcfcfc] text-sm text-slate-700 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:placeholder:text-slate-600"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
-            <div className="flex items-center gap-2 border-t border-neutral-100 bg-neutral-50/30 p-4 dark:border-neutral-800 dark:bg-neutral-900/30"></div>
           </CardContent>
         </Card>
       </motion.div>
