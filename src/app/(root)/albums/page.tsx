@@ -126,7 +126,10 @@ export default function AlbumLayout() {
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <SectionHeader
             title="Album"
-            desc={['Kelas X PPLG 1 - SMKN 1 Kandeman', 'Galeri Momen & Kenangan']}
+            desc={[
+              'Kelas X PPLG 1 - SMKN 1 Kandeman',
+              'Galeri Momen & Kenangan',
+            ]}
             color="bg-blue-600"
           />
 

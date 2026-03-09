@@ -12,7 +12,12 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
@@ -31,7 +36,11 @@ import {
 } from 'date-fns';
 import SectionHeader from '@/components/section-header';
 
-import { muCalendar, nuCalendar, RamadanDay } from '@/data/journal-ramadhan';
+import {
+  muCalendar,
+  nuCalendar,
+  type RamadanDay,
+} from '@/data/journal-ramadhan';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { motion, AnimatePresence } from 'motion/react';
@@ -94,7 +103,7 @@ export default function RamadhanPage() {
       const dateStr = format(date, 'yyyy-MM-dd');
       return currentCalendar.find((d) => d.date === dateStr);
     },
-    [currentCalendar]
+    [currentCalendar],
   );
 
   return (
@@ -220,10 +229,11 @@ export default function RamadhanPage() {
                       const ramadanDay = getRamadanDay(day);
                       const isCurrentMonth = isSameMonth(day, monthStart);
                       const isToday = isSameDay(day, today);
-                      const isPastOrToday = isBefore(startOfDay(day), startOfDay(today)) || isToday;
+                      const isPastOrToday =
+                        isBefore(startOfDay(day), startOfDay(today)) || isToday;
                       const datePath = ramadanDay
-                        ? `/ramadhan/${ramadanDay.hijriDay}`
-                        : `/ramadhan/${format(day, 'yyyy-MM-dd')}`;
+                        ? `/ramadan/${ramadanDay.hijriDay}`
+                        : `/ramadan/${format(day, 'yyyy-MM-dd')}`;
 
                       return (
                         <div
@@ -231,8 +241,11 @@ export default function RamadhanPage() {
                           style={{ minHeight: `${cellSize}px` }}
                           className={cn(
                             'group relative border-r border-b border-slate-200 p-3 transition-all duration-300 last:border-r-0 dark:border-slate-800',
-                            !isCurrentMonth && 'bg-slate-50/30 dark:bg-slate-900/30',
-                            ramadanDay ? 'bg-orange-50/20 dark:bg-orange-950/10' : ''
+                            !isCurrentMonth &&
+                              'bg-slate-50/30 dark:bg-slate-900/30',
+                            ramadanDay
+                              ? 'bg-orange-50/20 dark:bg-orange-950/10'
+                              : '',
                           )}
                         >
                           <div className="flex items-start justify-end">
@@ -242,7 +255,8 @@ export default function RamadhanPage() {
                                 isToday
                                   ? 'border border-slate-300 bg-slate-50 text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50'
                                   : 'text-[#667085] dark:text-slate-400',
-                                !isCurrentMonth && 'text-slate-300 dark:text-slate-700'
+                                !isCurrentMonth &&
+                                  'text-slate-300 dark:text-slate-700',
                               )}
                             >
                               {ramadanDay ? ramadanDay.hijriDay : ''}
@@ -303,17 +317,25 @@ const rowVariants = {
 
 function SilaturahimSection() {
   const generateId = () => {
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    if (
+      typeof window !== 'undefined' &&
+      window.crypto &&
+      window.crypto.randomUUID
+    ) {
       return window.crypto.randomUUID();
     }
     return Math.random().toString(36).substring(2, 15);
   };
 
-  const [entries, setEntries] = React.useState<Array<{ id: string; name: string; note: string }>>([
-    { id: generateId(), name: '', note: '' },
-  ]);
+  const [entries, setEntries] = React.useState<
+    Array<{ id: string; name: string; note: string }>
+  >([{ id: generateId(), name: '', note: '' }]);
 
-  const handleInputChange = (index: number, field: 'name' | 'note', value: string) => {
+  const handleInputChange = (
+    index: number,
+    field: 'name' | 'note',
+    value: string,
+  ) => {
     setEntries((prev) => {
       const newEntries = [...prev];
       newEntries[index] = { ...newEntries[index], [field]: value };
@@ -399,7 +421,11 @@ function SilaturahimSection() {
                     >
                       {/* Number / Plus */}
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-sm font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-100">
-                        {isFilled ? countFilledAbove + 1 : <Plus className="h-4 w-4" />}
+                        {isFilled ? (
+                          countFilledAbove + 1
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
                       </div>
 
                       {/* Inputs */}
@@ -407,7 +433,9 @@ function SilaturahimSection() {
                         <Input
                           placeholder="Nama yang dikunjungi"
                           value={entry.name}
-                          onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange(index, 'name', e.target.value)
+                          }
                           className="border-slate-200 bg-[#fcfcfc] text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-50 dark:placeholder:text-slate-600"
                         />
 
@@ -415,7 +443,9 @@ function SilaturahimSection() {
                           <Textarea
                             placeholder="Catatan kunjungan..."
                             value={entry.note}
-                            onChange={(e) => handleInputChange(index, 'note', e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(index, 'note', e.target.value)
+                            }
                             rows={2}
                             className="w-full resize-y border-slate-200 bg-[#fcfcfc] text-sm text-slate-700 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:placeholder:text-slate-600"
                           />

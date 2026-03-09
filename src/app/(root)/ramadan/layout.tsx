@@ -1,5 +1,5 @@
-import React from 'react';
-import { Metadata } from 'next';
+import type React from 'react';
+import type { Metadata } from 'next';
 import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   description: `Jurnal Ramadhan of ${SITE_NAME} of Skansaka`,
 };
 
-export default function RamadanLayout({ children }: { children: React.ReactNode }) {
+export default function RamadanLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return <>{children}</>;
 }

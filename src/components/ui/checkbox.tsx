@@ -11,7 +11,9 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ className, onCheckedChange, ...props }, ref) => {
-    const [checked, setChecked] = React.useState(props.defaultChecked || props.checked || false);
+    const [checked, setChecked] = React.useState(
+      props.defaultChecked || props.checked || false,
+    );
 
     React.useEffect(() => {
       if (props.checked !== undefined) {
@@ -42,7 +44,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             checked
               ? 'border-orange-500 bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)] dark:border-orange-500 dark:bg-orange-500'
               : 'border-neutral-300 bg-white/50 backdrop-blur-sm peer-hover:border-orange-300 dark:border-neutral-700 dark:bg-neutral-900/50',
-            className
+            className,
           )}
         >
           <AnimatePresence>
@@ -60,7 +62,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 Checkbox.displayName = 'Checkbox';
 

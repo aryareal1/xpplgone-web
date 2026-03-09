@@ -59,7 +59,7 @@ const bars: Bars = [
       { name: 'Home', icon: HomeIcon, path: '/' },
       { name: 'Feed', icon: NewspaperIcon, path: '/feed' },
       { name: 'Album', icon: AlbumIcon, path: '/albums' },
-      { name: 'Jurnal Ramadhan', icon: BookOpenCheckIcon, path: '/ramadhan' },
+      { name: 'Jurnal Ramadhan', icon: BookOpenCheckIcon, path: '/ramadan' },
     ],
   },
   {

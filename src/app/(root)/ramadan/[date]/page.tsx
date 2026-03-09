@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import type React from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -34,15 +35,15 @@ import { cn } from '@/lib/utils';
 import {
   muCalendar,
   nuCalendar,
-  RamadanDay,
+  type RamadanDay,
   physicalSpiritualJournal,
   sunahJournal,
-  FormData,
-  Shalat5,
-  ShalatSunah,
+  type FormData,
+  type Shalat5,
+  type ShalatSunah,
   initialFormData,
   Extra_Section,
-  ExtraSection,
+  type ExtraSection,
 } from '@/data/journal-ramadhan';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
@@ -93,7 +94,9 @@ const RamadhanHeader = memo(function RamadhanHeader({
   dateStr: string;
 }) {
   const displayDate = useMemo(() => {
-    return gregorianDate ? format(gregorianDate, 'EEEE, d MMMM yyyy', { locale: id }) : dateStr;
+    return gregorianDate
+      ? format(gregorianDate, 'EEEE, d MMMM yyyy', { locale: id })
+      : dateStr;
   }, [gregorianDate, dateStr]);
 
   return (
@@ -105,13 +108,15 @@ const RamadhanHeader = memo(function RamadhanHeader({
     >
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" asChild className="rounded-full">
-          <Link href="/ramadhan">
+          <Link href="/ramadan">
             <ChevronLeft className="h-5 w-5" />
           </Link>
         </Button>
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">
-            {ramadanDayInfo ? `${ramadanDayInfo.hijriDay} Ramadhan 1447 H` : 'Check-in Harian'}
+            {ramadanDayInfo
+              ? `${ramadanDayInfo.hijriDay} Ramadhan 1447 H`
+              : 'Check-in Harian'}
           </h1>
           <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
             {displayDate}
@@ -133,12 +138,12 @@ const DailyJournalSection = memo(function DailyJournalSection({
   handleCheckboxChange: (
     section: 'shalat5' | 'shalatSunah' | 'root',
     field: string,
-    value: boolean
+    value: boolean,
   ) => void;
   handleInputChange: (
     section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
     field: string,
-    value: string
+    value: string,
   ) => void;
 }) {
   return (
@@ -156,7 +161,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
         <CardContent className="grid gap-6 p-6">
           {/* Puasa Checkbox */}
           <div
-            onDoubleClick={() => handleCheckboxChange('root', 'puasa', !formData.puasa)}
+            onDoubleClick={() =>
+              handleCheckboxChange('root', 'puasa', !formData.puasa)
+            }
             className="flex cursor-pointer touch-manipulation items-center justify-between rounded-lg border border-orange-100 bg-orange-50/30 p-4 select-none dark:border-orange-900/30 dark:bg-orange-950/10"
           >
             <div className="space-y-0.5">
@@ -190,12 +197,14 @@ const DailyJournalSection = memo(function DailyJournalSection({
                     handleCheckboxChange(
                       'shalat5',
                       item.id,
-                      !formData.shalat5[item.id as keyof Shalat5]
+                      !formData.shalat5[item.id as keyof Shalat5],
                     )
                   }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
                 >
-                  <span className="text-xs font-bold capitalize">{item.name}</span>
+                  <span className="text-xs font-bold capitalize">
+                    {item.name}
+                  </span>
                   <input
                     type="checkbox"
                     checked={formData.shalat5[item.id as keyof Shalat5]}
@@ -222,16 +231,24 @@ const DailyJournalSection = memo(function DailyJournalSection({
                     handleCheckboxChange(
                       'shalatSunah',
                       item.id,
-                      !formData.shalatSunah[item.id as keyof ShalatSunah]
+                      !formData.shalatSunah[item.id as keyof ShalatSunah],
                     )
                   }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
                 >
-                  <span className="text-xs font-bold capitalize">{item.name}</span>
+                  <span className="text-xs font-bold capitalize">
+                    {item.name}
+                  </span>
                   <input
                     type="checkbox"
                     checked={formData.shalatSunah[item.id as keyof ShalatSunah]}
-                    onChange={(e) => handleCheckboxChange('shalatSunah', item.id, e.target.checked)}
+                    onChange={(e) =>
+                      handleCheckboxChange(
+                        'shalatSunah',
+                        item.id,
+                        e.target.checked,
+                      )
+                    }
                     className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
                   />
                 </div>
@@ -241,7 +258,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
 
           {/* Keterangan */}
           <div className="space-y-2">
-            <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300">Keterangan</h3>
+            <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300">
+              Keterangan
+            </h3>
             <Textarea
               placeholder="Catatan tambahan kegiatan hari ini..."
               value={formData.keterangan}
@@ -267,14 +286,17 @@ const JuzGridSelector = memo(function JuzGridSelector({
   handleInputChange: (
     section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
     field: string,
-    value: string
+    value: string,
   ) => void;
   placeholder?: string;
 }) {
   const [isJuzGridVisible, setIsJuzGridVisible] = useState(true);
 
   // Memoize the selected juz array to prevent re-calculations
-  const selectedJuzNumbers = useMemo(() => parseJuzToNumbers(juzValue), [juzValue]);
+  const selectedJuzNumbers = useMemo(
+    () => parseJuzToNumbers(juzValue),
+    [juzValue],
+  );
 
   const toggleJuz = useCallback(
     (n: number) => {
@@ -287,7 +309,7 @@ const JuzGridSelector = memo(function JuzGridSelector({
       }
       handleInputChange('tadarrus', 'juz', numbersToJuzRange(next));
     },
-    [selectedJuzNumbers, handleInputChange]
+    [selectedJuzNumbers, handleInputChange],
   );
 
   return (
@@ -297,7 +319,9 @@ const JuzGridSelector = memo(function JuzGridSelector({
           <span
             className={cn(
               '-mt-2.5 text-sm transition-colors',
-              !juzValue ? 'text-muted-foreground' : 'text-black dark:text-white'
+              !juzValue
+                ? 'text-muted-foreground'
+                : 'text-black dark:text-white',
             )}
           >
             {juzValue || placeholder}
@@ -352,7 +376,7 @@ const JuzGridSelector = memo(function JuzGridSelector({
                       'flex h-10 items-center justify-center rounded-lg text-xs font-bold transition-all',
                       isSelected
                         ? 'bg-emerald-500 text-white shadow-md ring-0 dark:shadow-none'
-                        : 'bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+                        : 'bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700',
                     )}
                   >
                     {n}
@@ -368,7 +392,11 @@ const JuzGridSelector = memo(function JuzGridSelector({
 });
 
 // 4. Action Buttons (Submit & Clear)
-const ActionButtons = memo(function ActionButtons({ onClearClick }: { onClearClick: () => void }) {
+const ActionButtons = memo(function ActionButtons({
+  onClearClick,
+}: {
+  onClearClick: () => void;
+}) {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSimpan = useCallback(() => {
@@ -385,7 +413,7 @@ const ActionButtons = memo(function ActionButtons({ onClearClick }: { onClearCli
             'h-12 flex-1 rounded-xl font-bold text-white shadow-lg transition-all duration-300',
             isSuccess
               ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 dark:shadow-none'
-              : 'bg-orange-600 shadow-orange-200 hover:bg-orange-700 dark:shadow-none'
+              : 'bg-orange-600 shadow-orange-200 hover:bg-orange-700 dark:shadow-none',
           )}
         >
           <AnimatePresence mode="wait">
@@ -425,8 +453,8 @@ const ActionButtons = memo(function ActionButtons({ onClearClick }: { onClearCli
         </Button>
       </div>
       <p className="text-center text-xs text-neutral-500">
-        Pastikan kalian tidak bohong dalam mengisi jurnal ini. Ingat, Allah Maha Melihat dan Maha
-        Mengetahui.
+        Pastikan kalian tidak bohong dalam mengisi jurnal ini. Ingat, Allah Maha
+        Melihat dan Maha Mengetahui.
       </p>
     </div>
   );
@@ -442,9 +470,10 @@ export default function RamadanCheckinPage() {
   const [loading, setLoading] = useState(true);
   const [userGender, setUserGender] = useState<string | null>(null);
   const [isFridayDay, setIsFridayDay] = useState(false);
-  const [ramadanDayInfo, setRamadanDayInfo] = useState<{ hijriDay: number; org: string } | null>(
-    null
-  );
+  const [ramadanDayInfo, setRamadanDayInfo] = useState<{
+    hijriDay: number;
+    org: string;
+  } | null>(null);
   const [gregorianDate, setGregorianDate] = useState<Date | null>(null);
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -478,13 +507,18 @@ export default function RamadanCheckinPage() {
         }
 
         let actualDate: Date | null = null;
-        let hijriDay = parseInt(dateStr);
+        const hijriDay = parseInt(dateStr);
         let currentRamadanInfo = null;
 
         if (!isNaN(hijriDay)) {
-          const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
+          const savedOrg = localStorage.getItem('ramadhan_org') as
+            | 'MU'
+            | 'NU'
+            | null;
           const calendar = savedOrg === 'NU' ? nuCalendar : muCalendar;
-          const dayData = calendar.find((d: RamadanDay) => d.hijriDay === hijriDay);
+          const dayData = calendar.find(
+            (d: RamadanDay) => d.hijriDay === hijriDay,
+          );
 
           if (dayData) {
             actualDate = parseISO(dayData.date);
@@ -522,7 +556,11 @@ export default function RamadanCheckinPage() {
   }, [dateStr, supabase]);
 
   const handleCheckboxChange = useCallback(
-    (section: 'shalat5' | 'shalatSunah' | 'root', field: string, value: boolean) => {
+    (
+      section: 'shalat5' | 'shalatSunah' | 'root',
+      field: string,
+      value: boolean,
+    ) => {
       setFormData((prev) => {
         if (section === 'shalat5' || section === 'shalatSunah') {
           return {
@@ -536,14 +574,14 @@ export default function RamadanCheckinPage() {
         return { ...prev, [field]: value } as FormData;
       });
     },
-    []
+    [],
   );
 
   const handleInputChange = useCallback(
     (
       section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
       field: string,
-      value: string
+      value: string,
     ) => {
       if (section === 'tadarrus' && field === 'juz') {
         const numbers = value.match(/\d+/g);
@@ -564,7 +602,7 @@ export default function RamadanCheckinPage() {
         return { ...prev, [field]: value } as FormData;
       });
     },
-    []
+    [],
   );
 
   const handleClear = useCallback(() => {
@@ -608,7 +646,11 @@ export default function RamadanCheckinPage() {
           {/* Extra Sections (Tadarrus, Tarawih, Ceramah, etc.) */}
           {Extra_Section.map((section: ExtraSection) => {
             // Check if section should be shown based on condition (if any)
-            if (section.condition && !section.condition(userGender, isFridayDay)) return null;
+            if (
+              section.condition &&
+              !section.condition(userGender, isFridayDay)
+            )
+              return null;
 
             return (
               <section
@@ -620,11 +662,14 @@ export default function RamadanCheckinPage() {
                     className={cn(
                       'flex h-10 w-10 items-center justify-center rounded-xl',
                       section.color.split(' ')[0],
-                      'dark:bg-opacity-20'
+                      'dark:bg-opacity-20',
                     )}
                   >
                     <section.icon
-                      className={cn('h-5 w-5', section.color.split(' ')[1] || section.color)}
+                      className={cn(
+                        'h-5 w-5',
+                        section.color.split(' ')[1] || section.color,
+                      )}
                     />
                   </div>
                   <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
@@ -641,13 +686,16 @@ export default function RamadanCheckinPage() {
                           ? 'grid-cols-1'
                           : section.fields.length === 2
                             ? 'sm:grid-cols-2'
-                            : 'sm:grid-cols-2 lg:grid-cols-3'
+                            : 'sm:grid-cols-2 lg:grid-cols-3',
                       )}
                     >
                       {section.fields.map((field) => (
                         <div
                           key={field.id}
-                          className={cn('space-y-2', field.id === 'materi' && 'lg:col-span-1')}
+                          className={cn(
+                            'space-y-2',
+                            field.id === 'materi' && 'lg:col-span-1',
+                          )}
                         >
                           <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300">
                             {field.label}
@@ -669,12 +717,18 @@ export default function RamadanCheckinPage() {
                                 type={field.type || 'text'}
                                 className={cn(
                                   field.icon && 'pl-10',
-                                  'bg-[#fcfcfc] dark:bg-slate-900'
+                                  'bg-[#fcfcfc] dark:bg-slate-900',
                                 )}
                                 placeholder={field.placeholder}
                                 value={formData[section.id]?.[field.id] || ''}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                  handleInputChange(section.id, field.id, e.target.value)
+                                onChange={(
+                                  e: React.ChangeEvent<HTMLInputElement>,
+                                ) =>
+                                  handleInputChange(
+                                    section.id,
+                                    field.id,
+                                    e.target.value,
+                                  )
                                 }
                               />
                             </div>
@@ -698,9 +752,12 @@ export default function RamadanCheckinPage() {
               <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
                 <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
-              <AlertDialogTitle className="text-center">Hapus Semua Isian?</AlertDialogTitle>
+              <AlertDialogTitle className="text-center">
+                Hapus Semua Isian?
+              </AlertDialogTitle>
               <AlertDialogDescription className="text-center">
-                Tindakan ini akan menghapus semua inputan yang sudah kamu isi di jurnal hari ini.
+                Tindakan ini akan menghapus semua inputan yang sudah kamu isi di
+                jurnal hari ini.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

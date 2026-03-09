@@ -11,7 +11,14 @@ export default function SectionHeader(props: {
 
   return (
     <header className="mb-6 flex items-start gap-4">
-      <div className={cn('self-stretch rounded-full', props.w || 'w-2', props.h, props.color)} />
+      <div
+        className={cn(
+          'self-stretch rounded-full',
+          props.w || 'w-2',
+          props.h,
+          props.color,
+        )}
+      />
       <div>
         <h2 className="font-outfit text-2xl font-bold tracking-tight text-slate-900 md:text-3xl lg:text-4xl dark:text-white">
           {props.title}

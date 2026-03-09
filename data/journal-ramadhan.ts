@@ -1,4 +1,12 @@
-import { LucideIcon, BookOpen, MessageSquare, Moon, Sun, User, MapPin } from 'lucide-react';
+import {
+  type LucideIcon,
+  BookOpen,
+  MessageSquare,
+  Moon,
+  Sun,
+  User,
+  MapPin,
+} from 'lucide-react';
 
 export interface RamadanDay {
   hijriDay: number;
@@ -205,8 +213,17 @@ export const Extra_Section: ExtraSection[] = [
     color: 'bg-blue-100 text-blue-600',
     condition: (gender, isFriday) => isFriday && gender === 'male',
     fields: [
-      { id: 'khotib', label: 'Khotib / Imam', placeholder: 'Nama Khotib/Imam', icon: User },
-      { id: 'tema', label: 'Tema Khutbah', placeholder: 'Materi yang disampaikan' },
+      {
+        id: 'khotib',
+        label: 'Khotib / Imam',
+        placeholder: 'Nama Khotib/Imam',
+        icon: User,
+      },
+      {
+        id: 'tema',
+        label: 'Tema Khutbah',
+        placeholder: 'Materi yang disampaikan',
+      },
     ],
   },
   {
@@ -215,9 +232,18 @@ export const Extra_Section: ExtraSection[] = [
     icon: BookOpen,
     color: 'bg-emerald-100 text-emerald-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Lokasi tadarrus', icon: MapPin },
+      {
+        id: 'tempat',
+        label: 'Tempat',
+        placeholder: 'Lokasi tadarrus',
+        icon: MapPin,
+      },
       { id: 'juz', label: 'Juz', placeholder: 'Pilih Juz:', type: 'text' },
-      { id: 'suratAyat', label: 'Surat - Ayat', placeholder: 'Al-Baqarah: 1-10' },
+      {
+        id: 'suratAyat',
+        label: 'Surat - Ayat',
+        placeholder: 'Al-Baqarah: 1-10',
+      },
     ],
   },
   {
@@ -226,7 +252,12 @@ export const Extra_Section: ExtraSection[] = [
     icon: Moon,
     color: 'bg-purple-100 text-purple-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Nama Masjid / Lokasi', icon: MapPin },
+      {
+        id: 'tempat',
+        label: 'Tempat',
+        placeholder: 'Nama Masjid / Lokasi',
+        icon: MapPin,
+      },
       { id: 'imam', label: 'Imam', placeholder: 'Nama Imam', icon: User },
     ],
   },
@@ -236,7 +267,12 @@ export const Extra_Section: ExtraSection[] = [
     icon: MessageSquare,
     color: 'bg-amber-100 text-amber-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Lokasi ceramah', icon: MapPin },
+      {
+        id: 'tempat',
+        label: 'Tempat',
+        placeholder: 'Lokasi ceramah',
+        icon: MapPin,
+      },
       { id: 'dai', label: "Da'i", placeholder: 'Nama Penceramah', icon: User },
       { id: 'materi', label: 'Materi', placeholder: 'Judul atau poin ceramah' },
     ],
