@@ -19,3 +19,5 @@ export type Profile = Static<typeof m.Profile>;
 export type StudentProfile = Static<typeof m.StudentProfile>;
 export type Fund = Static<typeof m.Fund>;
 export type FundDate = Static<typeof m.FundDate>;
+export type RamadanLog = Static<typeof m.RamadanLog>;
+export type EidVisit = Static<typeof m.EidVisit>;

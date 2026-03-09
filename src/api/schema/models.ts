@@ -127,6 +127,76 @@ const FundDate = t.Object(
   },
 );
 
+/** Ramadan daily log */
+const RamadanLog = t.Object(
+  {
+    ramadan_day: t.Number({ minimum: 1, maximum: 30 }),
+    ramadan_year: t.Number({ minimum: 1400 }),
+    fasting: t.Optional(t.Nullable(t.Boolean())),
+    salat: t.Optional(
+      t.Object({
+        isya: t.Optional(t.Nullable(t.Boolean())),
+        subuh: t.Optional(t.Nullable(t.Boolean())),
+        dhuhur: t.Optional(t.Nullable(t.Boolean())),
+        ashar: t.Optional(t.Nullable(t.Boolean())),
+        maghrib: t.Optional(t.Nullable(t.Boolean())),
+      }),
+    ),
+    salat_sunnah: t.Optional(
+      t.Object({
+        dhuha: t.Optional(t.Nullable(t.Boolean())),
+        tarawih: t.Optional(t.Nullable(t.Boolean())),
+        witir: t.Optional(t.Nullable(t.Boolean())),
+        tahajud: t.Optional(t.Nullable(t.Boolean())),
+        iftitah: t.Optional(t.Nullable(t.Boolean())),
+      }),
+    ),
+    jumah: t.Optional(
+      t.Object({
+        khotib: t.Optional(t.Nullable(t.String())),
+        khutbah: t.Optional(t.Nullable(t.String())),
+      }),
+    ),
+    tadarus: t.Optional(
+      t.Object({
+        place: t.Optional(t.Nullable(t.String())),
+        juz: t.Optional(t.Nullable(t.String())),
+        surah: t.Optional(t.Nullable(t.String())),
+      }),
+    ),
+    tarawih: t.Optional(
+      t.Object({
+        place: t.Optional(t.Nullable(t.String())),
+        imam: t.Optional(t.Nullable(t.String())),
+      }),
+    ),
+    ceramah: t.Optional(
+      t.Object({
+        place: t.Optional(t.Nullable(t.String())),
+        dai: t.Optional(t.Nullable(t.String())),
+        materi: t.Optional(t.Nullable(t.String())),
+      }),
+    ),
+    notes: t.Optional(t.Nullable(t.String())),
+  },
+  {
+    title: 'RamadanLog',
+  },
+);
+
+/** Eid visit */
+const EidVisit = t.Object(
+  {
+    id: t.Number(),
+    ramadan_year: t.Number({ minimum: 1400 }),
+    visited_name: t.String({ minLength: 1 }),
+    notes: t.Optional(t.Nullable(t.String())),
+  },
+  {
+    title: 'EidVisit',
+  },
+);
+
 export default {
   OAuth,
   AuthUser,
@@ -135,4 +205,6 @@ export default {
   StudentProfile,
   Fund,
   FundDate,
+  RamadanLog,
+  EidVisit,
 };

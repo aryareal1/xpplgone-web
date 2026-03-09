@@ -3,6 +3,7 @@ import { Elysia, redirect } from 'elysia';
 import auth from './endpoints/auth';
 import users from './endpoints/users';
 import funds from './endpoints/funds';
+import ramadan from './endpoints/ramadan';
 import { models } from './schema';
 import { SITE_NAME } from '@/lib/constants';
 
@@ -31,6 +32,10 @@ const App = new Elysia({ prefix: '/api' })
             description:
               'Manage the class funds data.\n\n_This endpoints are still work in progress and may change in the future_',
           },
+          {
+            name: 'Ramadan',
+            description: 'Manage the ramadan and eid journal data.',
+          },
         ],
         components: {
           securitySchemes: {
@@ -50,7 +55,7 @@ const App = new Elysia({ prefix: '/api' })
     }),
   )
   .use(models)
-  .use([auth, users, funds])
+  .use([auth, users, funds, ramadan])
   .get('/', redirect('/api/docs'), { detail: { hide: true } });
 
 export default App;

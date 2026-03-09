@@ -8,6 +8,8 @@ import {
   MapPin,
 } from 'lucide-react';
 
+export const hijriYear = 1447;
+
 export interface RamadanDay {
   hijriDay: number;
   date: string;
