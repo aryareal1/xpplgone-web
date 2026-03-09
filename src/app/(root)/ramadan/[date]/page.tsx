@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: AI use static element interactions */
 'use client';
 
 import type React from 'react';
@@ -44,6 +45,7 @@ import {
   initialFormData,
   Extra_Section,
   type ExtraSection,
+  hijriYear,
 } from '@/data/journal-ramadhan';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
@@ -55,15 +57,15 @@ const parseJuzToNumbers = (str: string): number[] => {
   const parts = str.split(/[, ]+/);
   parts.forEach((part) => {
     if (part.includes('-')) {
-      const [start, end] = part.split('-').map((s) => parseInt(s.trim()));
-      if (!isNaN(start) && !isNaN(end)) {
+      const [start, end] = part.split('-').map((s) => parseInt(s.trim(), 10));
+      if (!Number.isNaN(start) && !Number.isNaN(end)) {
         const min = Math.max(1, Math.min(start, end));
         const max = Math.min(30, Math.max(start, end));
         for (let i = min; i <= max; i++) nums.add(i);
       }
     } else {
-      const n = parseInt(part.trim());
-      if (!isNaN(n) && n >= 1 && n <= 30) nums.add(n);
+      const n = parseInt(part.trim(), 10);
+      if (!Number.isNaN(n) && n >= 1 && n <= 30) nums.add(n);
     }
   });
   return Array.from(nums).sort((a, b) => a - b);
@@ -136,12 +138,12 @@ const DailyJournalSection = memo(function DailyJournalSection({
 }: {
   formData: FormData;
   handleCheckboxChange: (
-    section: 'shalat5' | 'shalatSunah' | 'root',
+    section: 'salat' | 'salat_sunnah' | 'root',
     field: string,
     value: boolean,
   ) => void;
   handleInputChange: (
-    section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
+    section: 'jumah' | 'tadarus' | 'tarawih' | 'ceramah' | null,
     field: string,
     value: string,
   ) => void;
@@ -162,7 +164,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
           {/* Puasa Checkbox */}
           <div
             onDoubleClick={() =>
-              handleCheckboxChange('root', 'puasa', !formData.puasa)
+              handleCheckboxChange('root', 'fasting', !formData.fasting)
             }
             className="flex cursor-pointer touch-manipulation items-center justify-between rounded-lg border border-orange-100 bg-orange-50/30 p-4 select-none dark:border-orange-900/30 dark:bg-orange-950/10"
           >
@@ -176,9 +178,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
             </div>
             <input
               type="checkbox"
-              checked={formData.puasa}
+              checked={formData.fasting ?? false}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleCheckboxChange('root', 'puasa', e.target.checked)
+                handleCheckboxChange('root', 'fasting', e.target.checked)
               }
               className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
             />
@@ -195,9 +197,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
                   key={item.id}
                   onDoubleClick={() =>
                     handleCheckboxChange(
-                      'shalat5',
+                      'salat',
                       item.id,
-                      !formData.shalat5[item.id as keyof Shalat5],
+                      !formData.salat?.[item.id as keyof Shalat5],
                     )
                   }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
@@ -207,9 +209,11 @@ const DailyJournalSection = memo(function DailyJournalSection({
                   </span>
                   <input
                     type="checkbox"
-                    checked={formData.shalat5[item.id as keyof Shalat5]}
+                    checked={
+                      formData.salat?.[item.id as keyof Shalat5] ?? false
+                    }
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleCheckboxChange('shalat5', item.id, e.target.checked)
+                      handleCheckboxChange('salat', item.id, e.target.checked)
                     }
                     className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
                   />
@@ -229,9 +233,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
                   key={item.id}
                   onDoubleClick={() =>
                     handleCheckboxChange(
-                      'shalatSunah',
+                      'salat_sunnah',
                       item.id,
-                      !formData.shalatSunah[item.id as keyof ShalatSunah],
+                      !formData.salat_sunnah?.[item.id as keyof ShalatSunah],
                     )
                   }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
@@ -241,10 +245,13 @@ const DailyJournalSection = memo(function DailyJournalSection({
                   </span>
                   <input
                     type="checkbox"
-                    checked={formData.shalatSunah[item.id as keyof ShalatSunah]}
+                    checked={
+                      formData.salat_sunnah?.[item.id as keyof ShalatSunah] ??
+                      false
+                    }
                     onChange={(e) =>
                       handleCheckboxChange(
-                        'shalatSunah',
+                        'salat_sunnah',
                         item.id,
                         e.target.checked,
                       )
@@ -263,9 +270,9 @@ const DailyJournalSection = memo(function DailyJournalSection({
             </h3>
             <Textarea
               placeholder="Catatan tambahan kegiatan hari ini..."
-              value={formData.keterangan}
+              value={formData.notes ?? ''}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                handleInputChange(null, 'keterangan', e.target.value)
+                handleInputChange(null, 'notes', e.target.value)
               }
               className="min-h-[120px] bg-neutral-50/50 dark:border-[#2e3647] dark:bg-[#0f172b]"
             />
@@ -284,7 +291,7 @@ const JuzGridSelector = memo(function JuzGridSelector({
 }: {
   juzValue: string;
   handleInputChange: (
-    section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
+    section: 'jumah' | 'tadarus' | 'tarawih' | 'ceramah' | null,
     field: string,
     value: string,
   ) => void;
@@ -307,7 +314,7 @@ const JuzGridSelector = memo(function JuzGridSelector({
       } else {
         next = [...selectedJuzNumbers, n].sort((a, b) => a - b);
       }
-      handleInputChange('tadarrus', 'juz', numbersToJuzRange(next));
+      handleInputChange('tadarus', 'juz', numbersToJuzRange(next));
     },
     [selectedJuzNumbers, handleInputChange],
   );
@@ -394,15 +401,24 @@ const JuzGridSelector = memo(function JuzGridSelector({
 // 4. Action Buttons (Submit & Clear)
 const ActionButtons = memo(function ActionButtons({
   onClearClick,
+  formData,
+  hijriDay,
 }: {
   onClearClick: () => void;
+  formData: FormData;
+  hijriDay: number;
 }) {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSimpan = useCallback(() => {
     setIsSuccess(true);
     setTimeout(() => setIsSuccess(false), 3000);
-  }, []);
+    console.log({
+      ramadan_year: hijriYear,
+      ramadan_day: hijriDay,
+      ...formData,
+    });
+  }, [formData, hijriDay]);
 
   return (
     <div className="mt-4 flex flex-col gap-4">
@@ -507,10 +523,10 @@ export default function RamadanCheckinPage() {
         }
 
         let actualDate: Date | null = null;
-        const hijriDay = parseInt(dateStr);
+        const hijriDay = parseInt(dateStr, 10);
         let currentRamadanInfo = null;
 
-        if (!isNaN(hijriDay)) {
+        if (!Number.isNaN(hijriDay)) {
           const savedOrg = localStorage.getItem('ramadhan_org') as
             | 'MU'
             | 'NU'
@@ -557,12 +573,12 @@ export default function RamadanCheckinPage() {
 
   const handleCheckboxChange = useCallback(
     (
-      section: 'shalat5' | 'shalatSunah' | 'root',
+      section: 'salat' | 'salat_sunnah' | 'root',
       field: string,
       value: boolean,
     ) => {
       setFormData((prev) => {
-        if (section === 'shalat5' || section === 'shalatSunah') {
+        if (section === 'salat' || section === 'salat_sunnah') {
           return {
             ...prev,
             [section]: {
@@ -579,13 +595,13 @@ export default function RamadanCheckinPage() {
 
   const handleInputChange = useCallback(
     (
-      section: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah' | null,
+      section: 'jumah' | 'tadarus' | 'tarawih' | 'ceramah' | null,
       field: string,
       value: string,
     ) => {
-      if (section === 'tadarrus' && field === 'juz') {
+      if (section === 'tadarus' && field === 'juz') {
         const numbers = value.match(/\d+/g);
-        if (numbers && numbers.some((n) => parseInt(n) > 30)) {
+        if (numbers?.some((n) => parseInt(n, 10) > 30)) {
           return;
         }
       }
@@ -703,7 +719,7 @@ export default function RamadanCheckinPage() {
                           {field.id === 'juz' ? (
                             <div className="border-input rounded-md border bg-[#fcfcfc] p-3 shadow-xs dark:bg-slate-900">
                               <JuzGridSelector
-                                juzValue={formData.tadarrus.juz}
+                                juzValue={formData.tadarus?.juz ?? ''}
                                 handleInputChange={handleInputChange}
                                 placeholder={field.placeholder}
                               />
@@ -720,6 +736,7 @@ export default function RamadanCheckinPage() {
                                   'bg-[#fcfcfc] dark:bg-slate-900',
                                 )}
                                 placeholder={field.placeholder}
+                                // @ts-expect-error The type of formData is not matching with the section.id and field.id
                                 value={formData[section.id]?.[field.id] || ''}
                                 onChange={(
                                   e: React.ChangeEvent<HTMLInputElement>,
@@ -742,7 +759,11 @@ export default function RamadanCheckinPage() {
             );
           })}
 
-          <ActionButtons onClearClick={handleClearClick} />
+          <ActionButtons
+            onClearClick={handleClearClick}
+            formData={formData}
+            hijriDay={ramadanDayInfo?.hijriDay ?? 0}
+          />
         </motion.div>
 
         {/* Clear Confirmation Modal Contextualized Out */}
