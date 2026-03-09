@@ -1,3 +1,4 @@
+import type { RamadanLog } from '@/api/schema';
 import {
   type LucideIcon,
   BookOpen,
@@ -96,7 +97,7 @@ export const physicalSpiritualJournal: JournalSection[] = [
 
 export const sunahJournal: JournalSection[] = [
   { id: 'dhuha', name: 'Dhuha' },
-  { id: 'terawih', name: 'Terawih' },
+  { id: 'tarawih', name: 'Tarawih' },
   { id: 'witir', name: 'Witir' },
   { id: 'tahajud', name: 'Tahajud' },
   { id: 'iftitah', name: 'Iftitah' },
@@ -112,7 +113,7 @@ export interface Shalat5 {
 
 export interface ShalatSunah {
   dhuha: boolean;
-  terawih: boolean;
+  tarawih: boolean;
   witir: boolean;
   tahajud: boolean;
   iftitah: boolean;
@@ -120,71 +121,63 @@ export interface ShalatSunah {
 
 export interface Jumat {
   khotib: string;
-  tema: string;
+  khutbah: string;
   [key: string]: string;
 }
 
 export interface Tadarrus {
-  tempat: string;
+  place: string;
   juz: string;
-  suratAyat: string;
+  surah: string;
   [key: string]: string;
 }
 
 export interface TarawihWitir {
-  tempat: string;
+  place: string;
   [key: string]: string;
 }
 
 export interface Ceramah {
-  tempat: string;
+  place: string;
   dai: string;
   materi: string;
   [key: string]: string;
 }
 
-export interface FormData {
-  puasa: boolean;
-  shalat5: Shalat5;
-  shalatSunah: ShalatSunah;
-  keterangan: string;
-  jumat: Jumat;
-  tadarrus: Tadarrus;
-  tarawihWitir: TarawihWitir;
-  ceramah: Ceramah;
-}
+export type FormData = Omit<RamadanLog, 'ramadan_day' | 'ramadan_year'>;
 
 export const initialFormData: FormData = {
-  puasa: false,
-  shalat5: {
+  fasting: false,
+  salat: {
     subuh: false,
     dhuhur: false,
     ashar: false,
     maghrib: false,
     isya: false,
   },
-  shalatSunah: {
+  salat_sunnah: {
     dhuha: false,
-    terawih: false,
+    tarawih: false,
     witir: false,
     tahajud: false,
     iftitah: false,
   },
-  keterangan: '',
-  jumat: {
+  notes: '',
+  jumah: {
     khotib: '',
-    tema: '',
+    khutbah: '',
   },
-  tadarrus: {
-    tempat: '',
+  tadarus: {
+    place: '',
     juz: '',
-    suratAyat: '',
+    surah: '',
   },
-  tarawihWitir: {
-    tempat: '',
+  tarawih: {
+    place: '',
+    imam: '',
   },
   ceramah: {
-    tempat: '',
+    place: '',
     dai: '',
     materi: '',
   },
@@ -199,7 +192,7 @@ export interface FormField {
 }
 
 export interface ExtraSection {
-  id: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah';
+  id: 'jumah' | 'tadarus' | 'tarawih' | 'ceramah';
   title: string;
   icon: LucideIcon;
   color: string;
@@ -209,7 +202,7 @@ export interface ExtraSection {
 
 export const Extra_Section: ExtraSection[] = [
   {
-    id: 'jumat',
+    id: 'jumah',
     title: "Jumat'an",
     icon: Sun,
     color: 'bg-blue-100 text-blue-600',
@@ -229,7 +222,7 @@ export const Extra_Section: ExtraSection[] = [
     ],
   },
   {
-    id: 'tadarrus',
+    id: 'tadarus',
     title: "Kegiatan Tadarrus Al Qur'an",
     icon: BookOpen,
     color: 'bg-emerald-100 text-emerald-600',
@@ -249,7 +242,7 @@ export const Extra_Section: ExtraSection[] = [
     ],
   },
   {
-    id: 'tarawihWitir',
+    id: 'tarawih',
     title: 'Kegiatan Sholat Tarawih dan Witir',
     icon: Moon,
     color: 'bg-purple-100 text-purple-600',
