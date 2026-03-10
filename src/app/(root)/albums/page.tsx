@@ -1,7 +1,6 @@
 'use client';
 
-import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type WheelEvent, type MouseEvent } from 'react';
 import { ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -51,7 +50,7 @@ export default function AlbumLayout() {
     }
   }, [selectedAlbum]);
 
-  const handleWheel = (e: React.WheelEvent) => {
+  const handleWheel = (e: WheelEvent) => {
     if (selectedAlbum) {
       e.preventDefault();
       const delta = e.deltaY * -0.001;
@@ -63,7 +62,7 @@ export default function AlbumLayout() {
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: MouseEvent) => {
     if (zoom > 1) {
       setIsDragging(true);
       setDragStart({
@@ -74,7 +73,7 @@ export default function AlbumLayout() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (isDragging && zoom > 1) {
       setPosition({
         x: initialPosition.x + (e.clientX - dragStart.x),

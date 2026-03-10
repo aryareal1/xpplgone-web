@@ -1,6 +1,6 @@
 'use client';
 
-import type React from 'react';
+import type { WheelEvent, MouseEvent } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -17,9 +17,9 @@ interface AlbumModalProps {
   onNext: () => void;
   onPrev: () => void;
   onThumbnailClick: (index: number) => void;
-  onWheel: (e: React.WheelEvent) => void;
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseMove: (e: React.MouseEvent) => void;
+  onWheel: (e: WheelEvent) => void;
+  onMouseDown: (e: MouseEvent) => void;
+  onMouseMove: (e: MouseEvent) => void;
   onMouseUp: () => void;
   onDoubleClick: () => void;
 }

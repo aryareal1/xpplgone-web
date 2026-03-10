@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ const outfit = Outfit({
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>

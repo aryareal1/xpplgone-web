@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: AI use static element interactions */
 'use client';
 
-import type React from 'react';
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo, type ChangeEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -178,7 +177,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
             <input
               type="checkbox"
               checked={formData.fasting ?? false}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 handleCheckboxChange('root', 'fasting', e.target.checked)
               }
               className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
@@ -211,7 +210,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
                     checked={
                       formData.salat?.[item.id as keyof Shalat5] ?? false
                     }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       handleCheckboxChange('salat', item.id, e.target.checked)
                     }
                     className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
@@ -270,7 +269,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
             <Textarea
               placeholder="Catatan tambahan kegiatan hari ini..."
               value={formData.notes ?? ''}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                 handleInputChange(null, 'notes', e.target.value)
               }
               className="min-h-[120px] bg-neutral-50/50 dark:border-[#2e3647] dark:bg-[#0f172b]"
@@ -771,7 +770,7 @@ export default function RamadanCheckinPage() {
                                 // @ts-expect-error The type of formData is not matching with the section.id and field.id
                                 value={formData[section.id]?.[field.id] || ''}
                                 onChange={(
-                                  e: React.ChangeEvent<HTMLInputElement>,
+                                  e: ChangeEvent<HTMLInputElement>,
                                 ) =>
                                   handleInputChange(
                                     section.id,

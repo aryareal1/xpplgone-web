@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ChevronLeft,
@@ -41,13 +41,13 @@ import { SilaturahimSection } from './silaturahim';
 import api from '@/lib/api';
 
 export default function RamadhanPage() {
-  const today = React.useMemo(() => new Date(), []);
-  const [currentDate, setCurrentDate] = React.useState(today);
-  const [org, setOrg] = React.useState<'MU' | 'NU' | null>(null);
-  const [cellSize, setCellSize] = React.useState(176);
-  const [checkedInDays, setCheckedInDays] = React.useState<number[]>([]);
+  const today = useMemo(() => new Date(), []);
+  const [currentDate, setCurrentDate] = useState(today);
+  const [org, setOrg] = useState<'MU' | 'NU' | null>(null);
+  const [cellSize, setCellSize] = useState(176);
+  const [checkedInDays, setCheckedInDays] = useState<number[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
     setOrg(savedOrg || 'MU');
 
@@ -104,7 +104,7 @@ export default function RamadhanPage() {
 
   const currentCalendar = org === 'MU' ? muCalendar : nuCalendar;
 
-  const getRamadanDay = React.useCallback(
+  const getRamadanDay = useCallback(
     (date: Date): RamadanDay | undefined => {
       const dateStr = format(date, 'yyyy-MM-dd');
       return currentCalendar.find((d) => d.date === dateStr);

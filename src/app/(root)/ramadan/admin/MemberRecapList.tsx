@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, User, Mail, ChevronRight, Hash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,9 +16,9 @@ interface Student {
 }
 
 export default function MemberRecapList({ students }: { students: Student[] }) {
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredStudents = React.useMemo(() => {
+  const filteredStudents = useMemo(() => {
     return students.filter(
       (s) =>
         s.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

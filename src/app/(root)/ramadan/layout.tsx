@@ -1,4 +1,4 @@
-import type React from 'react';
+import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { SITE_NAME } from '@/lib/constants';
 import ClassOnly from '@/app/class-only';
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function RamadanLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
