@@ -6,19 +6,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
-  Users,
-  Plus,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import {
   format,
@@ -37,23 +29,23 @@ import {
 import SectionHeader from '@/components/section-header';
 
 import {
+  hijriYear,
   muCalendar,
   nuCalendar,
   type RamadanDay,
 } from '@/data/journal-ramadhan';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { motion, AnimatePresence } from 'motion/react';
-import { Textarea } from '@/components/ui/textarea';
+import { motion } from 'motion/react';
+import { SilaturahimSection } from './silaturahim';
+import api from '@/lib/api';
 
 export default function RamadhanPage() {
   const today = React.useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = React.useState(today);
   const [org, setOrg] = React.useState<'MU' | 'NU' | null>(null);
   const [cellSize, setCellSize] = React.useState(176);
-  const [checkedInDays, setCheckedInDays] = React.useState<
-    Record<number, boolean>
-  >({});
+  const [checkedInDays, setCheckedInDays] = React.useState<number[]>([]);
 
   React.useEffect(() => {
     const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
@@ -65,17 +57,12 @@ export default function RamadhanPage() {
     }
 
     // Gather checked in days
-    const getCheckedIn = () => {
-      const keys = Object.keys(localStorage);
-      const checkedIn: Record<number, boolean> = {};
-      for (const key of keys) {
-        if (key.startsWith('ramadhan_checkin_')) {
-          const parts = key.split('_');
-          const day = parseInt(parts[parts.length - 1], 10);
-          if (!Number.isNaN(day)) checkedIn[day] = true;
-        }
-      }
-      setCheckedInDays(checkedIn);
+    const getCheckedIn = async () => {
+      const { data } = await api.ramadan.logs.get({
+        query: { ramadan_year: hijriYear },
+      });
+      if (!data) return;
+      setCheckedInDays(data.data.map((d) => d.ramadan_day));
     };
 
     getCheckedIn();
@@ -284,7 +271,7 @@ export default function RamadhanPage() {
 
                           {ramadanDay && isPastOrToday && (
                             <div className="mt-auto flex w-full flex-col gap-1 pt-2">
-                              {checkedInDays[ramadanDay.hijriDay] ? (
+                              {checkedInDays.includes(ramadanDay.hijriDay) ? (
                                 <Button
                                   asChild
                                   size="sm"
@@ -315,179 +302,5 @@ export default function RamadhanPage() {
         <SilaturahimSection />
       </main>
     </div>
-  );
-}
-
-const rowVariants = {
-  initial: {
-    opacity: 0,
-    y: -10,
-    scale: 0.98,
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.25,
-      ease: [0.32, 0.72, 0, 1] as const,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    scale: 0.98,
-    transition: {
-      duration: 0.2,
-      ease: [0.32, 0.72, 0, 1] as const,
-    },
-  },
-};
-
-function SilaturahimSection() {
-  const generateId = () => {
-    if (
-      typeof window !== 'undefined' &&
-      window.crypto &&
-      window.crypto.randomUUID
-    ) {
-      return window.crypto.randomUUID();
-    }
-    return Math.random().toString(36).substring(2, 15);
-  };
-
-  const [entries, setEntries] = React.useState<
-    Array<{ id: string; name: string; note: string }>
-  >([{ id: generateId(), name: '', note: '' }]);
-
-  const handleInputChange = (
-    index: number,
-    field: 'name' | 'note',
-    value: string,
-  ) => {
-    setEntries((prev) => {
-      const newEntries = [...prev];
-      newEntries[index] = { ...newEntries[index], [field]: value };
-
-      const entry = newEntries[index];
-
-      const hasName = entry.name?.trim() !== '';
-      const hasNote = entry.note?.trim() !== '';
-      const isComplete = hasName;
-      const isEmpty = !hasName && !hasNote;
-
-      if (isComplete && index === newEntries.length - 1) {
-        newEntries.push({
-          id: generateId(),
-          name: '',
-          note: '',
-        });
-      }
-
-      if (isEmpty && newEntries.length > 1) {
-        return newEntries.filter((_, i) => i !== index);
-      }
-
-      return newEntries;
-    });
-  };
-
-  return (
-    <section id="silaturahim" className="w-full pt-12 pb-20">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{
-          duration: 0.8,
-          ease: [0.16, 1, 0.3, 1],
-        }}
-        className="mb-5"
-      >
-        <SectionHeader
-          title="Kegiatan Silaturahim"
-          desc="Daftar kunjungan silaturahim ke sanak saudara & teman Hari Raya Idul Fitri."
-          color="bg-emerald-500"
-        />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <Card className="overflow-hidden border-none bg-white shadow-sm dark:bg-slate-900">
-          <div className="-mt-6 border-b border-slate-100 bg-[#ededee] p-6 dark:border-slate-800 dark:bg-[#151f33]">
-            <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900 uppercase dark:text-slate-50">
-              <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              Daftar Kunjungan Idul Fitri
-            </h3>
-          </div>
-
-          <CardContent className="p-0">
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              <AnimatePresence mode="sync">
-                {entries.map((entry, index) => {
-                  const countFilledAbove = entries
-                    .slice(0, index)
-                    .filter((e) => e.name.trim() !== '').length;
-
-                  const isFilled = entry.name.trim() !== '';
-
-                  return (
-                    <motion.div
-                      key={entry.id}
-                      layout
-                      variants={rowVariants}
-                      initial="initial"
-                      animate="animate"
-                      exit="exit"
-                      transition={{
-                        layout: { duration: 0.25 },
-                      }}
-                      className="flex items-start gap-4 p-4"
-                    >
-                      {/* Number / Plus */}
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-sm font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-100">
-                        {isFilled ? (
-                          countFilledAbove + 1
-                        ) : (
-                          <Plus className="h-4 w-4" />
-                        )}
-                      </div>
-
-                      {/* Inputs */}
-                      <div className="flex flex-1 flex-col gap-2">
-                        <Input
-                          placeholder="Nama yang dikunjungi"
-                          value={entry.name}
-                          onChange={(e) =>
-                            handleInputChange(index, 'name', e.target.value)
-                          }
-                          className="border-slate-200 bg-[#fcfcfc] text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-50 dark:placeholder:text-slate-600"
-                        />
-
-                        <div className="flex items-start gap-2">
-                          <Textarea
-                            placeholder="Catatan kunjungan..."
-                            value={entry.note}
-                            onChange={(e) =>
-                              handleInputChange(index, 'note', e.target.value)
-                            }
-                            rows={2}
-                            className="w-full resize-y border-slate-200 bg-[#fcfcfc] text-sm text-slate-700 placeholder:text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:placeholder:text-slate-600"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </section>
   );
 }

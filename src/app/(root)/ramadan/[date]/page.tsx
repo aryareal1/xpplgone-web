@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -519,6 +518,7 @@ export default function RamadanCheckinPage() {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Load Data Effect
   useEffect(() => {
@@ -638,14 +638,24 @@ export default function RamadanCheckinPage() {
     [],
   );
 
-  const handleClear = useCallback(() => {
-    setFormData(initialFormData);
-    setShowConfirmClear(false);
-
+  const handleClear = useCallback(async () => {
     if (!ramadanDayInfo?.hijriDay) return;
-    api.ramadan
-      .logs({ year: hijriYear })({ day: ramadanDayInfo.hijriDay })
-      .delete();
+
+    setIsClearing(true);
+    try {
+      const { error } = await api.ramadan
+        .logs({ year: hijriYear })({ day: ramadanDayInfo.hijriDay })
+        .delete();
+
+      if (error) throw error;
+
+      setFormData(initialFormData);
+      setShowConfirmClear(false);
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+    } finally {
+      setIsClearing(false);
+    }
   }, [ramadanDayInfo]);
 
   const handleClearClick = useCallback(() => {
@@ -805,12 +815,20 @@ export default function RamadanCheckinPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction
+              <Button
                 onClick={handleClear}
-                className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                disabled={isClearing}
+                className="bg-red-600 font-bold text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
               >
-                Ya, Hapus Semua
-              </AlertDialogAction>
+                {isClearing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  'Ya, Hapus Semua'
+                )}
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -2,7 +2,7 @@ import Elysia, { t } from 'elysia';
 import { m, r } from '../../schema';
 import { createClient } from '@/lib/supabase/server';
 import { hijriYear } from '@/data/journal-ramadhan';
-import { PostgrestError } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 const mapper = (d: any) => ({
   ramadan_day: d.ramadan_day,
@@ -112,7 +112,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
         *,
-        user_profiles (id, uid)
+        user_profiles!inner (id, uid)
       `)
         .eq('user_profiles.uid', user.id)
         .order('ramadan_day');
@@ -133,6 +133,7 @@ export default new Elysia({ prefix: '/logs' })
           },
         });
       }
+
       return status(200, {
         success: true,
         message: 'Success get ramadan logs',
@@ -205,7 +206,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
         *,
-        user_profiles (id, uid)
+        user_profiles!inner (id, uid)
       `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)
@@ -298,7 +299,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
           *,
-          user_profiles (id, uid)
+          user_profiles!inner (id, uid)
         `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)
@@ -410,7 +411,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
           *,
-          user_profiles (id, uid)
+          user_profiles!inner (id, uid)
         `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)
