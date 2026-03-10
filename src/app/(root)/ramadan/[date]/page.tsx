@@ -3,7 +3,7 @@
 
 import type React from 'react';
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Loader2,
@@ -299,7 +299,6 @@ const JuzGridSelector = memo(function JuzGridSelector({
 }) {
   const [isJuzGridVisible, setIsJuzGridVisible] = useState(true);
 
-  // Memoize the selected juz array to prevent re-calculations
   const selectedJuzNumbers = useMemo(
     () => parseJuzToNumbers(juzValue),
     [juzValue],
@@ -409,27 +408,42 @@ const ActionButtons = memo(function ActionButtons({
   hijriDay: number;
 }) {
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSimpan = useCallback(() => {
-    setIsSuccess(true);
-    setTimeout(() => setIsSuccess(false), 3000);
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsSuccess(true);
+
+      setTimeout(() => {
+        setIsSuccess(false);
+        router.push('/ramadan');
+      }, 3000);
+    }, 1500);
+
     console.log({
       ramadan_year: hijriYear,
       ramadan_day: hijriDay,
       ...formData,
     });
-  }, [formData, hijriDay]);
+  }, [formData, hijriDay, router]);
 
   return (
     <div className="mt-4 flex flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button
           onClick={handleSimpan}
+          disabled={isLoading || isSuccess}
           className={cn(
-            'h-12 flex-1 rounded-xl font-bold text-white shadow-lg transition-all duration-300',
+            'h-12 sm:flex-1 rounded-xl font-bold text-white shadow-lg transition-all duration-300',
             isSuccess
               ? 'bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 dark:shadow-none'
-              : 'bg-orange-600 shadow-orange-200 hover:bg-orange-700 dark:shadow-none',
+              : isLoading
+                ? 'bg-orange-400 shadow-none'
+                : 'bg-orange-600 shadow-orange-200 hover:bg-orange-700 dark:shadow-none',
           )}
         >
           <AnimatePresence mode="wait">
@@ -443,6 +457,17 @@ const ActionButtons = memo(function ActionButtons({
               >
                 <BookmarkCheck className="mr-2 h-5 w-5 animate-bounce" />
                 Berhasil Disimpan!
+              </motion.div>
+            ) : isLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center"
+              >
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Menyimpan...
               </motion.div>
             ) : (
               <motion.div

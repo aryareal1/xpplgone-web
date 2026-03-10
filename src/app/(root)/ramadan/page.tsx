@@ -51,6 +51,9 @@ export default function RamadhanPage() {
   const [currentDate, setCurrentDate] = React.useState(today);
   const [org, setOrg] = React.useState<'MU' | 'NU' | null>(null);
   const [cellSize, setCellSize] = React.useState(176);
+  const [checkedInDays, setCheckedInDays] = React.useState<
+    Record<number, boolean>
+  >({});
 
   React.useEffect(() => {
     const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
@@ -60,6 +63,22 @@ export default function RamadhanPage() {
     if (savedSize) {
       setCellSize(parseInt(savedSize, 10));
     }
+
+    // Gather checked in days
+    const getCheckedIn = () => {
+      const keys = Object.keys(localStorage);
+      const checkedIn: Record<number, boolean> = {};
+      for (const key of keys) {
+        if (key.startsWith('ramadhan_checkin_')) {
+          const parts = key.split('_');
+          const day = parseInt(parts[parts.length - 1], 10);
+          if (!Number.isNaN(day)) checkedIn[day] = true;
+        }
+      }
+      setCheckedInDays(checkedIn);
+    };
+
+    getCheckedIn();
   }, []);
 
   const monthStart = startOfMonth(currentDate);
@@ -265,13 +284,23 @@ export default function RamadhanPage() {
 
                           {ramadanDay && isPastOrToday && (
                             <div className="mt-auto flex w-full flex-col gap-1 pt-2">
-                              <Button
-                                asChild
-                                size="sm"
-                                className="h-9 w-full border border-slate-200 bg-white px-2 py-0 text-xs font-bold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:hover:bg-slate-800"
-                              >
-                                <Link href={datePath}>Mulai check-in</Link>
-                              </Button>
+                              {checkedInDays[ramadanDay.hijriDay] ? (
+                                <Button
+                                  asChild
+                                  size="sm"
+                                  className="h-9 w-full border border-emerald-200 bg-emerald-50 px-2 py-0 text-xs font-bold text-emerald-700 shadow-sm hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                >
+                                  <Link href={datePath}>Selesai check-in</Link>
+                                </Button>
+                              ) : (
+                                <Button
+                                  asChild
+                                  size="sm"
+                                  className="h-9 w-full border border-slate-200 bg-white px-2 py-0 text-xs font-bold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:hover:bg-slate-800"
+                                >
+                                  <Link href={datePath}>Mulai check-in</Link>
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
