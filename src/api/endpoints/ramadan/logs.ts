@@ -2,6 +2,7 @@ import Elysia, { t } from 'elysia';
 import { m, r } from '../../schema';
 import { createClient } from '@/lib/supabase/server';
 import { hijriYear } from '@/data/journal-ramadhan';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 const mapper = (d: any) => ({
   ramadan_day: d.ramadan_day,
@@ -37,7 +38,7 @@ const mapper = (d: any) => ({
   ceramah: {
     place: d.ceramah_place,
     dai: d.ceramah_dai,
-    matero: d.ceramah_materi,
+    materi: d.ceramah_materi,
   },
   notes: d.notes,
 });
@@ -111,7 +112,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
         *,
-        user_profiles (id, uid)
+        user_profiles!inner (id, uid)
       `)
         .eq('user_profiles.uid', user.id)
         .order('ramadan_day');
@@ -132,6 +133,7 @@ export default new Elysia({ prefix: '/logs' })
           },
         });
       }
+
       return status(200, {
         success: true,
         message: 'Success get ramadan logs',
@@ -204,7 +206,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
         *,
-        user_profiles (id, uid)
+        user_profiles!inner (id, uid)
       `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)
@@ -267,121 +269,7 @@ export default new Elysia({ prefix: '/logs' })
     },
   )
 
-  // POST /ramadan/logs/{year}/{day} - Save Log
-  .post(
-    '/:year/:day',
-    async ({ params, body, status }) => {
-      const { year, day } = params;
-
-      const supabase = await createClient();
-      const { user } = (await supabase.auth.getUser()).data;
-      if (!user) {
-        return status(401, {
-          success: false,
-          message: 'Unauthorized',
-          error: {
-            status: 401,
-            code: 'UNAUTHORIZED',
-            reason: 'User not found',
-          },
-        });
-      }
-
-      const { data: student } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('uid', user.id)
-        .single();
-
-      const { data: logs, error: logError } = await supabase
-        .from('ramadan_logs')
-        .select(`
-          *,
-          user_profiles (id, uid)
-        `)
-        .eq('user_profiles.uid', user.id)
-        .eq('ramadan_day', day)
-        .eq('ramadan_year', year);
-
-      if (logError) {
-        return status(500, {
-          success: false,
-          message: 'Internal server error',
-          error: {
-            ...logError,
-            status: 500,
-            code: logError.name ?? 'INTERNAL_SERVER_ERROR',
-            reason: logError.message,
-          },
-        });
-      }
-
-      if (logs.length)
-        return status(409, {
-          success: false,
-          message: 'Conflict',
-          error: {
-            status: 409,
-            code: 'CONFLICT',
-            reason:
-              'Data with that day and year already exist. Please use PUT instead',
-          },
-        });
-
-      const { data, error } = await supabase
-        .from('ramadan_logs')
-        .insert(parser(student?.id!, year, day, body))
-        .select('*')
-        .single();
-
-      if (error) {
-        return status(500, {
-          success: false,
-          message: 'Internal server error',
-          error: {
-            ...error,
-            status: 500,
-            code: error.name ?? 'INTERNAL_SERVER_ERROR',
-            reason: error.message,
-          },
-        });
-      }
-
-      return status(201, {
-        success: true,
-        message: 'Success save log',
-        data: mapper(data),
-      });
-    },
-    {
-      detail: {
-        summary: 'Save Log',
-        description: "Saves student's log of spesific ramadan day.",
-        security: [{ 'Bearer Auth': [] }],
-      },
-      params: t.Object({
-        year: t.Number({
-          minimum: 1400,
-          description: 'Specify the hijra year',
-          default: hijriYear,
-        }),
-        day: t.Number({
-          minimum: 1,
-          maximum: 30,
-          description: 'Specify the ramadan day',
-        }),
-      }),
-      body: t.Omit(m.RamadanLog, ['ramadan_day', 'ramadan_year']),
-      response: {
-        201: r.Success(m.RamadanLog, 'Success save log', 'Saved'),
-        401: r.Failed('Unauthorized'),
-        409: r.Failed('Conflict'),
-        500: r.Failed('Internal server error'),
-      },
-    },
-  )
-
-  // PUT /ramadan/logs/{year}/{day} - Update Log
+  // PUT /ramadan/logs/{year}/{day} - Upsert Log
   .put(
     '/:year/:day',
     async ({ params, body, status }) => {
@@ -411,7 +299,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
           *,
-          user_profiles (id, uid)
+          user_profiles!inner (id, uid)
         `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)
@@ -430,27 +318,26 @@ export default new Elysia({ prefix: '/logs' })
         });
       }
 
-      if (!logs.length)
-        return status(404, {
-          success: false,
-          message: 'Not found',
-          error: {
-            status: 404,
-            code: 'NOT_FOUND',
-            reason:
-              'Cannot find data with that day and year. Save one with POST.',
-          },
-        });
-
-      const { data, error } = await supabase
-        .from('ramadan_logs')
-        .update({
-          ...parser(student?.id!, year, day, body),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', logs[0].id)
-        .select('*')
-        .single();
+      let data: any, error: PostgrestError | null;
+      if (!logs.length) {
+        // INSERT
+        ({ data, error } = await supabase
+          .from('ramadan_logs')
+          .insert(parser(student?.id!, year, day, body))
+          .select('*')
+          .single());
+      } else {
+        // UPDATE
+        ({ data, error } = await supabase
+          .from('ramadan_logs')
+          .update({
+            ...parser(student?.id!, year, day, body),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', logs[0].id)
+          .select('*')
+          .single());
+      }
 
       if (error) {
         return status(500, {
@@ -467,14 +354,15 @@ export default new Elysia({ prefix: '/logs' })
 
       return status(200, {
         success: true,
-        message: 'Success update log',
+        message: 'Success upsert log',
         data: mapper(data),
       });
     },
     {
       detail: {
-        summary: 'Update Log',
-        description: "Update existing student's log of spesific ramadan day.",
+        summary: 'Upsert Log',
+        description:
+          "Update existing or insert new student's log of spesific ramadan day.",
         security: [{ 'Bearer Auth': [] }],
       },
       params: t.Object({
@@ -491,7 +379,7 @@ export default new Elysia({ prefix: '/logs' })
       }),
       body: t.Omit(m.RamadanLog, ['ramadan_day', 'ramadan_year']),
       response: {
-        200: r.Success(m.RamadanLog, 'Success update log', 'Updated'),
+        200: r.Success(m.RamadanLog, 'Success upsert log', 'Upsert'),
         401: r.Failed('Unauthorized'),
         404: r.Failed('Not found'),
         500: r.Failed('Internal server error'),
@@ -523,7 +411,7 @@ export default new Elysia({ prefix: '/logs' })
         .from('ramadan_logs')
         .select(`
           *,
-          user_profiles (id, uid)
+          user_profiles!inner (id, uid)
         `)
         .eq('user_profiles.uid', user.id)
         .eq('ramadan_day', day)

@@ -28,7 +28,7 @@ export default new Elysia({ prefix: '/eid-visits' })
         .from('eid_visits')
         .select(`
           *,
-          user_profiles (id, uid)
+          user_profiles!inner (id, uid)
         `)
         .eq('user_profiles.uid', user.id)
         .order('ramadan_year', { ascending: false });
@@ -80,12 +80,10 @@ export default new Elysia({ prefix: '/eid-visits' })
     },
   )
 
-  // POST /eid-visits/{year} - Create Eid Visit
+  // POST /eid-visits - Create Eid Visit
   .post(
-    '/:year',
+    '/',
     async ({ params, body, status }) => {
-      const { year } = params;
-
       const supabase = await createClient();
 
       const { user } = (await supabase.auth.getUser()).data;
@@ -109,7 +107,6 @@ export default new Elysia({ prefix: '/eid-visits' })
       const { data, error } = await supabase
         .from('eid_visits')
         .insert({
-          ramadan_year: year,
           student_id: student?.id,
           ...body,
         })
@@ -140,14 +137,7 @@ export default new Elysia({ prefix: '/eid-visits' })
         description: "Add student's eid visit.",
         security: [{ 'Bearer Auth': [] }],
       },
-      params: t.Object({
-        year: t.Number({
-          minimum: 1400,
-          description: 'Specify the hijra year',
-          default: hijriYear,
-        }),
-      }),
-      body: t.Omit(m.EidVisit, ['id', 'ramadan_year']),
+      body: t.Omit(m.EidVisit, ['id']),
       response: {
         200: r.Success(m.EidVisit, 'Success add eid visit', 'Created'),
         401: r.Failed('Unauthorized'),
@@ -195,7 +185,7 @@ export default new Elysia({ prefix: '/eid-visits' })
 
       const { data, error } = await supabase
         .from('eid_visits')
-        .update(body)
+        .update({ ...body, updated_at: new Date().toISOString() })
         .eq('id', visit.id)
         .select('*')
         .single();

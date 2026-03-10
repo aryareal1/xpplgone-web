@@ -21,7 +21,7 @@ export default function ClassOnly() {
         FORBIDDEN
       </h1>
       <h2 className={`${funnel.className} text-lg`}>
-        Halaman ini dikhususkan untuk murid kelas {SITE_NAME}
+        Halaman ini dikhususkan untuk kelas {SITE_NAME}
       </h2>
       <p
         className={`${funnel.className} mt-5 text-gray-600 dark:text-gray-400`}

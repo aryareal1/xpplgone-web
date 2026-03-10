@@ -215,7 +215,7 @@ export const Extra_Section: ExtraSection[] = [
         icon: User,
       },
       {
-        id: 'tema',
+        id: 'khutbah',
         label: 'Tema Khutbah',
         placeholder: 'Materi yang disampaikan',
       },
@@ -228,14 +228,14 @@ export const Extra_Section: ExtraSection[] = [
     color: 'bg-emerald-100 text-emerald-600',
     fields: [
       {
-        id: 'tempat',
+        id: 'place',
         label: 'Tempat',
         placeholder: 'Lokasi tadarrus',
         icon: MapPin,
       },
       { id: 'juz', label: 'Juz', placeholder: 'Pilih Juz:', type: 'text' },
       {
-        id: 'suratAyat',
+        id: 'surah',
         label: 'Surat - Ayat',
         placeholder: 'Al-Baqarah: 1-10',
       },
@@ -248,7 +248,7 @@ export const Extra_Section: ExtraSection[] = [
     color: 'bg-purple-100 text-purple-600',
     fields: [
       {
-        id: 'tempat',
+        id: 'place',
         label: 'Tempat',
         placeholder: 'Nama Masjid / Lokasi',
         icon: MapPin,
@@ -263,7 +263,7 @@ export const Extra_Section: ExtraSection[] = [
     color: 'bg-amber-100 text-amber-600',
     fields: [
       {
-        id: 'tempat',
+        id: 'place',
         label: 'Tempat',
         placeholder: 'Lokasi ceramah',
         icon: MapPin,

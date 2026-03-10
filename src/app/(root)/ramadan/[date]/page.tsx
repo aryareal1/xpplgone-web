@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -32,7 +31,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { cn, sleep } from '@/lib/utils';
 import {
   muCalendar,
   nuCalendar,
@@ -47,8 +46,8 @@ import {
   type ExtraSection,
   hijriYear,
 } from '@/data/journal-ramadhan';
-import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
+import api from '@/lib/api';
 
 // --- Utility Functions ---
 const parseJuzToNumbers = (str: string): number[] => {
@@ -411,24 +410,25 @@ const ActionButtons = memo(function ActionButtons({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSimpan = useCallback(() => {
+  const handleSimpan = useCallback(async () => {
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSuccess(true);
+    const { data, error } = await api.ramadan
+      .logs({ year: hijriYear })({ day: hijriDay })
+      .put(formData);
 
-      setTimeout(() => {
-        setIsSuccess(false);
-        router.push('/ramadan');
-      }, 3000);
-    }, 1500);
+    if (error) throw error;
 
-    console.log({
-      ramadan_year: hijriYear,
-      ramadan_day: hijriDay,
-      ...formData,
-    });
+    setIsLoading(false);
+    setIsSuccess(true);
+
+    await sleep(3000);
+    setIsSuccess(false);
+
+    await sleep(1000);
+    router.push('/ramadan');
+
+    console.log(data);
   }, [formData, hijriDay, router]);
 
   return (
@@ -505,7 +505,6 @@ const ActionButtons = memo(function ActionButtons({
 export default function RamadanCheckinPage() {
   const params = useParams();
   const dateStr = params.date as string;
-  const supabase = createClient();
 
   // State
   const [loading, setLoading] = useState(true);
@@ -519,6 +518,7 @@ export default function RamadanCheckinPage() {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Load Data Effect
   useEffect(() => {
@@ -528,24 +528,9 @@ export default function RamadanCheckinPage() {
       try {
         setLoading(true);
 
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError) throw authError;
-
-        if (user && isMounted) {
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('gender')
-            .eq('uid', user.id)
-            .single();
-
-          if (!profileError && profile) {
-            setUserGender(profile?.gender || null);
-          }
-        }
+        const { data } = await api.users.me.get();
+        if (!data?.data) return;
+        setUserGender(data.data.gender);
 
         let actualDate: Date | null = null;
         const hijriDay = parseInt(dateStr, 10);
@@ -579,6 +564,13 @@ export default function RamadanCheckinPage() {
             setGregorianDate(actualDate);
             setIsFridayDay(isFriday(actualDate));
           }
+
+          await api.ramadan
+            .logs({ year: hijriYear })({ day: hijriDay })
+            .get()
+            .then(({ data }) => {
+              if (data) setFormData(data.data);
+            });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -594,7 +586,7 @@ export default function RamadanCheckinPage() {
     return () => {
       isMounted = false;
     };
-  }, [dateStr, supabase]);
+  }, [dateStr]);
 
   const handleCheckboxChange = useCallback(
     (
@@ -646,10 +638,25 @@ export default function RamadanCheckinPage() {
     [],
   );
 
-  const handleClear = useCallback(() => {
-    setFormData(initialFormData);
-    setShowConfirmClear(false);
-  }, []);
+  const handleClear = useCallback(async () => {
+    if (!ramadanDayInfo?.hijriDay) return;
+
+    setIsClearing(true);
+    try {
+      const { error } = await api.ramadan
+        .logs({ year: hijriYear })({ day: ramadanDayInfo.hijriDay })
+        .delete();
+
+      if (error) throw error;
+
+      setFormData(initialFormData);
+      setShowConfirmClear(false);
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+    } finally {
+      setIsClearing(false);
+    }
+  }, [ramadanDayInfo]);
 
   const handleClearClick = useCallback(() => {
     setShowConfirmClear(true);
@@ -808,12 +815,20 @@ export default function RamadanCheckinPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction
+              <Button
                 onClick={handleClear}
-                className="bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                disabled={isClearing}
+                className="bg-red-600 font-bold text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
               >
-                Ya, Hapus Semua
-              </AlertDialogAction>
+                {isClearing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  'Ya, Hapus Semua'
+                )}
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
