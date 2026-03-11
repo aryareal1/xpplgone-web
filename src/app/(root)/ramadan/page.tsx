@@ -43,29 +43,36 @@ import api from '@/lib/api';
 export default function RamadhanPage() {
   const today = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(today);
-  const [org, setOrg] = useState<'MU' | 'NU' | null>(null);
+  const [org, setOrg] = useState<'mu' | 'nu' | null>(null);
+  const [isChangingOrg, setIsChangingOrg] = useState(false);
   const [cellSize, setCellSize] = useState(176);
   const [checkedInDays, setCheckedInDays] = useState<number[]>([]);
 
   useEffect(() => {
-    const savedOrg = localStorage.getItem('ramadhan_org') as 'MU' | 'NU' | null;
-    setOrg(savedOrg || 'MU');
-
     const savedSize = localStorage.getItem('ramadhan_calendar_size');
     if (savedSize) {
       setCellSize(parseInt(savedSize, 10));
     }
 
-    // Gather checked in days
-    const getCheckedIn = async () => {
-      const { data } = await api.ramadan.logs.get({
+    const init = async () => {
+      // Fetch ormas
+      const { data: ormasData } = await api.ramadan.ormas.get();
+      if (ormasData?.success) {
+        setOrg(ormasData.data.ormas);
+      } else {
+        setOrg('nu');
+      }
+
+      // Gather checked in days
+      const { data: logsData } = await api.ramadan.logs.get({
         query: { ramadan_year: hijriYear },
       });
-      if (!data) return;
-      setCheckedInDays(data.data.map((d) => d.ramadan_day));
+      if (logsData?.success) {
+        setCheckedInDays(logsData.data.map((d) => d.ramadan_day));
+      }
     };
 
-    getCheckedIn();
+    init();
   }, []);
 
   const monthStart = startOfMonth(currentDate);
@@ -102,7 +109,7 @@ export default function RamadhanPage() {
     if (next.getMonth() <= 2) setCurrentDate(next);
   };
 
-  const currentCalendar = org === 'MU' ? muCalendar : nuCalendar;
+  const currentCalendar = org === 'mu' ? muCalendar : nuCalendar;
 
   const getRamadanDay = useCallback(
     (date: Date): RamadanDay | undefined => {
@@ -151,17 +158,26 @@ export default function RamadhanPage() {
                   </CardDescription>
                 </div>
                 <Tabs
-                  value={org || 'MU'}
-                  onValueChange={(v) => {
-                    const newOrg = v as 'MU' | 'NU';
-                    setOrg(newOrg);
-                    localStorage.setItem('ramadhan_org', newOrg);
+                  value={org || 'nu'}
+                  onValueChange={async (v) => {
+                    const newOrg = v as 'mu' | 'nu';
+                    setIsChangingOrg(true);
+                    try {
+                      await api.ramadan.ormas.put({ ormas: newOrg });
+                      setOrg(newOrg);
+                    } finally {
+                      setIsChangingOrg(false);
+                    }
                   }}
                   className="w-full md:w-[300px]"
                 >
                   <TabsList className="grid w-full grid-cols-2 md:w-[300px]">
-                    <TabsTrigger value="MU">Muhammadiyah</TabsTrigger>
-                    <TabsTrigger value="NU">Nahdlatul Ulama</TabsTrigger>
+                    <TabsTrigger value="mu" disabled={isChangingOrg}>
+                      Muhammadiyah
+                    </TabsTrigger>
+                    <TabsTrigger value="nu" disabled={isChangingOrg}>
+                      Nahdlatul Ulama
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>

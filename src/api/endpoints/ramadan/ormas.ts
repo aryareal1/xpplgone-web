@@ -82,7 +82,7 @@ export default new Elysia({ prefix: '/ormas' })
 
       const { data, error } = await supabase
         .from('user_profiles')
-        .update({ islamic_org: body })
+        .update({ islamic_org: body.ormas })
         .eq('uid', user.id)
         .select('islamic_org')
         .single();
@@ -103,7 +103,9 @@ export default new Elysia({ prefix: '/ormas' })
       return status(200, {
         success: true,
         message: 'Update success',
-        data: data.islamic_org,
+        data: {
+          ormas: data.islamic_org,
+        },
       });
     },
     {
