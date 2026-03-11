@@ -29,4 +29,15 @@ const Gender = t.Enum(
   },
 );
 
-export default { Role, Gender };
+const IslamicOrg = t.Enum(
+  {
+    NU: 'nu',
+    MU: 'mu',
+  },
+  {
+    title: 'IslamicOrg',
+    description: 'Ormas Islam',
+  },
+);
+
+export default { Role, Gender, IslamicOrg };

@@ -11,11 +11,20 @@ import {
   Calendar,
   Moon,
   Clock,
+  Users,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { muCalendar } from '@/data/journal-ramadhan';
+import { muCalendar, nuCalendar } from '@/data/journal-ramadhan';
 import StudentRecapContent from './StudentRecapContent';
+import type { Metadata } from 'next';
+import { SITE_NAME } from '@/lib/constants';
+
+export const metadata: Metadata = {
+  title: `Ramadhan Admin | ${SITE_NAME}`,
+  description: 'Melihat data rekap siswa',
+};
 
 export default async function StudentRecapPage({
   params,
@@ -45,7 +54,7 @@ export default async function StudentRecapPage({
   // Fetch student info
   const { data: student } = await supabase
     .from('user_profiles')
-    .select('id, display_name, username, nis, gender')
+    .select('id, display_name, username, nis, gender, islamic_org')
     .eq('nis', parseInt(nis, 10))
     .single();
 
@@ -58,21 +67,20 @@ export default async function StudentRecapPage({
     .eq('student_id', student.id)
     .order('ramadan_day', { ascending: true });
 
+  // Fetch eid visits
+  const { data: eidVisits } = await supabase
+    .from('eid_visits')
+    .select('*')
+    .eq('student_id', student.id)
+    .order('id', { ascending: true });
+
   // Calculate Stats
   const filledDays = logs?.length || 0;
   const fastingDays = logs?.filter((l) => l.fasting).length || 0;
   const tarawihDays = logs?.filter((l) => l.tarawih).length || 0;
-  const tadarusDays = logs?.filter((l) => l.tadarus_juz).length || 0;
-  const totalPrays =
-    logs?.reduce((acc, l) => {
-      let count = 0;
-      if (l.subuh) count++;
-      if (l.dhuhur) count++;
-      if (l.ashar) count++;
-      if (l.maghrib) count++;
-      if (l.isya) count++;
-      return acc + count;
-    }, 0) || 0;
+  const tadarusJuz = logs?.length
+    ? Math.max(...logs.map((l) => l.tadarus_juz || 0))
+    : 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -108,7 +116,7 @@ export default async function StudentRecapPage({
                 <ClipboardCheck className="h-6 w-6" />
                 Ringkasan Capaian Ramadhan
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatBox
                   icon={<Calendar className="h-4 w-4" />}
                   label="Terisi"
@@ -130,14 +138,8 @@ export default async function StudentRecapPage({
                 <StatBox
                   icon={<BookOpen className="h-4 w-4" />}
                   label="Tadarus"
-                  value={tadarusDays}
-                  sub="Selesai"
-                />
-                <StatBox
-                  icon={<Clock className="h-4 w-4" />}
-                  label="Shalat"
-                  value={totalPrays}
-                  sub="Waktu"
+                  value={tadarusJuz}
+                  sub="Juz"
                 />
               </div>
             </CardContent>
@@ -154,8 +156,59 @@ export default async function StudentRecapPage({
         <StudentRecapContent
           student={student}
           logs={logs || []}
-          calendar={muCalendar}
+          calendar={student.islamic_org === 'mu' ? muCalendar : nuCalendar}
         />
+
+        {/* Daftar Kunjungan Silaturahmi */}
+        <section className="mt-12">
+          <header className="mb-6 flex justify-between items-center">
+            <h2 className="text-xl font-black flex items-center gap-2 tracking-tight">
+              <Users className="h-5 w-5 text-emerald-500" />
+              Daftar Kunjungan Silaturahmi
+            </h2>
+          </header>
+
+          {eidVisits && eidVisits.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {eidVisits.map((visit, idx) => (
+                <Card
+                  key={visit.id}
+                  className="overflow-hidden border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 border-l-4 border-l-emerald-500 dark:border-l-emerald-500 shadow-sm"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                          {visit.visited_name}
+                        </p>
+                        {visit.notes && (
+                          <div className="mt-2 flex items-start gap-1.5">
+                            <MessageSquare className="h-3 w-3 text-slate-400 mt-0.5 shrink-0" />
+                            <p className="text-xs text-slate-500 dark:text-slate-400 italic leading-relaxed">
+                              {visit.notes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/40">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Users className="h-10 w-10 text-slate-200 dark:text-slate-800 mb-3" />
+                <p className="text-sm text-slate-400 italic">
+                  Belum ada data kunjungan silaturahmi
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </section>
       </main>
     </div>
   );
