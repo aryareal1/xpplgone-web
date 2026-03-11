@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import Elysia, { t } from 'elysia';
-import { m, r } from '../schema';
+import { e, m, r } from '../schema';
 
 export default new Elysia({
   prefix: '/users',
@@ -184,6 +184,135 @@ export default new Elysia({
           'User profile',
         ),
         404: r.Failed('User not found'),
+        500: r.Failed('Internal server error'),
+      },
+    },
+  )
+
+  .post(
+    '/',
+    async ({ body, status }) => {
+      const supabase = createAdminClient();
+      const { data: auth } = await (await createClient()).auth.getUser();
+
+      if (!auth.user)
+        return status(401, {
+          success: false,
+          message: 'Unauthorized',
+          error: {
+            status: 401,
+            code: 'UNAUTHORIZED',
+            reason: 'Unauthorized',
+          },
+        });
+
+      const { data: authProfile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('uid', auth.user.id)
+        .single();
+
+      if (!['owner', 'admin'].includes(authProfile?.role))
+        return status(403, {
+          success: false,
+          message: 'Forbidden',
+          error: {
+            status: 403,
+            code: 'FORBIDDEN',
+            reason: 'Forbidden',
+          },
+        });
+
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: body.email,
+      });
+
+      if (error)
+        return status(500, {
+          success: false,
+          message: 'Internal server error',
+          error: {
+            ...error,
+            status: 500,
+            code: error.name,
+            reason: error.message,
+          },
+        });
+
+      const { user } = data;
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .insert({
+          uid: user.id,
+          username: body.username,
+          display_name: body.display_name,
+          bio: body.bio,
+          gender: body.gender,
+          role: body.role,
+          nis: body.nis,
+        })
+        .select('*')
+        .single();
+
+      if (profileError)
+        return status(500, {
+          success: false,
+          message: 'Internal server error',
+          error: {
+            ...profileError,
+            status: 500,
+            code: profileError.name,
+            reason: profileError.message,
+          },
+        });
+
+      return status(200, {
+        success: true,
+        message: 'User created successfully',
+        data: {
+          id: profile.id,
+          uid: user.id,
+          username: profile.username,
+          display_name: profile.display_name,
+          original_name: user.user_metadata.name,
+          avatar_url: user.user_metadata.avatar_url,
+          bio: profile.bio,
+          role: profile.role,
+          gender: profile.gender,
+          email: user.user_metadata.email,
+        },
+      });
+    },
+    {
+      detail: {
+        summary: 'Create User',
+        description: 'Create a new user.',
+        security: [{ 'Bearer Auth': [] }],
+      },
+      body: t.Object({
+        email: t.String({
+          description: 'The email of the user',
+          minLength: 1,
+        }),
+        username: t.String({
+          description: 'The name of the user',
+          minLength: 1,
+        }),
+        bio: t.Optional(t.String({ description: 'The bio of the user' })),
+        display_name: t.Optional(
+          t.String({
+            description: 'The display name of the user',
+          }),
+        ),
+        gender: t.Union([e.Gender], { description: 'The gender of the user' }),
+        role: t.Union([e.Role], { description: 'The role of the user' }),
+        nis: t.Optional(t.Number({ description: 'The nis of the user' })),
+      }),
+      response: {
+        200: r.Success(m.Profile, 'User created successfully', 'User profile'),
+        400: r.Failed('Invalid request'),
+        401: r.Failed('Unauthorized'),
+        403: r.Failed('Forbidden'),
         500: r.Failed('Internal server error'),
       },
     },
