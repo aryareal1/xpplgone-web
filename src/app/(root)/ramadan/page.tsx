@@ -234,7 +234,7 @@ export default function RamadhanPage() {
                   </CardDescription>
                 </div>
                 <Tabs
-                  value={org || 'nu'}
+                  value={org || ''}
                   onValueChange={async (v) => {
                     const newOrg = v as 'mu' | 'nu';
                     setIsChangingOrg(true);

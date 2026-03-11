@@ -1,7 +1,14 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: AI use static element interactions */
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, memo, type ChangeEvent } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  memo,
+  type ChangeEvent,
+} from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -160,12 +167,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
       <Card className="overflow-hidden border-neutral-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-neutral-800 dark:bg-[#0f172b]">
         <CardContent className="grid gap-6 p-6">
           {/* Puasa Checkbox */}
-          <div
-            onDoubleClick={() =>
-              handleCheckboxChange('root', 'fasting', !formData.fasting)
-            }
-            className="flex cursor-pointer touch-manipulation items-center justify-between rounded-lg border border-orange-100 bg-orange-50/30 p-4 select-none dark:border-orange-900/30 dark:bg-orange-950/10"
-          >
+          <label className="flex cursor-pointer touch-manipulation items-center justify-between rounded-lg border border-orange-100 bg-orange-50/30 p-4 select-none dark:border-orange-900/30 dark:bg-orange-950/10">
             <div className="space-y-0.5">
               <span className="text-base font-bold text-neutral-900 italic dark:text-neutral-100">
                 Puasa
@@ -182,7 +184,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
               }
               className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
             />
-          </div>
+          </label>
 
           {/* Shalat 5 Waktu */}
           <div className="space-y-3">
@@ -191,15 +193,8 @@ const DailyJournalSection = memo(function DailyJournalSection({
             </h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               {physicalSpiritualJournal.map((item) => (
-                <div
+                <label
                   key={item.id}
-                  onDoubleClick={() =>
-                    handleCheckboxChange(
-                      'salat',
-                      item.id,
-                      !formData.salat?.[item.id as keyof Shalat5],
-                    )
-                  }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
                 >
                   <span className="text-xs font-bold capitalize">
@@ -215,7 +210,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
                     }
                     className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
                   />
-                </div>
+                </label>
               ))}
             </div>
           </div>
@@ -227,15 +222,8 @@ const DailyJournalSection = memo(function DailyJournalSection({
             </h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               {sunahJournal.map((item) => (
-                <div
+                <label
                   key={item.id}
-                  onDoubleClick={() =>
-                    handleCheckboxChange(
-                      'salat_sunnah',
-                      item.id,
-                      !formData.salat_sunnah?.[item.id as keyof ShalatSunah],
-                    )
-                  }
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
                 >
                   <span className="text-xs font-bold capitalize">
@@ -256,7 +244,7 @@ const DailyJournalSection = memo(function DailyJournalSection({
                     }
                     className="h-5 w-5 cursor-pointer rounded border-neutral-300 accent-orange-600"
                   />
-                </div>
+                </label>
               ))}
             </div>
           </div>
@@ -527,27 +515,32 @@ export default function RamadanCheckinPage() {
       try {
         setLoading(true);
 
-        const { data } = await api.users.me.get();
-        if (!data?.data) return;
-        setUserGender(data.data.gender);
+        const { data: userData } = await api.users.me.get();
+        if (!userData?.data) return;
+        setUserGender(userData.data.gender);
+
+        const { data: ormasData } = await api.ramadan.ormas.get();
+        const ormas =
+          ormasData?.success && ormasData.data.ormas
+            ? ormasData.data.ormas
+            : 'nu';
 
         let actualDate: Date | null = null;
         const hijriDay = parseInt(dateStr, 10);
         let currentRamadanInfo = null;
 
         if (!Number.isNaN(hijriDay)) {
-          const savedOrg = localStorage.getItem('ramadhan_org') as
-            | 'MU'
-            | 'NU'
-            | null;
-          const calendar = savedOrg === 'NU' ? nuCalendar : muCalendar;
+          const calendar = ormas === 'mu' ? muCalendar : nuCalendar;
           const dayData = calendar.find(
             (d: RamadanDay) => d.hijriDay === hijriDay,
           );
 
           if (dayData) {
             actualDate = parseISO(dayData.date);
-            currentRamadanInfo = { hijriDay, org: savedOrg || 'MU' };
+            currentRamadanInfo = {
+              hijriDay,
+              org: ormas === 'mu' ? 'MU' : 'NU',
+            };
           }
         } else {
           try {
@@ -769,9 +762,7 @@ export default function RamadanCheckinPage() {
                                 placeholder={field.placeholder}
                                 // @ts-expect-error The type of formData is not matching with the section.id and field.id
                                 value={formData[section.id]?.[field.id] || ''}
-                                onChange={(
-                                  e: ChangeEvent<HTMLInputElement>,
-                                ) =>
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                   handleInputChange(
                                     section.id,
                                     field.id,

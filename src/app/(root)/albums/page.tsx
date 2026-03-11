@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, type WheelEvent, type MouseEvent } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  type WheelEvent,
+  type MouseEvent,
+} from 'react';
 import { ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 
