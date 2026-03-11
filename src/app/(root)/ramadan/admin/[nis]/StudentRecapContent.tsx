@@ -1,6 +1,6 @@
 'use client';
 
-import { format, parseISO } from 'date-fns';
+import { format, isFriday, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import {
   CheckCircle2,
@@ -49,7 +49,7 @@ export default function StudentRecapContent({
   });
 
   const getCalendarDay = (dayNum: number) => {
-    return calendar.find((d) => d.hijriDay === dayNum);
+    return calendar.find((d) => d.hijriDay === dayNum)!;
   };
 
   return (
@@ -58,6 +58,7 @@ export default function StudentRecapContent({
         const log = logsMap.get(day);
         const calDay = getCalendarDay(day);
         const isFilled = !!log;
+        const isFridayDay = isFriday(new Date(calDay.date));
 
         const dateObj = calDay ? parseISO(calDay.date) : null;
 
@@ -107,7 +108,14 @@ export default function StudentRecapContent({
                 <div className="grid grid-cols-2 gap-2 text-xs mb-4">
                   <IbadahItem label="Puasa" status={log.fasting} />
                   <IbadahItem label="Subuh" status={log.subuh} />
-                  <IbadahItem label="Dhuhur" status={log.dhuhur} />
+                  <IbadahItem
+                    label={
+                      isFridayDay && student.gender === 'male'
+                        ? "Jum'at"
+                        : 'Dhuhur'
+                    }
+                    status={log.dhuhur}
+                  />
                   <IbadahItem label="Ashar" status={log.ashar} />
                   <IbadahItem label="Maghrib" status={log.maghrib} />
                   <IbadahItem label="Isya" status={log.isya} />
@@ -173,7 +181,7 @@ export default function StudentRecapContent({
                             status={log?.subuh ?? false}
                           />
                           <IbadahRow
-                            label="Shalat Dhuhur"
+                            label={`Shalat ${isFridayDay && student.gender === 'male' ? "Jum'at" : 'Dhuhur'}`}
                             status={log?.dhuhur ?? false}
                           />
                           <IbadahRow

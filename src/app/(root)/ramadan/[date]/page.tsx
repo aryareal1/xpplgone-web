@@ -51,6 +51,7 @@ import {
   Extra_Section,
   type ExtraSection,
   hijriYear,
+  physicalSpiritualJournalJumah,
 } from '@/data/journal-ramadhan';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '@/lib/api';
@@ -138,10 +139,12 @@ const RamadhanHeader = memo(function RamadhanHeader({
 // 2. Daily Journal Section (Puasa, Shalat 5 Waktu, Shalat Sunah)
 const DailyJournalSection = memo(function DailyJournalSection({
   formData,
+  isJumah,
   handleCheckboxChange,
   handleInputChange,
 }: {
   formData: FormData;
+  isJumah: boolean;
   handleCheckboxChange: (
     section: 'salat' | 'salat_sunnah' | 'root',
     field: string,
@@ -192,7 +195,10 @@ const DailyJournalSection = memo(function DailyJournalSection({
               Shalat 5 Waktu
             </h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-              {physicalSpiritualJournal.map((item) => (
+              {(isJumah
+                ? physicalSpiritualJournalJumah
+                : physicalSpiritualJournal
+              ).map((item) => (
                 <label
                   key={item.id}
                   className="flex cursor-pointer touch-manipulation flex-col items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50/50 p-3 select-none dark:border-[#2e3647] dark:bg-[#0f172b]"
@@ -679,6 +685,7 @@ export default function RamadanCheckinPage() {
         >
           <DailyJournalSection
             formData={formData}
+            isJumah={isFridayDay && userGender === 'male'}
             handleCheckboxChange={handleCheckboxChange}
             handleInputChange={handleInputChange}
           />
