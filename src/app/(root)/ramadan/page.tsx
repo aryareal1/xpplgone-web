@@ -11,6 +11,13 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import {
   format,
@@ -45,6 +52,7 @@ export default function RamadhanPage() {
   const [currentDate, setCurrentDate] = useState(today);
   const [org, setOrg] = useState<'mu' | 'nu' | null>(null);
   const [isChangingOrg, setIsChangingOrg] = useState(false);
+  const [showOrmasModal, setShowOrmasModal] = useState(false);
   const [cellSize, setCellSize] = useState(176);
   const [checkedInDays, setCheckedInDays] = useState<number[]>([]);
 
@@ -55,25 +63,53 @@ export default function RamadhanPage() {
     }
 
     const init = async () => {
-      // Fetch ormas
-      const { data: ormasData } = await api.ramadan.ormas.get();
-      if (ormasData?.success) {
-        setOrg(ormasData.data.ormas);
-      } else {
-        setOrg('nu');
-      }
+      try {
+        // 1. Fetch data ormas dari database
+        const { data: ormasData } = await api.ramadan.ormas.get();
 
-      // Gather checked in days
-      const { data: logsData } = await api.ramadan.logs.get({
-        query: { ramadan_year: hijriYear },
-      });
-      if (logsData?.success) {
-        setCheckedInDays(logsData.data.map((d) => d.ramadan_day));
+        if (ormasData?.success) {
+          if (ormasData.data.ormas === null) {
+            // Jika data masih null, tampilkan modal pilihan
+            setShowOrmasModal(true);
+          } else {
+            // Jika sudah ada, langsung set ke state
+            setOrg(ormasData.data.ormas);
+          }
+        } else {
+          // Fallback jika API bermasalah (default ke NU atau sesuai kebijakan)
+          setOrg('nu');
+        }
+
+        // 2. Gather checked in days
+        const { data: logsData } = await api.ramadan.logs.get({
+          query: { ramadan_year: hijriYear },
+        });
+        if (logsData?.success) {
+          setCheckedInDays(logsData.data.map((d) => d.ramadan_day));
+        }
+      } catch (error) {
+        console.error('Init Error:', error);
       }
     };
 
     init();
   }, []);
+
+  // Handler untuk menyimpan pilihan ormas dari modal
+  const handleInitialOrgSelect = async (selectedOrg: 'mu' | 'nu') => {
+    setIsChangingOrg(true);
+    try {
+      const { data } = await api.ramadan.ormas.put({ ormas: selectedOrg });
+      if (data?.success) {
+        setOrg(selectedOrg);
+        setShowOrmasModal(false);
+      }
+    } catch (err) {
+      console.error('Gagal menyimpan pilihan ormas', err);
+    } finally {
+      setIsChangingOrg(false);
+    }
+  };
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -121,6 +157,47 @@ export default function RamadhanPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 pb-20 transition-colors duration-500 dark:bg-slate-950">
+      {/* Modal Ormas */}
+      <Dialog open={showOrmasModal}>
+        <DialogContent
+          className="sm:max-w-[540px] p-8 [&>button]:hidden bg-[#f8f9fa] dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="text-left space-y-3">
+            <DialogTitle className="text-2xl font-semibold text-slate-900 dark:text-white">
+              Pilih Kalender
+            </DialogTitle>
+            <DialogDescription className="text-base text-slate-500 dark:text-slate-400">
+              Ramadan kali ini kamu mengikuti kalender yang mana? Data ini akan
+              menyesuaikan jadwal jurnalmu.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleInitialOrgSelect('mu')}
+              disabled={isChangingOrg}
+              className="h-15 rounded-xl border-slate-200 bg-transparent text-slate-900 font-semibold text-base hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800 transition-all"
+            >
+              Muhammadiyah
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleInitialOrgSelect('nu')}
+              disabled={isChangingOrg}
+              className="h-15 rounded-xl border-slate-200 bg-transparent text-slate-900 font-semibold text-base hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800 transition-all"
+            >
+              Nahdlatul Ulama
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <main className="font-outfit mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <section id="calendar" className="w-full">
           <motion.header
@@ -144,7 +221,6 @@ export default function RamadhanPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <Card className="overflow-hidden border-none bg-white shadow-sm dark:bg-slate-900">
-              {/* Organization Switcher Header */}
               <div className="-mt-6 -mb-6 flex flex-col items-start gap-4 border-b border-slate-100 bg-[#ededee] p-6 md:flex-row md:items-center md:justify-between dark:border-slate-800 dark:bg-[#151f33]">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
@@ -232,7 +308,6 @@ export default function RamadhanPage() {
                 </div>
               </div>
 
-              {/* Scrollable Calendar Grid */}
               <div className="show-scrollbar overflow-x-auto pb-4">
                 <div className="min-w-[800px] md:min-w-0">
                   <div className="grid grid-cols-7 border-y border-slate-200 dark:border-slate-800">
