@@ -10,7 +10,6 @@ import {
   BookOpen,
   Calendar,
   Moon,
-  Clock,
   Users,
   MessageSquare,
 } from 'lucide-react';
@@ -20,6 +19,7 @@ import { muCalendar, nuCalendar } from '@/data/journal-ramadhan';
 import StudentRecapContent from './StudentRecapContent';
 import type { Metadata } from 'next';
 import { SITE_NAME } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: `Ramadhan Admin | ${SITE_NAME}`,
@@ -176,11 +176,16 @@ export default async function StudentRecapPage({
                   className="overflow-hidden border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 border-l-4 border-l-emerald-500 dark:border-l-emerald-500 shadow-sm"
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
+                    <div
+                      className={cn(
+                        'flex gap-3',
+                        visit.notes ? 'items-start' : 'items-center',
+                      )}
+                    >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                         {idx + 1}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 flex-col min-w-0">
                         <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
                           {visit.visited_name}
                         </p>
