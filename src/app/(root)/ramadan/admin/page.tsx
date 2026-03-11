@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import SectionHeader from '@/components/section-header';
 import MemberRecapList from './MemberRecapList';
+import { SITE_NAME } from '@/lib/constants';
 
 export const metadata = {
-  title: 'Admin Recap Ramadhan | Class Site',
+  title: `Ramadhan Admin | ${SITE_NAME}`,
   description: 'Rekap data harian Ramadhan peserta didik.',
 };
 

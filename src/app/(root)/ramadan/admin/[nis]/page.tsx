@@ -16,8 +16,15 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { muCalendar } from '@/data/journal-ramadhan';
+import { muCalendar, nuCalendar } from '@/data/journal-ramadhan';
 import StudentRecapContent from './StudentRecapContent';
+import type { Metadata } from 'next';
+import { SITE_NAME } from '@/lib/constants';
+
+export const metadata: Metadata = {
+  title: `Ramadhan Admin | ${SITE_NAME}`,
+  description: 'Melihat data rekap siswa',
+};
 
 export default async function StudentRecapPage({
   params,
@@ -47,7 +54,7 @@ export default async function StudentRecapPage({
   // Fetch student info
   const { data: student } = await supabase
     .from('user_profiles')
-    .select('id, display_name, username, nis, gender')
+    .select('id, display_name, username, nis, gender, islamic_org')
     .eq('nis', parseInt(nis, 10))
     .single();
 
@@ -74,16 +81,6 @@ export default async function StudentRecapPage({
   const tadarusJuz = logs?.length
     ? Math.max(...logs.map((l) => l.tadarus_juz || 0))
     : 0;
-  const totalPrays =
-    logs?.reduce((acc, l) => {
-      let count = 0;
-      if (l.subuh) count++;
-      if (l.dhuhur) count++;
-      if (l.ashar) count++;
-      if (l.maghrib) count++;
-      if (l.isya) count++;
-      return acc + count;
-    }, 0) || 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -159,7 +156,7 @@ export default async function StudentRecapPage({
         <StudentRecapContent
           student={student}
           logs={logs || []}
-          calendar={muCalendar}
+          calendar={student.islamic_org === 'mu' ? muCalendar : nuCalendar}
         />
 
         {/* Daftar Kunjungan Silaturahmi */}

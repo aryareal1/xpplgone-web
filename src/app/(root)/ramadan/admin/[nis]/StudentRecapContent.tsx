@@ -31,6 +31,7 @@ interface Student {
   username: string;
   nis: number;
   gender: string | null;
+  islamic_org: string | null;
 }
 
 export default function StudentRecapContent({
