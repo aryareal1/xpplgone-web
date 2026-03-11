@@ -10,7 +10,6 @@ import {
   BookOpen,
   Calendar,
   Moon,
-  Clock,
   Users,
   MessageSquare,
 } from 'lucide-react';
