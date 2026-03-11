@@ -341,6 +341,14 @@ export default function StudentRecapContent({
                         <div className="space-y-3">
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-amber-900/60 font-medium dark:text-amber-400/60">
+                              Tempat
+                            </span>
+                            <p className="font-bold text-amber-900 dark:text-amber-200 text-xs leading-relaxed">
+                              {log?.ceramah_place || '-'}
+                            </p>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-amber-900/60 font-medium dark:text-amber-400/60">
                               Penceramah
                             </span>
                             <span className="font-bold text-amber-900 dark:text-amber-100">
