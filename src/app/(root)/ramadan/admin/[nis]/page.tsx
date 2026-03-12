@@ -78,9 +78,7 @@ export default async function StudentRecapPage({
   const filledDays = logs?.length || 0;
   const fastingDays = logs?.filter((l) => l.fasting).length || 0;
   const tarawihDays = logs?.filter((l) => l.tarawih).length || 0;
-  const tadarusJuz = logs?.length
-    ? Math.max(...logs.map((l) => l.tadarus_juz || 0))
-    : 0;
+  const tadarusDays = logs?.filter((l) => l.tadarus_juz).length || 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -138,8 +136,8 @@ export default async function StudentRecapPage({
                 <StatBox
                   icon={<BookOpen className="h-4 w-4" />}
                   label="Tadarus"
-                  value={tadarusJuz}
-                  sub="Juz"
+                  value={tadarusDays}
+                  sub="Hari"
                 />
               </div>
             </CardContent>

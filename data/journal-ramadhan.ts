@@ -95,6 +95,14 @@ export const physicalSpiritualJournal: JournalSection[] = [
   { id: 'isya', name: 'Isya' },
 ];
 
+export const physicalSpiritualJournalJumah: JournalSection[] = [
+  { id: 'subuh', name: 'Subuh' },
+  { id: 'dhuhur', name: "Jum'at" },
+  { id: 'ashar', name: 'Ashar' },
+  { id: 'maghrib', name: 'Maghrib' },
+  { id: 'isya', name: 'Isya' },
+];
+
 export const sunahJournal: JournalSection[] = [
   { id: 'dhuha', name: 'Dhuha' },
   { id: 'tarawih', name: 'Tarawih' },
