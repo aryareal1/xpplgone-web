@@ -57,7 +57,12 @@ export const timeSchedule: TimeSlot[] = [
 ];
 
 export const fridaySchedule: TimeSlot[] = [
-  { period: 'Jam 0/Kegiatan Jumat', start: '07:00', end: '07:45', type: 'event' },
+  {
+    period: 'Jam 0/Kegiatan Jumat',
+    start: '07:00',
+    end: '07:45',
+    type: 'event',
+  },
   { period: 'Jam 1', start: '07:45', end: '08:25', type: 'class' },
   { period: 'Jam 2', start: '08:25', end: '09:05', type: 'class' },
   { period: 'Istirahat', start: '09:05', end: '09:25', type: 'break' },

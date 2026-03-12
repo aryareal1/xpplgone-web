@@ -1,6 +1,4 @@
 {
-  "typescript.tsdk": "node_modules\\typescript\\lib",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always",
-  }
+  "editor.defaultFormatter": "biomejs.biome",
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

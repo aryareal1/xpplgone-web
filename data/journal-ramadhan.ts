@@ -1,4 +1,15 @@
-import { LucideIcon, BookOpen, MessageSquare, Moon, Sun, User, MapPin } from 'lucide-react';
+import type { RamadanLog } from '@/api/schema';
+import {
+  type LucideIcon,
+  BookOpen,
+  MessageSquare,
+  Moon,
+  Sun,
+  User,
+  MapPin,
+} from 'lucide-react';
+
+export const hijriYear = 1447;
 
 export interface RamadanDay {
   hijriDay: number;
@@ -84,9 +95,17 @@ export const physicalSpiritualJournal: JournalSection[] = [
   { id: 'isya', name: 'Isya' },
 ];
 
+export const physicalSpiritualJournalJumah: JournalSection[] = [
+  { id: 'subuh', name: 'Subuh' },
+  { id: 'dhuhur', name: "Jum'at" },
+  { id: 'ashar', name: 'Ashar' },
+  { id: 'maghrib', name: 'Maghrib' },
+  { id: 'isya', name: 'Isya' },
+];
+
 export const sunahJournal: JournalSection[] = [
   { id: 'dhuha', name: 'Dhuha' },
-  { id: 'terawih', name: 'Terawih' },
+  { id: 'tarawih', name: 'Tarawih' },
   { id: 'witir', name: 'Witir' },
   { id: 'tahajud', name: 'Tahajud' },
   { id: 'iftitah', name: 'Iftitah' },
@@ -102,7 +121,7 @@ export interface Shalat5 {
 
 export interface ShalatSunah {
   dhuha: boolean;
-  terawih: boolean;
+  tarawih: boolean;
   witir: boolean;
   tahajud: boolean;
   iftitah: boolean;
@@ -110,71 +129,63 @@ export interface ShalatSunah {
 
 export interface Jumat {
   khotib: string;
-  tema: string;
+  khutbah: string;
   [key: string]: string;
 }
 
 export interface Tadarrus {
-  tempat: string;
+  place: string;
   juz: string;
-  suratAyat: string;
+  surah: string;
   [key: string]: string;
 }
 
 export interface TarawihWitir {
-  tempat: string;
+  place: string;
   [key: string]: string;
 }
 
 export interface Ceramah {
-  tempat: string;
+  place: string;
   dai: string;
   materi: string;
   [key: string]: string;
 }
 
-export interface FormData {
-  puasa: boolean;
-  shalat5: Shalat5;
-  shalatSunah: ShalatSunah;
-  keterangan: string;
-  jumat: Jumat;
-  tadarrus: Tadarrus;
-  tarawihWitir: TarawihWitir;
-  ceramah: Ceramah;
-}
+export type FormData = Omit<RamadanLog, 'ramadan_day' | 'ramadan_year'>;
 
-export const INITIAL_FORM_DATA: FormData = {
-  puasa: false,
-  shalat5: {
+export const initialFormData: FormData = {
+  fasting: false,
+  salat: {
     subuh: false,
     dhuhur: false,
     ashar: false,
     maghrib: false,
     isya: false,
   },
-  shalatSunah: {
+  salat_sunnah: {
     dhuha: false,
-    terawih: false,
+    tarawih: false,
     witir: false,
     tahajud: false,
     iftitah: false,
   },
-  keterangan: '',
-  jumat: {
+  notes: '',
+  jumah: {
     khotib: '',
-    tema: '',
+    khutbah: '',
   },
-  tadarrus: {
-    tempat: '',
+  tadarus: {
+    place: '',
     juz: '',
-    suratAyat: '',
+    surah: '',
   },
-  tarawihWitir: {
-    tempat: '',
+  tarawih: {
+    place: '',
+    imam: '',
   },
   ceramah: {
-    tempat: '',
+    place: '',
     dai: '',
     materi: '',
   },
@@ -189,7 +200,7 @@ export interface FormField {
 }
 
 export interface ExtraSection {
-  id: 'jumat' | 'tadarrus' | 'tarawihWitir' | 'ceramah';
+  id: 'jumah' | 'tadarus' | 'tarawih' | 'ceramah';
   title: string;
   icon: LucideIcon;
   color: string;
@@ -197,36 +208,59 @@ export interface ExtraSection {
   condition?: (gender: string | null, isFriday: boolean) => boolean;
 }
 
-export const EXTRA_SECTIONS: ExtraSection[] = [
+export const Extra_Section: ExtraSection[] = [
   {
-    id: 'jumat',
+    id: 'jumah',
     title: "Jumat'an",
     icon: Sun,
     color: 'bg-blue-100 text-blue-600',
     condition: (gender, isFriday) => isFriday && gender === 'male',
     fields: [
-      { id: 'khotib', label: 'Khotib / Imam', placeholder: 'Nama Khotib/Imam', icon: User },
-      { id: 'tema', label: 'Tema Khutbah', placeholder: 'Materi yang disampaikan' },
+      {
+        id: 'khotib',
+        label: 'Khotib / Imam',
+        placeholder: 'Nama Khotib/Imam',
+        icon: User,
+      },
+      {
+        id: 'khutbah',
+        label: 'Tema Khutbah',
+        placeholder: 'Materi yang disampaikan',
+      },
     ],
   },
   {
-    id: 'tadarrus',
+    id: 'tadarus',
     title: "Kegiatan Tadarrus Al Qur'an",
     icon: BookOpen,
     color: 'bg-emerald-100 text-emerald-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Lokasi tadarrus', icon: MapPin },
-      { id: 'juz', label: 'Juz', placeholder: 'Contoh: 1', type: 'number' },
-      { id: 'suratAyat', label: 'Surat - Ayat', placeholder: 'Al-Baqarah: 1-10' },
+      {
+        id: 'place',
+        label: 'Tempat',
+        placeholder: 'Lokasi tadarrus',
+        icon: MapPin,
+      },
+      { id: 'juz', label: 'Juz', placeholder: 'Pilih Juz:', type: 'text' },
+      {
+        id: 'surah',
+        label: 'Surat - Ayat',
+        placeholder: 'Al-Baqarah: 1-10',
+      },
     ],
   },
   {
-    id: 'tarawihWitir',
+    id: 'tarawih',
     title: 'Kegiatan Sholat Tarawih dan Witir',
     icon: Moon,
     color: 'bg-purple-100 text-purple-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Nama Masjid / Lokasi', icon: MapPin },
+      {
+        id: 'place',
+        label: 'Tempat',
+        placeholder: 'Nama Masjid / Lokasi',
+        icon: MapPin,
+      },
       { id: 'imam', label: 'Imam', placeholder: 'Nama Imam', icon: User },
     ],
   },
@@ -236,7 +270,12 @@ export const EXTRA_SECTIONS: ExtraSection[] = [
     icon: MessageSquare,
     color: 'bg-amber-100 text-amber-600',
     fields: [
-      { id: 'tempat', label: 'Tempat', placeholder: 'Lokasi ceramah', icon: MapPin },
+      {
+        id: 'place',
+        label: 'Tempat',
+        placeholder: 'Lokasi ceramah',
+        icon: MapPin,
+      },
       { id: 'dai', label: "Da'i", placeholder: 'Nama Penceramah', icon: User },
       { id: 'materi', label: 'Materi', placeholder: 'Judul atau poin ceramah' },
     ],

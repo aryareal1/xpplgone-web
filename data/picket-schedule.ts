@@ -10,7 +10,16 @@ export interface PicketDay {
 export const picketSchedule: PicketDay[] = [
   {
     day: 'Senin',
-    members: ['Dila', 'Intan', 'Fadhil', 'Vina', 'Syifa', 'Khansa', 'Roichan', 'Auliya'],
+    members: [
+      'Dila',
+      'Intan',
+      'Fadhil',
+      'Vina',
+      'Syifa',
+      'Khansa',
+      'Roichan',
+      'Auliya',
+    ],
     color: 'from-blue-600 to-indigo-700',
     lightColor: 'bg-blue-50 dark:bg-blue-950/30',
     borderColor: 'border-blue-200 dark:border-blue-900',
@@ -26,7 +35,15 @@ export const picketSchedule: PicketDay[] = [
   },
   {
     day: 'Rabu',
-    members: ['Fayakun', 'Nikma', 'Iqbal', 'Fatimah', 'Gading', 'Noval', 'Vano'],
+    members: [
+      'Fayakun',
+      'Nikma',
+      'Iqbal',
+      'Fatimah',
+      'Gading',
+      'Noval',
+      'Vano',
+    ],
     color: 'from-amber-500 to-orange-600',
     lightColor: 'bg-amber-50 dark:bg-amber-950/30',
     borderColor: 'border-amber-200 dark:border-amber-900',
