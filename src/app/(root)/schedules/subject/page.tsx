@@ -15,11 +15,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   type TimeSlot,
   type Lesson,
-  scheduleDataRamadhan,
-  mondayRamadhanSchedule,
-  fridayRamadhanSchedule,
-  timeRamadhanSchedule,
-  nameRamadhanSchedule,
+  scheduleData,
+  mondaySchedule,
+  fridaySchedule,
+  timeSchedule,
 } from '@/data/subject-schedule';
 import { StatCard } from './stat-card';
 import { SubjectGridView } from './grid-view';
@@ -107,10 +106,7 @@ export default function TimelineSchedule() {
 
   const today = currentTime.getDay();
   const isWeekend = today === 0 || today === 6;
-  const todaySchedule = useMemo(
-    () => scheduleDataRamadhan[currentDay],
-    [currentDay],
-  );
+  const todaySchedule = useMemo(() => scheduleData[currentDay], [currentDay]);
   const dayName = useMemo(
     () => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'][currentDay],
     [currentDay],
@@ -119,9 +115,9 @@ export default function TimelineSchedule() {
   const isGrid = viewMode === 'grid';
 
   const currentSchedule = useMemo(() => {
-    if (dayName === 'Senin') return mondayRamadhanSchedule;
-    if (dayName === 'Jumat') return fridayRamadhanSchedule;
-    return timeRamadhanSchedule;
+    if (dayName === 'Senin') return mondaySchedule;
+    if (dayName === 'Jumat') return fridaySchedule;
+    return timeSchedule;
   }, [dayName]);
 
   const getClassPeriodsInRange = useCallback(
@@ -273,7 +269,7 @@ export default function TimelineSchedule() {
             className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
           >
             <SectionHeader
-              title={`Jadwal Pelajaran ${nameRamadhanSchedule}`}
+              title={`Jadwal Pelajaran`}
               desc={[
                 'Kelas X PPLG 1 - SMKN 1 Kandeman',
                 'Semester Genap Tahun Ajaran 2025/2026',
@@ -345,7 +341,7 @@ export default function TimelineSchedule() {
             />
           </div>
 
-          <SubjectGridView scheduleData={scheduleDataRamadhan} />
+          <SubjectGridView scheduleData={scheduleData} />
         </div>
       </div>
     );
