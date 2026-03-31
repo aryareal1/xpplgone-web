@@ -189,6 +189,7 @@ export default new Elysia({
     },
   )
 
+  // POST /users - Create User
   .post(
     '/',
     async ({ body, status }) => {
@@ -322,13 +323,14 @@ export default new Elysia({
   .get(
     '/students',
     async ({ query, status }) => {
-      let { role, sort } = query;
+      let { include_roles, exclude_roles, sort } = query;
       sort = sort ?? 'display_name';
       const supabase = await createClient();
 
       let { data, error } = await supabase
         .from('user_profiles')
         .select('*')
+        .not('nis', 'is', null)
         .order(sort);
 
       if (error)
@@ -362,19 +364,21 @@ export default new Elysia({
         gender,
       }));
 
-      role = `${role ? `${role},` : ''}!owner,!admin`;
-      const isAnd = role.split(',').some((r) => !r.startsWith('!'));
+      const include = include_roles?.split(',') || [];
+      const exclude = exclude_roles?.split(',') || [];
+
+      if (include.length > 0) {
+        data = data.filter((u) => include.includes(u.role));
+      }
+
+      if (exclude.length > 0) {
+        data = data.filter((u) => !exclude.includes(u.role));
+      }
 
       return status(200, {
         success: true,
         message: 'Success get all students',
-        data: data.filter((u) =>
-          isAnd
-            ? role.split(',').includes(u.role) &&
-              !role.split(',').includes(`!${u.role}`)
-            : role.split(',').includes(u.role) ||
-              !role.split(',').includes(`!${u.role}`),
-        ),
+        data,
       });
     },
     {
@@ -383,7 +387,12 @@ export default new Elysia({
         description: 'Get all students.',
       },
       query: t.Object({
-        role: t.Optional(t.String({ description: 'Role of the user' })),
+        include_roles: t.Optional(
+          t.String({ description: 'Roles to include, comma separated' }),
+        ),
+        exclude_roles: t.Optional(
+          t.String({ description: 'Roles to exclude, comma separated' }),
+        ),
         sort: t.Optional(
           t.Enum(
             {
