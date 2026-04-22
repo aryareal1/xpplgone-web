@@ -1,34 +1,34 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
 import {
-  Clock,
+  BookOpen,
   Calendar,
+  Clock,
+  GraduationCap,
   Grid3x3,
   LayoutList,
-  GraduationCap,
   Users,
-  BookOpen,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import SectionHeader from '@/components/section-header';
 import {
-  type TimeSlot,
-  type Lesson,
-  scheduleData,
-  mondaySchedule,
   fridaySchedule,
+  type Lesson,
+  mondaySchedule,
+  scheduleData,
+  type TimeSlot,
   timeSchedule,
 } from '@/data/subject-schedule';
-import { StatCard } from './stat-card';
+import { cn } from '@/lib/utils';
 import { SubjectGridView } from './grid-view';
+import { StatCard } from './stat-card';
 import {
-  TimelineLessonItem,
   TimelineBreakItem,
   TimelineEventItem,
+  TimelineLessonItem,
 } from './timeline-items';
 import { WeekendView } from './weekend-view';
-import SectionHeader from '@/components/section-header';
 
 export default function TimelineSchedule() {
   const [currentTime, setCurrentTime] = useState(new Date());

@@ -1,11 +1,11 @@
 import openapi from '@elysiajs/openapi';
 import { Elysia, redirect } from 'elysia';
+import { SITE_NAME } from '@/lib/constants';
 import auth from './endpoints/auth';
-import users from './endpoints/users';
 import funds from './endpoints/funds';
 import ramadan from './endpoints/ramadan';
+import users from './endpoints/users';
 import { models } from './schema';
-import { SITE_NAME } from '@/lib/constants';
 
 const App = new Elysia({ prefix: '/api' })
   .use(

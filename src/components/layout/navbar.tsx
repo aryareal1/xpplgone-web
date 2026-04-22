@@ -1,14 +1,19 @@
 'use client';
 
+import { AlignLeftIcon, LogOutIcon, MoonIcon, SunIcon } from 'lucide-react';
+import { motion as m, stagger, type Variants } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '../ui/button';
-import { AlignLeftIcon, LogOutIcon, MoonIcon, SunIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import type { Profile as IProfile } from '@/api/schema';
+import { useUser } from '@/hooks/use-user';
+import { SITE_NAME } from '@/lib/constants';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { createClient } from '@/lib/supabase/client';
-import { motion as m, stagger, type Variants } from 'motion/react';
 import { useSidebar } from '../ui/sidebar';
-import { useUser } from '@/hooks/use-user';
-import { SITE_NAME } from '@/lib/constants';
-import type { Profile as IProfile } from '@/api/schema';
 
 const navigations = [
   { name: 'Home', path: '/' },

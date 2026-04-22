@@ -1,8 +1,8 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import SectionHeader from '@/components/section-header';
-import { motion, AnimatePresence } from 'motion/react';
 
 import { picketSchedule } from '@/data/picket-schedule';
 import { PicketCard } from './picket-card';

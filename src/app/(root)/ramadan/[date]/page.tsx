@@ -1,26 +1,29 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: AI use static element interactions */
 'use client';
 
+import { format, isFriday, parseISO } from 'date-fns';
+import { id } from 'date-fns/locale';
 import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  memo,
-  type ChangeEvent,
-} from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  Loader2,
-  BookmarkCheck,
-  ChevronLeft,
-  CalendarDays,
-  Trash2,
   AlertTriangle,
+  BookmarkCheck,
+  CalendarDays,
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
+  Loader2,
+  Trash2,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  type ChangeEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -30,33 +33,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { format, parseISO, isFriday } from 'date-fns';
-import { id } from 'date-fns/locale';
-
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, sleep } from '@/lib/utils';
 import {
-  muCalendar,
-  nuCalendar,
-  type RamadanDay,
-  physicalSpiritualJournal,
-  sunahJournal,
-  type FormData,
-  type Shalat5,
-  type ShalatSunah,
-  initialFormData,
   Extra_Section,
   type ExtraSection,
+  type FormData,
   hijriYear,
+  initialFormData,
+  muCalendar,
+  nuCalendar,
+  physicalSpiritualJournal,
   physicalSpiritualJournalJumah,
+  type RamadanDay,
+  type Shalat5,
+  type ShalatSunah,
+  sunahJournal,
 } from '@/data/journal-ramadhan';
-import { motion, AnimatePresence } from 'motion/react';
 import api from '@/lib/api';
+import { cn, sleep } from '@/lib/utils';
 
-// --- Utility Functions ---
 const parseJuzToNumbers = (str: string): number[] => {
   if (!str) return [];
   const nums = new Set<number>();
@@ -91,7 +89,6 @@ const numbersToJuzRange = (nums: number[]): string => {
   return result.join(', ');
 };
 
-// 1. Header Component
 const RamadhanHeader = memo(function RamadhanHeader({
   ramadanDayInfo,
   gregorianDate,
@@ -136,7 +133,6 @@ const RamadhanHeader = memo(function RamadhanHeader({
   );
 });
 
-// 2. Daily Journal Section (Puasa, Shalat 5 Waktu, Shalat Sunah)
 const DailyJournalSection = memo(function DailyJournalSection({
   formData,
   isJumah,
@@ -275,7 +271,6 @@ const DailyJournalSection = memo(function DailyJournalSection({
   );
 });
 
-// 3. Juz Grid Selector
 const JuzGridSelector = memo(function JuzGridSelector({
   juzValue,
   handleInputChange,
@@ -389,7 +384,6 @@ const JuzGridSelector = memo(function JuzGridSelector({
   );
 });
 
-// 4. Action Buttons (Submit & Clear)
 const ActionButtons = memo(function ActionButtons({
   onClearClick,
   formData,
@@ -494,12 +488,10 @@ const ActionButtons = memo(function ActionButtons({
   );
 });
 
-// --- Main Page Component ---
 export default function RamadanCheckinPage() {
   const params = useParams();
   const dateStr = params.date as string;
 
-  // State
   const [loading, setLoading] = useState(true);
   const [userGender, setUserGender] = useState<string | null>(null);
   const [isFridayDay, setIsFridayDay] = useState(false);
@@ -513,7 +505,6 @@ export default function RamadanCheckinPage() {
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
-  // Load Data Effect
   useEffect(() => {
     let isMounted = true;
 
@@ -690,9 +681,7 @@ export default function RamadanCheckinPage() {
             handleInputChange={handleInputChange}
           />
 
-          {/* Extra Sections (Tadarrus, Tarawih, Ceramah, etc.) */}
           {Extra_Section.map((section: ExtraSection) => {
-            // Check if section should be shown based on condition (if any)
             if (
               section.condition &&
               !section.condition(userGender, isFridayDay)

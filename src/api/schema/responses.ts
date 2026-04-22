@@ -1,4 +1,4 @@
-import { t, type TSchema } from 'elysia';
+import { type TSchema, t } from 'elysia';
 
 const Success = <T extends TSchema>(
   schema: T,

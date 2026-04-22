@@ -1,11 +1,11 @@
 'use client';
 
-import type { WheelEvent, MouseEvent } from 'react';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'motion/react';
+import Image from 'next/image';
+import { type MouseEvent, memo, useMemo, type WheelEvent } from 'react';
 import type { Album } from '@/data/albums';
+import { cn } from '@/lib/utils';
 
 interface AlbumModalProps {
   selectedAlbum: Album | null;
@@ -24,7 +24,42 @@ interface AlbumModalProps {
   onDoubleClick: () => void;
 }
 
-export function AlbumModal({
+const Thumbnail = memo(function Thumbnail({
+  photo,
+  idx,
+  isActive,
+  onClick,
+}: {
+  photo: string;
+  idx: number;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition-all',
+        isActive
+          ? 'scale-95 border-indigo-500 opacity-100'
+          : 'border-transparent opacity-40 hover:scale-105 hover:opacity-100',
+      )}
+      type="button"
+    >
+      <Image
+        fill
+        src={photo}
+        alt={`Thumbnail ${idx + 1}`}
+        className="object-cover"
+        sizes="48px"
+        quality={40}
+        loading="lazy"
+      />
+    </button>
+  );
+});
+
+export const AlbumModal = memo(function AlbumModal({
   selectedAlbum,
   currentImageIndex,
   zoom,
@@ -40,6 +75,19 @@ export function AlbumModal({
   onMouseUp,
   onDoubleClick,
 }: AlbumModalProps) {
+  const cursorStyle = useMemo(
+    () => (zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'),
+    [zoom, isDragging],
+  );
+
+  const imageTransform = useMemo(
+    () => ({
+      transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+      transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+    }),
+    [zoom, position.x, position.y, isDragging],
+  );
+
   return (
     <AnimatePresence>
       {selectedAlbum && (
@@ -104,10 +152,7 @@ export function AlbumModal({
               onMouseUp={onMouseUp}
               onMouseLeave={onMouseUp}
               onDoubleClick={onDoubleClick}
-              style={{
-                cursor:
-                  zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
-              }}
+              style={{ cursor: cursorStyle }}
             >
               <Image
                 fill
@@ -117,10 +162,7 @@ export function AlbumModal({
                 quality={90}
                 priority
                 sizes="100vw"
-                style={{
-                  transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                  transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                }}
+                style={imageTransform}
                 draggable={false}
               />
             </motion.div>
@@ -143,25 +185,13 @@ export function AlbumModal({
             <div className="mx-auto max-w-7xl overflow-x-auto px-4">
               <div className="flex min-w-max justify-center gap-3 sm:justify-start">
                 {selectedAlbum.photos.map((photo, idx) => (
-                  <button
+                  <Thumbnail
                     key={photo}
+                    photo={photo}
+                    idx={idx}
+                    isActive={idx === currentImageIndex}
                     onClick={() => onThumbnailClick(idx)}
-                    className={cn(
-                      'relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition-all',
-                      idx === currentImageIndex
-                        ? 'scale-95 border-indigo-500 opacity-100'
-                        : 'border-transparent opacity-40 hover:scale-105 hover:opacity-100',
-                    )}
-                    type="button"
-                  >
-                    <Image
-                      fill
-                      src={photo}
-                      alt={`Thumbnail ${idx + 1}`}
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -170,4 +200,4 @@ export function AlbumModal({
       )}
     </AnimatePresence>
   );
-}
+});

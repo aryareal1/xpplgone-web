@@ -1,7 +1,7 @@
+import Elysia, { t } from 'elysia';
 import { m, r } from '@/api/schema';
 import { hijriYear } from '@/data/journal-ramadhan';
 import { createClient } from '@/lib/supabase/server';
-import Elysia, { t } from 'elysia';
 
 export default new Elysia({ prefix: '/eid-visits' })
   // GET /eid-visits - Get Eid Visits

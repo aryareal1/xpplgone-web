@@ -1,6 +1,7 @@
 'use client';
 
-import type { EidVisit } from '@/api/schema';
+import { Loader2, Plus, Users } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   type Dispatch,
   type SetStateAction,
@@ -8,16 +9,15 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import type { EidVisit } from '@/api/schema';
 import SectionHeader from '@/components/section-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Plus, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import api from '@/lib/api';
 import { hijriYear } from '@/data/journal-ramadhan';
-import { generateUid } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
+import api from '@/lib/api';
+import { generateUid } from '@/lib/utils';
 
 const rowVariants = {
   initial: {

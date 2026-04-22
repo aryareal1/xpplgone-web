@@ -1,13 +1,13 @@
-import type { RamadanLog } from '@/api/schema';
 import {
-  type LucideIcon,
   BookOpen,
+  type LucideIcon,
+  MapPin,
   MessageSquare,
   Moon,
   Sun,
   User,
-  MapPin,
 } from 'lucide-react';
+import type { RamadanLog } from '@/api/schema';
 
 export const hijriYear = 1447;
 

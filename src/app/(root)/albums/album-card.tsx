@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
+import { Calendar, ImageIcon, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
-import { MapPin, Calendar } from 'lucide-react';
+import Image from 'next/image';
 import type { Album } from '@/data/albums';
 
 interface AlbumCardProps {
@@ -12,12 +12,14 @@ interface AlbumCardProps {
 }
 
 export function AlbumCard({ album, index, onClick }: AlbumCardProps) {
+  const isAboveFold = index < 3;
+
   return (
     <motion.div
       key={album.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
+      transition={{ delay: index * 0.08 + 0.2, duration: 0.4 }}
       onClick={() => onClick(album)}
       className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-indigo-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700"
     >
@@ -29,6 +31,9 @@ export function AlbumCard({ album, index, onClick }: AlbumCardProps) {
           alt={album.title}
           className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          quality={75}
+          priority={isAboveFold}
+          loading={isAboveFold ? 'eager' : 'lazy'}
         />
         <div className="absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -55,9 +60,9 @@ export function AlbumCard({ album, index, onClick }: AlbumCardProps) {
             <span className="font-medium">{album.date}</span>
           </div>
 
-          {/* Preview Thumbnails */}
+          {/* Preview Thumbnails - limited to 3 for performance */}
           <div className="mt-4 flex gap-2 overflow-hidden pt-2">
-            {album.photos.slice(0, 4).map((photo) => (
+            {album.photos.slice(0, 3).map((photo) => (
               <div
                 key={photo}
                 className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-100 dark:border-slate-700"
@@ -68,12 +73,14 @@ export function AlbumCard({ album, index, onClick }: AlbumCardProps) {
                   alt=""
                   className="object-cover"
                   sizes="40px"
+                  quality={50}
+                  loading="lazy"
                 />
               </div>
             ))}
-            {album.photos.length > 4 && (
+            {album.photos.length > 3 && (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                +{album.photos.length - 4}
+                <ImageIcon className="h-4 w-4" />
               </div>
             )}
           </div>

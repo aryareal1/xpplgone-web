@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import type { Profile } from '@/api/schema';
 import api from '@/lib/api';
-import { useEffect, useState } from 'react';
 
 export function useUser() {
   const [loading, setLoading] = useState(true);

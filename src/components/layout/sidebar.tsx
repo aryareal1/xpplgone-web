@@ -1,6 +1,31 @@
 'use client';
 
+import {
+  AlbumIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BookOpenCheckIcon,
+  ChevronDownIcon,
+  ClipboardClockIcon,
+  Code2Icon,
+  HomeIcon,
+  NewspaperIcon,
+  NotepadTextIcon,
+  PiggyBankIcon,
+  UsersRoundIcon,
+} from 'lucide-react';
+import { motion as m } from 'motion/react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { SITE_NAME } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
@@ -17,31 +42,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '../ui/sidebar';
-import Image from 'next/image';
-import {
-  AlbumIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-  ChevronDownIcon,
-  ClipboardClockIcon,
-  Code2Icon,
-  HomeIcon,
-  BookOpenCheckIcon,
-  NewspaperIcon,
-  NotepadTextIcon,
-  PiggyBankIcon,
-  UsersRoundIcon,
-} from 'lucide-react';
-import { motion as m } from 'motion/react';
-import { Button } from '../ui/button';
-import { cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '../ui/collapsible';
-import { SITE_NAME } from '@/lib/constants';
 
 type Bars = {
   title?: string;

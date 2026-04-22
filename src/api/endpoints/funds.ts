@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
 import Elysia, { t } from 'elysia';
+import { createClient } from '@/lib/supabase/server';
 import { m, r } from '../schema';
 
 export default new Elysia({

@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
-import NavBar from '@/components/layout/navbar';
-import { Outfit, Roboto_Slab } from 'next/font/google';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import AppSidebar from '@/components/layout/sidebar';
-import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { SITE_NAME } from '@/lib/constants';
+import { Outfit, Roboto_Slab } from 'next/font/google';
+import { cookies } from 'next/headers';
+import NavBar from '@/components/layout/navbar';
+import AppSidebar from '@/components/layout/sidebar';
+import { ThemeProvider } from '@/components/theme-provider';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: `Home | ${SITE_NAME}`,

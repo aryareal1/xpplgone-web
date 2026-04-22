@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { Calendar } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export function WeekendView({ dayWeekend }: { dayWeekend: string }) {
   return (

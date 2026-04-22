@@ -1,8 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Check } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {

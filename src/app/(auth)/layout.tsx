@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Outfit, Roboto_Slab } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Suspense, type ReactNode } from 'react';
+import { Outfit, Roboto_Slab } from 'next/font/google';
+import { type ReactNode, Suspense } from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
 import { SITE_NAME } from '@/lib/constants';
 
 export const metadata: Metadata = {

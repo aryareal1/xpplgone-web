@@ -1,9 +1,9 @@
 'use client';
 
+import { Check, Clock, MapPin, Users } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Check, Clock, Users, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { Lesson, TimeSlot } from '@/data/subject-schedule';
+import { cn } from '@/lib/utils';
 
 interface TimelineLessonItemProps {
   lesson: Lesson;

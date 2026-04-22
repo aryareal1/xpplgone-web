@@ -1,5 +1,8 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,9 +15,6 @@ import {
 } from '@/components/ui/card';
 import { SITE_NAME } from '@/lib/constants';
 import { createClient } from '@/lib/supabase/client';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
   const supabase = createClient();

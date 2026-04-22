@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import type { StudentProfile } from '@/api/schema';
 import api from '@/lib/api';
-import { useEffect, useState } from 'react';
 
 export function useStudents() {
   const [loading, setLoading] = useState(true);

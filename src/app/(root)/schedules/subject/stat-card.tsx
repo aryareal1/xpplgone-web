@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface StatCardProps {

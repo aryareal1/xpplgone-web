@@ -1,10 +1,10 @@
 import './globals.css';
-import { Funnel_Display, Lexend } from 'next/font/google';
+import { HomeIcon } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Funnel_Display, Lexend } from 'next/font/google';
+import Link from 'next/link';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
-import { HomeIcon } from 'lucide-react';
-import Link from 'next/link';
 import { SITE_NAME } from '@/lib/constants';
 
 const lexend = Lexend({ subsets: ['latin'] });

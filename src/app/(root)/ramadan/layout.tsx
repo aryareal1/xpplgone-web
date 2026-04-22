@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { SITE_NAME } from '@/lib/constants';
+import type { ReactNode } from 'react';
 import ClassOnly from '@/app/class-only';
+import { SITE_NAME } from '@/lib/constants';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {

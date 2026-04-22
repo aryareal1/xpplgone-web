@@ -1,26 +1,16 @@
 'use client';
 
-import { AgGridReact } from 'ag-grid-react';
+import { PopoverArrow } from '@radix-ui/react-popover';
 import {
-  type ColDef,
   AllCommunityModule,
+  type CellContextMenuEvent,
+  type ColDef,
+  type ColumnHeaderContextMenuEvent,
+  type INumberCellEditorParams,
   ModuleRegistry,
   themeQuartz,
-  type INumberCellEditorParams,
-  type CellContextMenuEvent,
-  type ColumnHeaderContextMenuEvent,
 } from 'ag-grid-community';
-import { useUser } from '@/hooks/use-user';
-import SectionHeader from '@/components/section-header';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { useStudents } from '@/hooks/use-students';
-import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { AgGridReact } from 'ag-grid-react';
 import {
   ChartNoAxesColumnIcon,
   PencilLineIcon,
@@ -30,6 +20,13 @@ import {
   Trash2Icon,
   User2Icon,
 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useTheme } from 'next-themes';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Fund, FundDate } from '@/api/schema';
+import SectionHeader from '@/components/section-header';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
   CardAction,
@@ -37,8 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { PopoverArrow } from '@radix-ui/react-popover';
-import { Calendar } from '@/components/ui/calendar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,10 +41,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from 'next-themes';
-import { motion } from 'motion/react';
-import type { Fund, FundDate } from '@/api/schema';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { useStudents } from '@/hooks/use-students';
+import { useUser } from '@/hooks/use-user';
 import api from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 

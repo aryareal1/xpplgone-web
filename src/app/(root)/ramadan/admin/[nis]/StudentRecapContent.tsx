@@ -3,15 +3,19 @@
 import { format, isFriday, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import {
-  CheckCircle2,
-  XCircle,
   BookOpen,
   Calendar,
+  CheckCircle2,
+  ExternalLink,
   MessageSquare,
   Moon,
   User as UserIcon,
-  ExternalLink,
+  XCircle,
 } from 'lucide-react';
+import type { RamadanLog } from '@/api/schema';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import type { RamadanDay } from '@/data/journal-ramadhan';
+import { cn } from '@/lib/utils';
 
 interface Student {
   id: string;
@@ -40,7 +41,7 @@ export default function StudentRecapContent({
   calendar,
 }: {
   student: Student;
-  logs: any[];
+  logs: RamadanLog[];
   calendar: RamadanDay[];
 }) {
   const logsMap = new Map();

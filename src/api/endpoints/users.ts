@@ -1,6 +1,6 @@
+import Elysia, { t } from 'elysia';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import Elysia, { t } from 'elysia';
 import { e, m, r } from '../schema';
 
 export default new Elysia({

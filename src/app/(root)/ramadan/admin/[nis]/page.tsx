@@ -1,25 +1,25 @@
-import type { ReactNode } from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { redirect, notFound } from 'next/navigation';
-import SectionHeader from '@/components/section-header';
-import { Card, CardContent } from '@/components/ui/card';
 import {
-  ClipboardCheck,
-  CheckCircle2,
-  ChevronLeft,
   BookOpen,
   Calendar,
+  CheckCircle2,
+  ChevronLeft,
+  ClipboardCheck,
+  MessageSquare,
   Moon,
   Users,
-  MessageSquare,
 } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { muCalendar, nuCalendar } from '@/data/journal-ramadhan';
-import StudentRecapContent from './StudentRecapContent';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+import type { ReactNode } from 'react';
+import SectionHeader from '@/components/section-header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { muCalendar, nuCalendar } from '@/data/journal-ramadhan';
 import { SITE_NAME } from '@/lib/constants';
+import { createClient } from '@/lib/supabase/server';
 import { cn } from '@/lib/utils';
+import StudentRecapContent from './StudentRecapContent';
 
 export const metadata: Metadata = {
   title: `Ramadhan Admin | ${SITE_NAME}`,
@@ -34,7 +34,6 @@ export default async function StudentRecapPage({
   const { nis } = await params;
   const supabase = await createClient();
 
-  // Access Control
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -51,7 +50,6 @@ export default async function StudentRecapPage({
     redirect('/ramadan');
   }
 
-  // Fetch student info
   const { data: student } = await supabase
     .from('user_profiles')
     .select('id, display_name, username, nis, gender, islamic_org')
@@ -60,21 +58,19 @@ export default async function StudentRecapPage({
 
   if (!student) return notFound();
 
-  // Fetch all 30 days logs
-  const { data: logs } = await supabase
-    .from('ramadan_logs')
-    .select('*')
-    .eq('student_id', student.id)
-    .order('ramadan_day', { ascending: true });
+  const [{ data: logs }, { data: eidVisits }] = await Promise.all([
+    supabase
+      .from('ramadan_logs')
+      .select('*')
+      .eq('student_id', student.id)
+      .order('ramadan_day', { ascending: true }),
+    supabase
+      .from('eid_visits')
+      .select('*')
+      .eq('student_id', student.id)
+      .order('id', { ascending: true }),
+  ]);
 
-  // Fetch eid visits
-  const { data: eidVisits } = await supabase
-    .from('eid_visits')
-    .select('*')
-    .eq('student_id', student.id)
-    .order('id', { ascending: true });
-
-  // Calculate Stats
   const filledDays = logs?.length || 0;
   const fastingDays = logs?.filter((l) => l.fasting).length || 0;
   const tarawihDays = logs?.filter((l) => l.tarawih).length || 0;

@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import SectionHeader from '@/components/section-header';
-import MemberRecapList from './MemberRecapList';
 import { SITE_NAME } from '@/lib/constants';
+import { createClient } from '@/lib/supabase/server';
+import MemberRecapList from './MemberRecapList';
 
 export const metadata = {
   title: `Ramadhan Admin | ${SITE_NAME}`,
@@ -20,7 +20,6 @@ export default async function RamadanAdminPage() {
     redirect('/login?next=/ramadan/admin');
   }
 
-  // Check role
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('role')
@@ -36,7 +35,6 @@ export default async function RamadanAdminPage() {
     redirect('/ramadan');
   }
 
-  // Fetch students via RPC
   const { data: students, error: studentsError } =
     await supabase.rpc('get_students_recap');
 

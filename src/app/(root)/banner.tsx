@@ -1,6 +1,6 @@
-import { SITE_NAME } from '@/lib/constants';
 import { motion as m, stagger, type Variants } from 'motion/react';
 import Image from 'next/image';
+import { SITE_NAME } from '@/lib/constants';
 
 const variants = [
   {

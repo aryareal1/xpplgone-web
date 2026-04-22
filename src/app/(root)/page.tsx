@@ -1,15 +1,15 @@
 'use client';
 
+import { motion as m, stagger, type Variants } from 'motion/react';
+import Image from 'next/image';
+import SectionHeader from '@/components/section-header';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import Image from 'next/image';
-import { motion as m, stagger, type Variants } from 'motion/react';
 import Banner from './banner';
-import SectionHeader from '@/components/section-header';
 
 const variants = {
   albumImage: [

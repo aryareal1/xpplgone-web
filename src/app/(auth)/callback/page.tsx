@@ -1,8 +1,8 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function CallbackPage() {
   const supabase = createClient();

@@ -1,7 +1,19 @@
 'use client';
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import {
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isBefore,
+  isSameDay,
+  isSameMonth,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from 'date-fns';
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,43 +21,29 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import SectionHeader from '@/components/section-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  startOfWeek,
-  endOfWeek,
-  isSameMonth,
-  isSameDay,
-  addMonths,
-  subMonths,
-  isBefore,
-  startOfDay,
-} from 'date-fns';
-import SectionHeader from '@/components/section-header';
-
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   hijriYear,
   muCalendar,
   nuCalendar,
   type RamadanDay,
 } from '@/data/journal-ramadhan';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-import { motion } from 'motion/react';
-import { SilaturahimSection } from './silaturahim';
 import api from '@/lib/api';
+import { cn } from '@/lib/utils';
+import { SilaturahimSection } from './silaturahim';
 
 export default function RamadhanPage() {
   const today = useMemo(() => new Date(), []);
@@ -64,23 +62,18 @@ export default function RamadhanPage() {
 
     const init = async () => {
       try {
-        // 1. Fetch data ormas dari database
         const { data: ormasData } = await api.ramadan.ormas.get();
 
         if (ormasData?.success) {
           if (ormasData.data.ormas === null) {
-            // Jika data masih null, tampilkan modal pilihan
             setShowOrmasModal(true);
           } else {
-            // Jika sudah ada, langsung set ke state
             setOrg(ormasData.data.ormas);
           }
         } else {
-          // Fallback jika API bermasalah (default ke NU atau sesuai kebijakan)
           setOrg('nu');
         }
 
-        // 2. Gather checked in days
         const { data: logsData } = await api.ramadan.logs.get({
           query: { ramadan_year: hijriYear },
         });
@@ -95,7 +88,6 @@ export default function RamadhanPage() {
     init();
   }, []);
 
-  // Handler untuk menyimpan pilihan ormas dari modal
   const handleInitialOrgSelect = async (selectedOrg: 'mu' | 'nu') => {
     setIsChangingOrg(true);
     try {
@@ -309,7 +301,7 @@ export default function RamadhanPage() {
               </div>
 
               <div className="show-scrollbar overflow-x-auto pb-4">
-                <div className="min-w-[800px] md:min-w-0">
+                <div className="min-w-[560px] sm:min-w-[680px] md:min-w-0">
                   <div className="grid grid-cols-7 border-y border-slate-200 dark:border-slate-800">
                     {weekDays.map((day) => (
                       <div

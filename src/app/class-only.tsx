@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { SITE_NAME } from '@/lib/constants';
 import { LogInIcon } from 'lucide-react';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { SITE_NAME } from '@/lib/constants';
 
 const lexend = Lexend({ subsets: ['latin'] });
 const funnel = Funnel_Display({ subsets: ['latin'] });

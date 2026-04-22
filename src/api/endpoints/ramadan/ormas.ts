@@ -1,6 +1,6 @@
+import Elysia, { t } from 'elysia';
 import { e, r } from '@/api/schema';
 import { createClient } from '@/lib/supabase/server';
-import Elysia, { t } from 'elysia';
 
 export default new Elysia({ prefix: '/ormas' })
   .get(

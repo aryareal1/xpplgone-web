@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { Calendar, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
 import type { Day } from '@/data/subject-schedule';
+import { cn } from '@/lib/utils';
 
 interface SubjectGridViewProps {
   scheduleData: Day[];

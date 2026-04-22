@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { Search, User, Mail, ChevronRight, Hash } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import { ChevronRight, Hash, Mail, Search, User } from 'lucide-react';
 import { motion } from 'motion/react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 interface Student {
   uid: string;

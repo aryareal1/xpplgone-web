@@ -1,19 +1,23 @@
 'use client';
 
-import {
-  useState,
-  useEffect,
-  useCallback,
-  type WheelEvent,
-  type MouseEvent,
-} from 'react';
 import { ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-
+import dynamic from 'next/dynamic';
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useState,
+  type WheelEvent,
+} from 'react';
+import SectionHeader from '@/components/section-header';
 import { type Album, albums } from '@/data/albums';
 import { AlbumCard } from './album-card';
-import { AlbumModal } from './album-modal';
-import SectionHeader from '@/components/section-header';
+
+const AlbumModal = dynamic(
+  () => import('./album-modal').then((mod) => ({ default: mod.AlbumModal })),
+  { ssr: false },
+);
 
 export default function AlbumLayout() {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -24,17 +28,17 @@ export default function AlbumLayout() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 
-  const openAlbum = (album: Album) => {
+  const openAlbum = useCallback((album: Album) => {
     setSelectedAlbum(album);
     setCurrentImageIndex(0);
-  };
+  }, []);
 
-  const closeAlbum = () => {
+  const closeAlbum = useCallback(() => {
     setSelectedAlbum(null);
     setCurrentImageIndex(0);
     setZoom(1);
     setPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
   const nextImage = useCallback(() => {
     if (selectedAlbum) {
@@ -56,53 +60,66 @@ export default function AlbumLayout() {
     }
   }, [selectedAlbum]);
 
-  const handleWheel = (e: WheelEvent) => {
-    if (selectedAlbum) {
-      e.preventDefault();
-      const delta = e.deltaY * -0.001;
-      const newZoom = Math.min(Math.max(1, zoom + delta), 4);
-      setZoom(newZoom);
-      if (newZoom === 1) {
-        setPosition({ x: 0, y: 0 });
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (selectedAlbum) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.001;
+        setZoom((prevZoom) => {
+          const newZoom = Math.min(Math.max(1, prevZoom + delta), 4);
+          if (newZoom === 1) {
+            setPosition({ x: 0, y: 0 });
+          }
+          return newZoom;
+        });
       }
-    }
-  };
+    },
+    [selectedAlbum],
+  );
 
-  const handleMouseDown = (e: MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX,
-        y: e.clientY,
-      });
-      setInitialPosition(position);
-    }
-  };
+  const handleMouseDown = useCallback(
+    (e: MouseEvent) => {
+      if (zoom > 1) {
+        setIsDragging(true);
+        setDragStart({ x: e.clientX, y: e.clientY });
+        setInitialPosition(position);
+      }
+    },
+    [zoom, position],
+  );
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging && zoom > 1) {
-      setPosition({
-        x: initialPosition.x + (e.clientX - dragStart.x),
-        y: initialPosition.y + (e.clientY - dragStart.y),
-      });
-    }
-  };
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging && zoom > 1) {
+        setPosition({
+          x: initialPosition.x + (e.clientX - dragStart.x),
+          y: initialPosition.y + (e.clientY - dragStart.y),
+        });
+      }
+    },
+    [isDragging, zoom, initialPosition, dragStart],
+  );
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = useCallback(() => {
     if (zoom > 1) {
       setZoom(1);
       setPosition({ x: 0, y: 0 });
     } else {
       setZoom(2);
     }
-  };
+  }, [zoom]);
+
+  const handleThumbnailClick = useCallback((idx: number) => {
+    setCurrentImageIndex(idx);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
 
   // Keyboard navigation
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Gawean AI
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedAlbum) return;
@@ -114,7 +131,18 @@ export default function AlbumLayout() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedAlbum, nextImage, prevImage]);
+  }, [selectedAlbum, nextImage, prevImage, closeAlbum]);
+
+  useEffect(() => {
+    if (selectedAlbum) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedAlbum]);
 
   return (
     <div className="font-outfit min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -139,11 +167,8 @@ export default function AlbumLayout() {
           />
 
           <div className="flex items-center gap-4">
-            <motion.div
-              whileHover={{ y: -5, scale: 1.02 }}
-              className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-slate-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition-transform group-hover:scale-110 dark:bg-indigo-900/30 dark:text-indigo-400">
+            <motion.div className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-slate-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition-transform dark:bg-indigo-900/30 dark:text-indigo-400">
                 <ImageIcon className="h-5 w-5" />
               </div>
               <div>
@@ -189,27 +214,25 @@ export default function AlbumLayout() {
           ))}
         </div>
 
-        {/* Slideshow Modal */}
-        <AlbumModal
-          selectedAlbum={selectedAlbum}
-          currentImageIndex={currentImageIndex}
-          zoom={zoom}
-          position={position}
-          isDragging={isDragging}
-          onClose={closeAlbum}
-          onNext={nextImage}
-          onPrev={prevImage}
-          onThumbnailClick={(idx) => {
-            setCurrentImageIndex(idx);
-            setZoom(1);
-            setPosition({ x: 0, y: 0 });
-          }}
-          onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onDoubleClick={handleDoubleClick}
-        />
+        {/* Slideshow Modal - dynamically imported */}
+        {selectedAlbum && (
+          <AlbumModal
+            selectedAlbum={selectedAlbum}
+            currentImageIndex={currentImageIndex}
+            zoom={zoom}
+            position={position}
+            isDragging={isDragging}
+            onClose={closeAlbum}
+            onNext={nextImage}
+            onPrev={prevImage}
+            onThumbnailClick={handleThumbnailClick}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onDoubleClick={handleDoubleClick}
+          />
+        )}
       </div>
     </div>
   );
