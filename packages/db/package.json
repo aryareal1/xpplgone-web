@@ -1,0 +1,23 @@
+{
+  "name": "@xirpl/db",
+  "module": "src/index.ts",
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^1.0.0-rc.4",
+    "pg": "^8.22.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "drizzle-orm": "^1.0.0-rc.4"
+  }
+}

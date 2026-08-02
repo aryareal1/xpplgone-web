@@ -1,0 +1,12 @@
+{
+  "name": "@xirpl/shared",
+  "module": "src/index.ts",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
