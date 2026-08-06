@@ -21,7 +21,6 @@ export interface Day {
   lessons: Lesson[];
 }
 
-// --- NORMAL SCHEDULE ---
 export const mondaySchedule: TimeSlot[] = [
   { period: 'Jam 0/Apel/Upacara', start: '07:00', end: '07:40', type: 'event' },
   { period: 'Jam 1', start: '07:40', end: '08:20', type: 'class' },
@@ -256,7 +255,6 @@ export const scheduleData: Day[] = [
   },
 ];
 
-// --- RAMADHAN SCHEDULE ---
 export const nameRamadhanSchedule = '(Ramadhan)';
 
 export const mondayRamadhanSchedule: TimeSlot[] = [

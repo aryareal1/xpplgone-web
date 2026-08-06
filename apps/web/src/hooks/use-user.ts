@@ -11,8 +11,6 @@ export function useUser() {
     api.auth.me.get().then(({ data }) => {
       const u = data?.data;
       if (u) {
-        // ponytail: API /auth/me returns raw DB row (camelCase), not Profile
-        // shape — map here; fix API response schema later.
         setUser(u);
         setIsAuthenticated(true);
       }

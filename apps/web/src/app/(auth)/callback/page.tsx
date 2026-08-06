@@ -11,7 +11,6 @@ export default function CallbackPage() {
   useEffect(() => {
     const loop = setInterval(() => setDots((v) => (v + 1) % 4), 500);
 
-    // Cookies are already set by the API /auth/callback redirect.
     router.replace(searchParams.get('redirect') || '/');
 
     return () => {

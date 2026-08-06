@@ -1,1 +1,1 @@
-export const SITE_NAME = 'X PPLG 1';
+export const SITE_NAME = 'XI RPL';

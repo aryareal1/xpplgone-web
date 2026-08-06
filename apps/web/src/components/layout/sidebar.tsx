@@ -57,15 +57,13 @@ const bars: Bars = [
   {
     items: [
       { name: 'Home', icon: HomeIcon, path: '/' },
-      { name: 'Feed', icon: NewspaperIcon, path: '/feed' },
       { name: 'Album', icon: AlbumIcon, path: '/albums' },
-      { name: 'Jurnal Ramadhan', icon: BookOpenCheckIcon, path: '/ramadan' },
+      { name: 'Jurnal Kebiasaan', icon: BookOpenCheckIcon, path: '/habit' },
     ],
   },
   {
     title: 'Administrasi Kelas',
     items: [
-      { name: 'Anggota', icon: UsersRoundIcon, path: '/members' },
       {
         name: 'Jadwal',
         icon: ClipboardClockIcon,
@@ -74,8 +72,6 @@ const bars: Bars = [
           { name: 'Piket', path: '/schedules/picket' },
         ],
       },
-      { name: 'Tugas', icon: NotepadTextIcon, path: '/assigments' },
-      { name: 'Kas', icon: PiggyBankIcon, path: '/funds' },
     ],
   },
   {
