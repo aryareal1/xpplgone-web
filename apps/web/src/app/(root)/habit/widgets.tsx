@@ -146,11 +146,7 @@ export function HabitCalendar({
                       'flex aspect-square items-center justify-center rounded-lg text-sm font-medium transition-all',
                       future
                         ? 'cursor-not-allowed text-slate-300 dark:text-slate-700'
-                        : cn(
-                            'cursor-pointer hover:scale-110',
-                            HEAT_BG[lvl],
-                            HEAT_TEXT[lvl],
-                          ),
+                        : cn('cursor-pointer', HEAT_BG[lvl], HEAT_TEXT[lvl]),
                       sameDay(cell, today) &&
                         'ring-2 ring-orange-400 ring-offset-2 ring-offset-background',
                       sameDay(cell, selected) &&
@@ -283,8 +279,8 @@ export function HabitStats({
                 {streak.todayDone
                   ? `Aman untuk hari ini · terpanjang ${streak.best} hari`
                   : streak.atRisk
-                    ? 'Selesaikan 4 modul hari ini agar streak tidak putus'
-                    : 'Selesaikan 4 modul hari ini untuk memulai streak'}
+                    ? 'Absen sebelum 07:00 agar streak tidak putus'
+                    : 'Absen sebelum 07:00 untuk memulai streak'}
               </p>
             </div>
           </div>
