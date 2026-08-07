@@ -4,10 +4,11 @@
   "scripts": {
     "dev": "next dev -p 3600",
     "build": "next build",
-    "start": "next start -p 3610"
+    "start": "next start -p 3610",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@elysiajs/eden": "^1.4.8",
+    "@elysia/eden": "^1.4.10",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "@xirpl/api": "workspace:*",
@@ -32,9 +33,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "elysia": "^1.4.29",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "babel-plugin-react-compiler": "1.0.0"
+    "typescript": "^5"
   },
   "ignoreScripts": [
     "sharp",
