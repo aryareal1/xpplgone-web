@@ -218,9 +218,8 @@ export function streakInfo(today: Date) {
 
   for (let i = 0; i < STREAK_WINDOW; i++) {
     const key = fmtDate(new Date(midnight - i * DAY_MS));
-    done.push(
-      localStorage.getItem(storageKey(key)) ? level(load(key)) === 4 : false,
-    );
+    const hadir = load(key).hadir;
+    done.push(!!hadir && !hadir.late);
   }
 
   return streakFrom(done);
