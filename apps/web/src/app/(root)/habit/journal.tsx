@@ -4,6 +4,7 @@ import {
   CheckIcon,
   ClockIcon,
   DumbbellIcon,
+  LayoutDashboardIcon,
   LockIcon,
   MoonStarIcon,
   NotebookPenIcon,
@@ -11,6 +12,7 @@ import {
   UploadIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   type ReactNode,
@@ -23,7 +25,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { useUser } from '@/hooks/use-user';
 import { cn } from '@/lib/utils';
+import { isAdminRole } from '../../../../data/habit-admin';
 import {
   type Answer,
   attendanceWindow,
@@ -95,6 +99,7 @@ export default function HabitJournal() {
   const pathname = usePathname();
   const params = useSearchParams();
   const reduce = useReducedMotion();
+  const { user } = useUser();
 
   const [mounted, setMounted] = useState(false);
   const [data, setData] = useState<HabitDay>(emptyDay);
@@ -210,6 +215,19 @@ export default function HabitJournal() {
             })}
             {!editable && ' · hanya bisa dibaca'}
           </p>
+          {isAdminRole(user?.role) && (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              pointer
+            >
+              <Link href="/habit/admin">
+                <LayoutDashboardIcon /> Dasbor anggota
+              </Link>
+            </Button>
+          )}
         </m.header>
 
         <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-[1fr_360px]">
@@ -250,7 +268,7 @@ export default function HabitJournal() {
               <ul className="divide-y divide-slate-200/70 dark:divide-slate-800">
                 {IBADAH.map((name, i) => (
                   <li key={name}>
-                    <label
+                    <div
                       className={cn(
                         'flex items-center gap-3 py-3',
                         editable
@@ -259,24 +277,35 @@ export default function HabitJournal() {
                       )}
                     >
                       <Checkbox
+                        id={`ibadah-${i}`}
                         checked={data.ibadah[i] === true}
                         disabled={!editable}
                         onCheckedChange={(checked) =>
                           update((d) => ({
                             ...d,
                             ibadah: d.ibadah.map((old, j) =>
-                              j === i ? checked : old,
+                              j === i
+                                ? typeof checked === 'boolean'
+                                  ? checked
+                                  : null
+                                : old,
                             ),
                           }))
                         }
                       />
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      <label
+                        htmlFor={`ibadah-${i}`}
+                        className={cn(
+                          'text-sm font-medium text-slate-700 dark:text-slate-200',
+                          editable && 'cursor-pointer',
+                        )}
+                      >
                         {name}
-                      </span>
+                      </label>
                       <span className="ml-auto">
                         <Tick show={data.ibadah[i] === true} />
                       </span>
-                    </label>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -1,6 +1,6 @@
 'use client';
 
-import type { Profile as IProfile } from '@xirpl/api/schema';
+import type { User as IProfile } from '@xirpl/api/schema';
 import { SITE_NAME } from '@xirpl/shared';
 import { AlignLeftIcon, LogOutIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { motion as m, stagger, type Variants } from 'motion/react';
