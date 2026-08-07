@@ -14,12 +14,14 @@ import { r } from '../schema';
 
 const s3 = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
-  region: process.env.S3_REGION ?? 'us-east-1',
+  region: process.env.S3_REGION || 'us-east-1',
   forcePathStyle: true, // required for MinIO path-style addressing
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY_ID!,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
   },
+  // Streams + checksum chunked-encoding conflict on MinIO ("x-amz-decoded-content-length: undefined").
+  requestChecksumCalculation: 'WHEN_REQUIRED',
 });
 
 const bucket = process.env.S3_BUCKET!;
@@ -59,6 +61,7 @@ export default new Elysia({
           Key: key,
           // Stream the upload to MinIO instead of buffering it in memory.
           Body: Readable.fromWeb(file.stream() as never),
+          ContentLength: file.size,
           ContentType: file.type || undefined,
         }),
       );
