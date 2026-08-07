@@ -1,10 +1,11 @@
 import crypto from 'node:crypto';
 import bearer from '@elysia/bearer';
 import jwt from '@elysia/jwt';
-import { db, sessions, users } from '@xirpl/db';
+import { db, googleIdentitiesTable, sessionsTable, usersTable } from '@xirpl/db';
 import oauth2 from 'better-elysia-oauth2';
 import { eq } from 'drizzle-orm';
 import Elysia from 'elysia';
+import { apiUrl } from '../utils';
 
 export default new Elysia({ name: 'auth' })
   .use(
@@ -12,7 +13,7 @@ export default new Elysia({ name: 'auth' })
       Google: [
         process.env.GOOGLE_CLIENT_ID!,
         process.env.GOOGLE_CLIENT_SECRET!,
-        'http://localhost:3601/auth/callback',
+        `${apiUrl}/auth/callback`,
       ],
     }),
   )
@@ -38,7 +39,7 @@ export default new Elysia({ name: 'auth' })
             redirectUrl: string;
           }>('Google');
 
-          const user = await db.query.users.findFirst({
+          const user = await db.query.usersTable.findFirst({
             where: {
               email: openId?.email as string,
             },
@@ -53,14 +54,14 @@ export default new Elysia({ name: 'auth' })
 
           const session = (
             await db
-              .insert(sessions)
+              .insert(sessionsTable)
               .values({
                 user_id: user.id,
                 user_agent: headers['user-agent'],
                 ip: server?.requestIP(request)?.address,
                 refresh_token_hash: hashToken(refreshToken),
               })
-              .returning({ id: sessions.id })
+              .returning({ id: sessionsTable.id })
           )[0];
 
           const accessToken = await jwt.sign({
@@ -71,18 +72,41 @@ export default new Elysia({ name: 'auth' })
           });
 
           await db
-            .update(users)
+            .update(usersTable)
             .set({
               avatar_url: !user.avatar_url
                 ? (openId?.picture as string)
                 : undefined,
-              google_access_token_hash: hashToken(tokens.accessToken()),
-              google_access_token_expired_at: tokens.accessTokenExpiresAt(),
-              google_refresh_token_hash: hashToken(tokens.refreshToken()),
-              identity_data: openId,
               last_sign_in_at: new Date(),
             })
-            .where(eq(users.id, user.id));
+            .where(eq(usersTable.id, user.id));
+
+          // Upsert google identity for the user.
+          const existingIdentity = await db.query.googleIdentitiesTable.findFirst({
+            where: { user_id: user.id },
+            columns: { id: true },
+          });
+
+          const identityData = {
+            user_id: user.id,
+            sub: openId?.sub as string,
+            name: (openId?.name as string) ?? '',
+            given_name: openId?.given_name as string,
+            family_name: openId?.family_name as string,
+            picture: openId?.picture as string,
+            access_token_hash: hashToken(tokens.accessToken()),
+            access_token_expired_at: tokens.accessTokenExpiresAt(),
+            refresh_token_hash: hashToken(tokens.refreshToken()),
+          };
+
+          if (existingIdentity) {
+            await db
+              .update(googleIdentitiesTable)
+              .set(identityData)
+              .where(eq(googleIdentitiesTable.id, existingIdentity.id));
+          } else {
+            await db.insert(googleIdentitiesTable).values(identityData);
+          }
 
           return {
             refreshToken,
@@ -95,7 +119,7 @@ export default new Elysia({ name: 'auth' })
         const token = await jwt.verify(accessToken);
         if (!token) return null;
 
-        const session = await db.query.sessions.findFirst({
+        const session = await db.query.sessionsTable.findFirst({
           where: {
             id: token.sid as string,
             user_id: token.sub,
@@ -109,7 +133,7 @@ export default new Elysia({ name: 'auth' })
         return { session, user: session.user };
       },
       async refresh(refreshToken: string) {
-        const session = await db.query.sessions.findFirst({
+        const session = await db.query.sessionsTable.findFirst({
           where: {
             refresh_token_hash: hashToken(refreshToken),
           },
@@ -128,12 +152,12 @@ export default new Elysia({ name: 'auth' })
         });
 
         await db
-          .update(sessions)
+          .update(sessionsTable)
           .set({
             refreshed_at: new Date(),
             expired_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           })
-          .where(eq(sessions.id, session.id));
+          .where(eq(sessionsTable.id, session.id));
 
         return accessToken;
       },
@@ -141,7 +165,7 @@ export default new Elysia({ name: 'auth' })
         const token = await jwt.verify(accessToken);
         if (!token) return null;
 
-        await db.delete(sessions).where(eq(sessions.id, token.sid as string));
+        await db.delete(sessionsTable).where(eq(sessionsTable.id, token.sid as string));
         return true;
       },
     },

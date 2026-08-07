@@ -1,4 +1,4 @@
-import { db, users } from '@xirpl/db';
+import { db, usersTable } from '@xirpl/db';
 import Elysia, { t } from 'elysia';
 import auth from '../middleware/auth';
 import { e, m, r } from '../schema';
@@ -7,13 +7,13 @@ export default new Elysia({
   prefix: '/users',
   detail: { tags: ['Users'] },
 })
-  // GET /users/:q - Get user by id or username
+  // GET /users/:id - Get user by id or username
   .get(
-    '/:q',
+    '/:id',
     async ({ params, status }) => {
-      const { q } = params;
+      const { id: q } = params;
 
-      const user = await db.query.users.findFirst({
+      const user = await db.query.usersTable.findFirst({
         where: {
           OR: [{ id: q }, { username: q }],
         },
@@ -50,7 +50,7 @@ export default new Elysia({
         description: 'Get the user by id or uid.',
       },
       params: t.Object({
-        q: t.String({
+        id: t.String({
           description: 'The user id or username to get',
         }),
       }),
@@ -72,10 +72,10 @@ export default new Elysia({
       const include = include_roles?.split(',') || ([] as any);
       const exclude = exclude_roles?.split(',') || ([] as any);
 
-      const users = await db.query.users.findMany({
+      const users = await db.query.usersTable.findMany({
         where: {
           role: {
-            in: include,
+            in: include.length ? include : undefined,
             notIn: ['developer', 'teacher', 'homeroom_teacher', ...exclude],
           },
         },
@@ -156,18 +156,18 @@ export default new Elysia({
         });
 
       const newUser = (
-        await db.insert(users).values(body).returning({
-          id: users.id,
-          email: users.email,
-          username: users.username,
-          display_name: users.display_name,
-          avatar_url: users.avatar_url,
-          bio: users.bio,
-          role: users.role,
-          gender: users.gender,
-          nis: users.nis,
-          islamic_org: users.islamic_org,
-          created_at: users.created_at,
+        await db.insert(usersTable).values(body).returning({
+          id: usersTable.id,
+          email: usersTable.email,
+          username: usersTable.username,
+          display_name: usersTable.display_name,
+          avatar_url: usersTable.avatar_url,
+          bio: usersTable.bio,
+          role: usersTable.role,
+          gender: usersTable.gender,
+          nis: usersTable.nis,
+          islamic_org: usersTable.islamic_org,
+          created_at: usersTable.created_at,
         })
       )[0];
 

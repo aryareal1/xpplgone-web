@@ -34,7 +34,67 @@ const Student = t.Object(
   },
 );
 
+const Photo = t.Object(
+  {
+    data: t.String({
+      description: 'Downscaled JPEG data URL of the proof photo.',
+    }),
+    at: t.String({
+      description: 'ISO timestamp when the photo was taken.',
+    }),
+  },
+  {
+    title: 'Photo',
+  },
+);
+
+const HabitDay = t.Object(
+  {
+    date: t.String({
+      description: 'Journal date in YYYY-MM-DD format.',
+    }),
+    ibadah: t.Array(t.Nullable(t.Boolean()), {
+      description: '4 ibadah answers: Duha, Tahajud, Qabliyah Subuh, Ba\'diah Isya.',
+    }),
+    hadir: t.Nullable(
+      t.Object(
+        {
+          at: t.String({ description: 'ISO timestamp of check-in.' }),
+          late: t.Boolean(),
+        },
+        { title: 'Attendance' },
+      ),
+    ),
+    olahraga: t.Object(
+      {
+        done: t.Nullable(t.Boolean()),
+        sport: t.String(),
+        minutes: t.Nullable(t.Number()),
+        photo: t.Nullable(Photo),
+        alt: t.String(),
+      },
+      { title: 'Sport' },
+    ),
+    belajar: t.Object(
+      {
+        done: t.Nullable(t.Boolean()),
+        start: t.Nullable(Photo),
+        end: t.Nullable(Photo),
+        alt: t.String(),
+        topic: t.String(),
+        media: t.String(),
+      },
+      { title: 'Study' },
+    ),
+  },
+  {
+    title: 'HabitDay',
+  },
+);
+
 export default {
   User,
   Student,
+  Photo,
+  HabitDay,
 };

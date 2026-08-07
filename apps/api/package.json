@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/server.ts",
-    "build": "bun build --compile --minify-whitespace --minify-syntax --outfile server src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --minify-whitespace --minify-syntax --target bun --outdir dist",
+    "start": "PORT=3611 bun dist/index.js",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./src/app.ts",
     "./schema": "./src/schema/index.ts"
   },
   "devDependencies": {
