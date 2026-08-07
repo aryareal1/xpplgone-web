@@ -4,11 +4,6 @@ import Elysia, { t } from 'elysia';
 import auth from '../middleware/auth';
 import { m, r } from '../schema';
 
-const fmtDate = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-    d.getDate(),
-  ).padStart(2, '0')}`;
-
 /**
  * HabitDay <-> DB row. Dates arrive from the client as `YYYY/MM/DD` (see
  * web/data/habit-data.ts), normalize to `YYYY-MM-DD` for Postgres.
@@ -47,7 +42,9 @@ export const toDay = (row: any): any => ({
     done: row.did_sport,
     sport: row.sport_type ?? '',
     minutes: row.sport_minutes ?? null,
-    photo: row.sport_proof_url ? { data: row.sport_proof_url, at: row.updated_at } : null,
+    photo: row.sport_proof_url
+      ? { data: row.sport_proof_url, at: row.updated_at }
+      : null,
     alt: '',
   },
   belajar: {

@@ -1,5 +1,4 @@
-import { db, habitJournalsTable, usersTable } from '@xirpl/db';
-import { and, eq } from 'drizzle-orm';
+import { db, habitJournalsTable } from '@xirpl/db';
 import Elysia, { t } from 'elysia';
 import auth from '../middleware/auth';
 import { m, r } from '../schema';

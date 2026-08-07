@@ -16,7 +16,6 @@ export const apiUrl =
     ? process.env.API_URL
     : 'http://localhost:3601';
 
-
 /**
  * Default cookie properties.
  */
