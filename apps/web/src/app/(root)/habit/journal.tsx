@@ -30,12 +30,14 @@ import { cn } from '@/lib/utils';
 import { isAdminRole } from '../../../../data/habit-admin';
 import {
   type Answer,
+  attendanceCopy,
   attendanceWindow,
   emptyDay,
   fmtDate,
   fmtTime,
   type HabitDay,
   IBADAH,
+  isWeekend,
   load,
   loadMonth,
   type ModuleKey,
@@ -44,18 +46,11 @@ import {
   SPORT_TYPES,
   save,
 } from '../../../../data/habit-data';
-import { HabitCalendar, HabitStats } from './widgets';
+import { HabitCalendar, HabitStats, InfoHint } from './widgets';
 
-const MAX_PHOTO = 8 * 1024 * 1024;
+const MAX_PHOTO = 5 * 1024 * 1024;
 const MAX_EDGE = 1280;
 
-/**
- * File -> downscaled JPEG data URL.
- * Raw camera photos are megabytes; base64 adds another third and localStorage
- * only holds ~5MB total, so storing them untouched blows the quota and the
- * save silently fails. Downscaling first keeps a day's three proofs well under
- * budget.
- */
 const readPhoto = (file: File) =>
   new Promise<Photo>((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
@@ -63,7 +58,7 @@ const readPhoto = (file: File) =>
       return;
     }
     if (file.size > MAX_PHOTO) {
-      reject(new Error('Ukuran foto maksimal 8MB.'));
+      reject(new Error('Ukuran foto maksimal 5MB.'));
       return;
     }
 
@@ -149,6 +144,7 @@ export default function HabitJournal() {
     router.replace(`${pathname}?date=${fmtDate(d)}`, { scroll: false });
 
   const gate = attendanceWindow(now);
+  const copy = attendanceCopy(selected);
   const waitingForOpen = editable && !data.hadir && gate === 'closed';
   useEffect(() => {
     if (!waitingForOpen) return;
@@ -156,13 +152,6 @@ export default function HabitJournal() {
     return () => clearInterval(timer);
   }, [waitingForOpen]);
 
-  /**
-   * Takes an updater, not a patch: a photo upload resolves asynchronously, so
-   * a patch built from render-time `data` would clobber whatever was saved in
-   * the meantime. That is what made the first proof photo vanish on reload.
-   * `dataRef` is assigned synchronously so two uploads in the same tick chain
-   * instead of racing.
-   */
   const update = useCallback(
     (fn: (prev: HabitDay) => HabitDay) => {
       const next = fn(dataRef.current);
@@ -224,7 +213,7 @@ export default function HabitJournal() {
               pointer
             >
               <Link href="/habit/admin">
-                <LayoutDashboardIcon /> Dasbor anggota
+                <LayoutDashboardIcon /> Dasbor Admin
               </Link>
             </Button>
           )}
@@ -261,6 +250,7 @@ export default function HabitJournal() {
               title="Ibadah"
               tone="ibadah"
               index={0}
+              info="Centang tiap salat sunah yang kamu kerjakan hari ini. Modul dihitung selesai hanya kalau keempatnya tercentang, dan nilai Ibadah di statistik memakai rata-rata jumlah centang."
               done={data.ibadah.every((v) => v === true)}
               reduce={reduce}
               first
@@ -313,9 +303,14 @@ export default function HabitJournal() {
 
             <Section
               icon={ClockIcon}
-              title="Kehadiran"
+              title={copy.title}
               tone="hadir"
               index={1}
+              info={
+                isWeekend(selected)
+                  ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan dan memutus streak.'
+                  : 'Tekan tombolnya untuk absen. Dibuka 06:00, dan lewat 07:00 tercatat terlambat sehingga streak putus. Waktu absen ikut tersimpan.'
+              }
               done={!!data.hadir}
               reduce={reduce}
             >
@@ -329,7 +324,7 @@ export default function HabitJournal() {
                         : 'text-emerald-600 dark:text-emerald-400',
                     )}
                   >
-                    {data.hadir.late ? 'Terlambat' : 'Hadir'}
+                    {data.hadir.late ? copy.late : copy.ok}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400">
                     {' '}
@@ -362,21 +357,28 @@ export default function HabitJournal() {
               >
                 {data.hadir ? (
                   <>
-                    <CheckIcon /> Sudah Absen
+                    <CheckIcon /> {copy.doneAction}
                   </>
+                ) : !editable ? (
+                  'Tidak tercatat'
                 ) : gate === 'closed' ? (
                   'Absensi belum dibuka'
                 ) : (
-                  'Hadir'
+                  copy.action
                 )}
               </Button>
-              {!data.hadir && (
+              {!data.hadir && editable && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {gate === 'closed'
                     ? 'Absensi dibuka pukul 06:00.'
                     : gate === 'open'
-                      ? 'Absen sebelum 07:00 supaya tidak tercatat terlambat.'
-                      : 'Lewat 07:00, kehadiran akan tercatat terlambat.'}
+                      ? `${copy.verb} sebelum ${copy.deadline} supaya tidak tercatat ${copy.late.toLowerCase()}.`
+                      : `Lewat ${copy.deadline}, ${copy.noun} akan tercatat ${copy.late.toLowerCase()}.`}
+                </p>
+              )}
+              {!data.hadir && !editable && (
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Tidak ada catatan {copy.noun} pada tanggal ini.
                 </p>
               )}
             </Section>
@@ -386,6 +388,7 @@ export default function HabitJournal() {
               title="Olahraga"
               tone="olahraga"
               index={2}
+              info="Jawab Ya lalu isi jenis, durasi, dan foto bukti. Modul selesai setelah fotonya masuk. Jawab Tidak juga sah selesai asal alasannya diisi."
               done={
                 data.olahraga.done === true
                   ? !!data.olahraga.photo
@@ -429,9 +432,18 @@ export default function HabitJournal() {
                       }
                       className="h-9 w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                     >
-                      <option value="">Pilih jenis olahraga</option>
+                      <option
+                        value=""
+                        className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        Pilih jenis olahraga
+                      </option>
                       {SPORT_TYPES.map((s) => (
-                        <option key={s} value={s}>
+                        <option
+                          key={s}
+                          value={s}
+                          className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                        >
                           {s}
                         </option>
                       ))}
@@ -506,6 +518,7 @@ export default function HabitJournal() {
               title="Gemar Belajar"
               tone="belajar"
               index={3}
+              info="Jawab Ya lalu isi topik, media, dan dua foto bukti (mulai dan selesai). Modul baru selesai setelah keduanya terupload. Jawab Tidak sah selesai asal alasannya diisi."
               done={
                 data.belajar.done === true
                   ? !!data.belajar.start && !!data.belajar.end
@@ -655,6 +668,7 @@ const TONES: Record<ModuleKey, string> = {
 function Section({
   icon: Icon,
   title,
+  info,
   tone,
   index,
   done,
@@ -665,6 +679,7 @@ function Section({
 }: {
   icon: typeof ClockIcon;
   title: string;
+  info: string;
   tone: ModuleKey;
   index: number;
   done: boolean;
@@ -690,6 +705,7 @@ function Section({
         <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
           {title}
         </span>
+        <InfoHint label={title} text={info} />
         <Tick show={done} />
       </h2>
       {children}

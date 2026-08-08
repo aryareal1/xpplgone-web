@@ -4,6 +4,7 @@ import {
   fmtDate,
   type HabitDay,
   IBADAH,
+  isWeekend,
   LATE_HOUR,
   level,
   type ModuleKey,
@@ -11,6 +12,7 @@ import {
   OPEN_HOUR,
   SPORT_TYPES,
   streakFrom,
+  WAKE_HOUR,
 } from './habit-data';
 import { picketSchedule } from './picket-schedule';
 export const ADMIN_ROLES = [
@@ -112,7 +114,7 @@ const hash = (s: string) => {
 const rand = (...parts: (string | number)[]) =>
   hash(parts.join('|')) / 4294967296;
 
-const pick = <T,>(list: readonly T[], r: number) =>
+const pick = <T>(list: readonly T[], r: number) =>
   list[Math.min(list.length - 1, Math.floor(r * list.length))] as T;
 
 /** Per-member baseline, 0.38..0.96, so the class spreads instead of clumping. */
@@ -120,7 +122,7 @@ const discipline = (id: string) => 0.38 + rand(id, 'discipline') * 0.58;
 
 export function memberDay(id: string, date: Date): HabitDay | null {
   const key = fmtDate(date);
-  const weekend = date.getDay() === 0 || date.getDay() === 6;
+  const weekend = isWeekend(date);
   const p = discipline(id) * (weekend ? 0.82 : 1);
 
   // Some days are never opened at all.
@@ -133,7 +135,13 @@ export function memberDay(id: string, date: Date): HabitDay | null {
     const late = rand(id, key, 'late') > p;
     const at = new Date(date);
     at.setHours(
-      late ? LATE_HOUR : OPEN_HOUR,
+      weekend
+        ? late
+          ? WAKE_HOUR
+          : WAKE_HOUR - 1
+        : late
+          ? LATE_HOUR
+          : OPEN_HOUR,
       Math.floor(rand(id, key, 'menit-absen') * 59),
       0,
       0,

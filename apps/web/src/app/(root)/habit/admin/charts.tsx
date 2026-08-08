@@ -21,9 +21,14 @@ import { cn } from '@/lib/utils';
 import { MODULE_HEX } from '../../../../../data/habit-admin';
 import {
   type HabitDay,
+  HEAT_BG,
+  HEAT_TEXT,
   level,
   MODULES,
   type ModuleKey,
+  MONTHS,
+  sameDay,
+  WEEKDAYS,
 } from '../../../../../data/habit-data';
 
 const AXIS = { fontSize: 11, fill: 'currentColor' };
@@ -85,13 +90,14 @@ export function TrendArea({
   const gradientId = useId();
 
   if (series.length < 2)
-    return (
-      <Empty height={height}>Belum cukup data untuk bulan ini.</Empty>
-    );
+    return <Empty height={height}>Belum cukup data untuk bulan ini.</Empty>;
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={series} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+      <AreaChart
+        data={series}
+        margin={{ top: 8, right: 8, bottom: 0, left: -18 }}
+      >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity={0.35} />
@@ -148,7 +154,11 @@ export function ModuleRadar({
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
         <PolarGrid className="stroke-slate-200 dark:stroke-slate-800" />
-        <PolarAngleAxis dataKey="label" tick={AXIS} className="text-slate-500" />
+        <PolarAngleAxis
+          dataKey="label"
+          tick={AXIS}
+          className="text-slate-500"
+        />
         <Tooltip content={<ChartTip />} />
         <Radar
           name="Ketuntasan"
@@ -241,13 +251,7 @@ export function DistributionBars({
   );
 }
 
-function Empty({
-  height,
-  children,
-}: {
-  height: number;
-  children: ReactNode;
-}) {
+function Empty({ height, children }: { height: number; children: ReactNode }) {
   return (
     <p
       style={{ height }}
@@ -261,33 +265,6 @@ function Empty({
 // ---------------------------------------------------------------------------
 // Read-only heat calendar
 // ---------------------------------------------------------------------------
-
-const HEAT_BG = [
-  'bg-slate-100 dark:bg-slate-800/60',
-  'bg-emerald-100 dark:bg-emerald-950',
-  'bg-emerald-200 dark:bg-emerald-900',
-  'bg-emerald-300 dark:bg-emerald-700',
-  'bg-emerald-400 dark:bg-emerald-500',
-];
-
-const HEAT_TEXT = [
-  'text-slate-400 dark:text-slate-500',
-  'text-emerald-900 dark:text-emerald-200',
-  'text-emerald-900 dark:text-emerald-100',
-  'text-emerald-950 dark:text-white',
-  'text-emerald-950 dark:text-white',
-];
-
-const WEEKDAYS = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
-
-export const MONTHS = Array.from({ length: 12 }, (_, i) =>
-  new Date(2000, i, 1).toLocaleDateString('id-ID', { month: 'long' }),
-);
-
-const sameDay = (a: Date, b: Date) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
 
 /**
  * Same heat ramp as the student journal, but every cell is a button that only
@@ -314,13 +291,14 @@ export function HeatCalendar({
   return (
     <div>
       <div className="mb-2 grid grid-cols-7 gap-2">
-        {WEEKDAYS.map((d, i) => (
-          <span
-            key={i}
-            className="text-center text-xs font-medium text-slate-400"
+        {WEEKDAYS.map((d) => (
+          <abbr
+            key={d}
+            title={d}
+            className="text-center text-xs font-medium text-slate-400 no-underline"
           >
-            {d}
-          </span>
+            {d[0]}
+          </abbr>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-2">
