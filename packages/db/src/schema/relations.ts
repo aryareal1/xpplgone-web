@@ -1,9 +1,5 @@
 import { defineRelations } from 'drizzle-orm';
-import {
-  googleIdentitiesTable,
-  sessionsTable,
-  usersTable,
-} from './auth';
+import { googleIdentitiesTable, sessionsTable, usersTable } from './auth';
 import { attendancesTable, habitJournalsTable } from './journal';
 
 export default defineRelations(

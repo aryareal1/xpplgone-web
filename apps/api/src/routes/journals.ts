@@ -47,7 +47,9 @@ export const toDay = (row: any): any => ({
     done: row.did_sport,
     sport: row.sport_type ?? '',
     minutes: row.sport_minutes ?? null,
-    photo: row.sport_proof_url ? { data: row.sport_proof_url, at: row.updated_at } : null,
+    photo: row.sport_proof_url
+      ? { data: row.sport_proof_url, at: row.updated_at }
+      : null,
     alt: '',
   },
   belajar: {

@@ -45,19 +45,21 @@ import {
   summarize,
 } from '../../../../../data/habit-admin';
 import {
+  attendanceCopy,
   dailySeries,
   fmtTime,
   type HabitDay,
   IBADAH,
   level,
   MODULES,
+  MONTHS,
 } from '../../../../../data/habit-data';
+import { InfoHint } from '../widgets';
 import {
   DistributionBars,
   HeatCalendar,
   ModuleBars,
   ModuleRadar,
-  MONTHS,
   TrendArea,
 } from './charts';
 
@@ -224,10 +226,14 @@ export default function AdminDashboard() {
                   new Date(month.getFullYear(), Number(e.target.value), 1),
                 )
               }
-              className="cursor-pointer rounded-lg bg-transparent px-2 py-1 text-sm font-medium text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:text-slate-200"
+              className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               {MONTHS.map((n, i) => (
-                <option key={n} value={i}>
+                <option
+                  key={n}
+                  value={i}
+                  className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                >
                   {n}
                 </option>
               ))}
@@ -269,6 +275,7 @@ export default function AdminDashboard() {
                 value={`${klass.score}%`}
                 hint={`${klass.perfect} hari penuh tercatat`}
                 tone="emerald"
+                info="Rata-rata skor seluruh anggota bulan ini. Skor tiap anggota adalah porsi modul yang selesai dari 4 modul per hari."
               />
               <Stat
                 icon={FlameIcon}
@@ -276,6 +283,7 @@ export default function AdminDashboard() {
                 value={`${klass.streaking}`}
                 hint="anggota ≥ 3 hari beruntun"
                 tone="orange"
+                info="Berapa anggota yang sedang punya rentetan minimal 3 hari berturut-turut hadir tepat waktu. Dihitung mundur dari hari ini, jadi tidak ikut berubah saat kamu ganti bulan."
               />
               <Stat
                 icon={ClockIcon}
@@ -283,6 +291,7 @@ export default function AdminDashboard() {
                 value={`${klass.late}`}
                 hint={`${klass.absent} kali tanpa absen`}
                 tone="sky"
+                info="Total kejadian absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Angka kecil di bawahnya adalah hari yang sama sekali tidak diabsen."
               />
               <Stat
                 icon={ShieldAlertIcon}
@@ -290,14 +299,19 @@ export default function AdminDashboard() {
                 value={`${klass.atRisk}`}
                 hint="skor di bawah 50%"
                 tone="rose"
+                info="Jumlah anggota dengan skor bulan ini di bawah 50%. Pakai ini untuk memilih siapa yang perlu ditindaklanjuti lebih dulu."
               />
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold tracking-tight">
+                  <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     Tren harian kelas
+                    <InfoHint
+                      label="Tren harian kelas"
+                      text="Tiap titik adalah satu tanggal: rata-rata persen modul selesai seluruh anggota pada hari itu. Lembah yang dalam menandai hari yang perlu ditanyakan."
+                    />
                   </CardTitle>
                   <CardDescription>
                     Rata-rata modul selesai per tanggal.
@@ -310,8 +324,12 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold tracking-tight">
+                  <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     Ketuntasan modul
+                    <InfoHint
+                      label="Ketuntasan modul"
+                      text="Radar empat sumbu, satu per modul, berisi rata-rata kelas. Sumbu yang mengempis menunjukkan modul yang paling sering tidak selesai."
+                    />
                   </CardTitle>
                   <CardDescription>Rata-rata seluruh anggota.</CardDescription>
                 </CardHeader>
@@ -322,8 +340,12 @@ export default function AdminDashboard() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold tracking-tight">
+                  <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     Sebaran skor
+                    <InfoHint
+                      label="Sebaran skor"
+                      text="Berapa anggota yang jatuh di tiap rentang skor. Menunjukkan apakah kelas merata atau terbelah antara yang rajin dan yang tertinggal."
+                    />
                   </CardTitle>
                   <CardDescription>Jumlah anggota per rentang.</CardDescription>
                 </CardHeader>
@@ -334,8 +356,12 @@ export default function AdminDashboard() {
 
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-lg font-bold tracking-tight">
+                  <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     Perbandingan modul
+                    <InfoHint
+                      label="Perbandingan modul"
+                      text="Angka yang sama dengan radar, tapi berdampingan sebagai batang supaya selisih antarmodul lebih mudah dibaca."
+                    />
                   </CardTitle>
                   <CardDescription>
                     Modul mana yang paling sering tertinggal.
@@ -350,8 +376,12 @@ export default function AdminDashboard() {
             <Card className="mt-6">
               <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle className="text-lg font-bold tracking-tight">
+                  <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
                     Daftar anggota
+                    <InfoHint
+                      label="Daftar anggota"
+                      text="Kolom Ibadah sampai Belajar adalah persen hari modul itu selesai bulan ini. Hadir memakai batas 07:00 pada hari sekolah dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Streak dihitung mundur dari hari ini, bukan per bulan."
+                    />
                   </CardTitle>
                   <CardDescription>
                     Klik satu nama untuk melihat statistik lengkapnya.
@@ -556,6 +586,7 @@ function MemberDetail({
           value={`${row.streak.count}`}
           hint={`terpanjang ${row.streak.best} hari`}
           tone="orange"
+          info="Rentetan hari berturut-turut anggota ini hadir tepat waktu, dihitung mundur dari hari ini lintas bulan. Terlambat atau tidak absen memutusnya."
         />
         <Stat
           icon={CalendarDaysIcon}
@@ -563,13 +594,15 @@ function MemberDetail({
           value={`${row.perfect}`}
           hint={`dari ${row.tracked} hari`}
           tone="emerald"
+          info="Jumlah hari di bulan ini yang keempat modulnya selesai semua. Hari yang cuma sebagian terisi tidak dihitung."
         />
         <Stat
           icon={ClockIcon}
           label="Terlambat"
           value={`${row.late}`}
-          hint="absen lewat 07:00"
+          hint="absen lewat batas"
           tone="sky"
+          info="Berapa kali anggota ini absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Tetap tercatat hadir, tapi streak putus."
         />
         <Stat
           icon={ShieldAlertIcon}
@@ -577,14 +610,19 @@ function MemberDetail({
           value={`${row.absent}`}
           hint="tidak tercatat hadir"
           tone="rose"
+          info="Hari di bulan ini yang sama sekali tidak diabsen. Beda dengan Terlambat: di sini tidak ada catatan kehadiran sama sekali."
         />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg font-bold tracking-tight">
+            <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
               Tren harian
+              <InfoHint
+                label="Tren harian"
+                text="Persen modul selesai anggota ini per tanggal. 100% berarti keempat modul beres, 0% berarti hari itu kosong."
+              />
             </CardTitle>
             <CardDescription>
               Persentase modul selesai tiap tanggal.
@@ -597,8 +635,12 @@ function MemberDetail({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-bold tracking-tight">
+            <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
               Profil modul
+              <InfoHint
+                label="Profil modul"
+                text="Persen ketuntasan per modul untuk anggota ini bulan ini. Angka di daftar bawah radar adalah nilai yang sama dalam bentuk pasti."
+              />
             </CardTitle>
             <CardDescription>Kekuatan dan kelemahan.</CardDescription>
           </CardHeader>
@@ -624,8 +666,12 @@ function MemberDetail({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-bold tracking-tight">
+            <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight">
               Kalender {MONTHS[month.getMonth()]}
+              <InfoHint
+                label="Kalender"
+                text="Warna tiap tanggal menunjukkan berapa dari 4 modul yang selesai hari itu. Klik satu tanggal untuk melihat rinciannya di kartu sebelahnya."
+              />
             </CardTitle>
             <CardDescription>
               Warna makin pekat berarti makin banyak modul selesai.
@@ -655,7 +701,15 @@ function MemberDetail({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DayDetail day={detail} picked={day !== null} />
+            <DayDetail
+              day={detail}
+              picked={day !== null}
+              date={
+                day === null
+                  ? null
+                  : new Date(month.getFullYear(), month.getMonth(), day)
+              }
+            />
           </CardContent>
         </Card>
       </div>
@@ -666,9 +720,11 @@ function MemberDetail({
 function DayDetail({
   day,
   picked,
+  date,
 }: {
   day: HabitDay | null;
   picked: boolean;
+  date: Date | null;
 }) {
   if (!picked)
     return (
@@ -683,6 +739,8 @@ function DayDetail({
         Tidak ada catatan pada tanggal ini.
       </p>
     );
+
+  const copy = attendanceCopy(date ?? new Date());
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -701,7 +759,16 @@ function DayDetail({
         </ul>
       </DetailBlock>
 
-      <DetailBlock icon={ClockIcon} title="Kehadiran" tone="text-sky-500">
+      <DetailBlock
+        icon={ClockIcon}
+        title={copy.title}
+        tone="text-sky-500"
+        info={
+          copy.title === 'Bangun Pagi'
+            ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi dengan batas 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan dan memutus streak.'
+            : 'Absensi dibuka 06:00. Lewat 07:00 tetap tercatat hadir tapi berstatus terlambat, dan streak anggota putus.'
+        }
+      >
         {day.hadir ? (
           <p className="text-sm text-slate-600 dark:text-slate-300">
             <span
@@ -712,7 +779,7 @@ function DayDetail({
                   : 'text-emerald-600 dark:text-emerald-400',
               )}
             >
-              {day.hadir.late ? 'Terlambat' : 'Hadir'}
+              {day.hadir.late ? copy.late : copy.ok}
             </span>{' '}
             pada {fmtTime(day.hadir.at)}
           </p>
@@ -723,11 +790,7 @@ function DayDetail({
         )}
       </DetailBlock>
 
-      <DetailBlock
-        icon={DumbbellIcon}
-        title="Olahraga"
-        tone="text-emerald-500"
-      >
+      <DetailBlock icon={DumbbellIcon} title="Olahraga" tone="text-emerald-500">
         {day.olahraga.done === true ? (
           <dl className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
             <Row label="Jenis" value={day.olahraga.sport || '—'} />
@@ -823,11 +886,13 @@ function DetailBlock({
   icon: Icon,
   title,
   tone,
+  info,
   children,
 }: {
   icon: typeof ClockIcon;
   title: string;
   tone: string;
+  info?: string;
   children: ReactNode;
 }) {
   return (
@@ -835,6 +900,7 @@ function DetailBlock({
       <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-50">
         <Icon className={cn('size-4', tone)} />
         {title}
+        {info && <InfoHint label={title} text={info} />}
       </h3>
       {children}
     </div>
@@ -856,12 +922,14 @@ function Stat({
   value,
   hint,
   tone,
+  info,
 }: {
   icon: typeof UsersIcon;
   label: string;
   value: string;
   hint: string;
   tone: keyof typeof TONES;
+  info: string;
 }) {
   return (
     <Card>
@@ -875,8 +943,9 @@ function Stat({
           <Icon className="size-4.5" />
         </span>
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
             {label}
+            <InfoHint label={label} text={info} />
           </p>
           <p className="text-2xl leading-tight font-bold tabular-nums text-slate-900 dark:text-slate-50">
             {value}
@@ -921,8 +990,8 @@ function DashboardSkeleton({ bare }: { bare?: boolean }) {
   const body = (
     <>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
+        {['skor', 'streak', 'telat', 'perhatian'].map((k) => (
+          <Skeleton key={k} className="h-24 rounded-xl" />
         ))}
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">

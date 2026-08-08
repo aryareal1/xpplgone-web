@@ -54,7 +54,8 @@ const HabitDay = t.Object(
       description: 'Journal date in YYYY-MM-DD format.',
     }),
     ibadah: t.Array(t.Nullable(t.Boolean()), {
-      description: '4 ibadah answers: Duha, Tahajud, Qabliyah Subuh, Ba\'diah Isya.',
+      description:
+        "4 ibadah answers: Duha, Tahajud, Qabliyah Subuh, Ba'diah Isya.",
     }),
     hadir: t.Nullable(
       t.Object(

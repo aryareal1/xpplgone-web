@@ -64,16 +64,40 @@ export const SPORT_TYPES = [
 export const OPEN_HOUR = 6;
 export const LATE_HOUR = 7;
 
+/** Weekend: modul kehadiran berganti jadi bangun pagi, batas 06:00. */
+export const WAKE_HOUR = 6;
+
+export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
+
 export type AttendanceWindow = 'closed' | 'open' | 'late';
 
 export const attendanceWindow = (d: Date): AttendanceWindow =>
-  d.getHours() < OPEN_HOUR
-    ? 'closed'
-    : d.getHours() < LATE_HOUR
+  isWeekend(d)
+    ? d.getHours() < WAKE_HOUR
       ? 'open'
-      : 'late';
+      : 'late'
+    : d.getHours() < OPEN_HOUR
+      ? 'closed'
+      : d.getHours() < LATE_HOUR
+        ? 'open'
+        : 'late';
 
 export const isLate = (d: Date) => attendanceWindow(d) === 'late';
+
+/** Satu sumber teks untuk jurnal, statistik, dan dasbor admin. */
+export function attendanceCopy(d: Date) {
+  const w = isWeekend(d);
+  return {
+    title: w ? 'Bangun Pagi' : 'Kehadiran',
+    noun: w ? 'bangun pagi' : 'kehadiran',
+    action: w ? 'Bangun Pagi' : 'Hadir',
+    doneAction: w ? 'Sudah Dicatat' : 'Sudah Absen',
+    ok: w ? 'Bangun Pagi' : 'Hadir',
+    late: w ? 'Kesiangan' : 'Terlambat',
+    deadline: w ? '06:00' : '07:00',
+    verb: w ? 'Catat bangun pagi' : 'Absen',
+  };
+}
 
 export const MODULES = [
   {
@@ -98,6 +122,43 @@ export const MODULES = [
 ] as const;
 
 export type ModuleKey = (typeof MODULES)[number]['key'];
+
+/** Monday first, matching the calendar grid. Full names so keys are unique. */
+export const WEEKDAYS = [
+  'Senin',
+  'Selasa',
+  'Rabu',
+  'Kamis',
+  'Jumat',
+  'Sabtu',
+  'Minggu',
+] as const;
+
+export const MONTHS = Array.from({ length: 12 }, (_, i) =>
+  new Date(2000, i, 1).toLocaleDateString('id-ID', { month: 'long' }),
+);
+
+/** 0 done .. 4 done. Soft emerald ramp, commit-graph style. */
+export const HEAT_BG = [
+  'bg-slate-100 dark:bg-slate-800/60',
+  'bg-emerald-100 dark:bg-emerald-950',
+  'bg-emerald-200 dark:bg-emerald-900',
+  'bg-emerald-300 dark:bg-emerald-700',
+  'bg-emerald-400 dark:bg-emerald-500',
+];
+
+export const HEAT_TEXT = [
+  'text-slate-400 dark:text-slate-500',
+  'text-emerald-900 dark:text-emerald-200',
+  'text-emerald-900 dark:text-emerald-100',
+  'text-emerald-950 dark:text-white',
+  'text-emerald-950 dark:text-white',
+];
+
+export const sameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
 
 export const emptyDay = (): HabitDay => ({
   ibadah: IBADAH.map(() => null),

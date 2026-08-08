@@ -1,7 +1,12 @@
 import crypto from 'node:crypto';
 import bearer from '@elysia/bearer';
 import jwt from '@elysia/jwt';
-import { db, googleIdentitiesTable, sessionsTable, usersTable } from '@xirpl/db';
+import {
+  db,
+  googleIdentitiesTable,
+  sessionsTable,
+  usersTable,
+} from '@xirpl/db';
 import oauth2 from 'better-elysia-oauth2';
 import { eq } from 'drizzle-orm';
 import Elysia from 'elysia';
@@ -82,10 +87,11 @@ export default new Elysia({ name: 'auth' })
             .where(eq(usersTable.id, user.id));
 
           // Upsert google identity for the user.
-          const existingIdentity = await db.query.googleIdentitiesTable.findFirst({
-            where: { user_id: user.id },
-            columns: { id: true },
-          });
+          const existingIdentity =
+            await db.query.googleIdentitiesTable.findFirst({
+              where: { user_id: user.id },
+              columns: { id: true },
+            });
 
           const identityData = {
             user_id: user.id,
@@ -165,7 +171,9 @@ export default new Elysia({ name: 'auth' })
         const token = await jwt.verify(accessToken);
         if (!token) return null;
 
-        await db.delete(sessionsTable).where(eq(sessionsTable.id, token.sid as string));
+        await db
+          .delete(sessionsTable)
+          .where(eq(sessionsTable.id, token.sid as string));
         return true;
       },
     },

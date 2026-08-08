@@ -1,46 +1,61 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRightIcon, FlameIcon } from 'lucide-react';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FlameIcon,
+  InfoIcon,
+} from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
 import { useId, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
+  attendanceCopy,
   consistency,
   dailySeries,
   type HabitDay,
+  HEAT_BG,
+  HEAT_TEXT,
   level,
   MODULES,
   monthStats,
+  MONTHS,
+  sameDay,
   streakInfo,
+  WEEKDAYS,
 } from '../../../../data/habit-data';
 
-/** 0 done .. 4 done. Soft emerald ramp, commit-graph style. */
-const HEAT_BG = [
-  'bg-slate-100 dark:bg-slate-800/60',
-  'bg-emerald-100 dark:bg-emerald-950',
-  'bg-emerald-200 dark:bg-emerald-900',
-  'bg-emerald-300 dark:bg-emerald-700',
-  'bg-emerald-400 dark:bg-emerald-500',
-];
+/**
+ * Explains what a number means. Controlled open so a tap works on touch, where
+ * Radix's hover trigger never fires.
+ */
+export function InfoHint({ label, text }: { label: string; text: string }) {
+  const [open, setOpen] = useState(false);
 
-const HEAT_TEXT = [
-  'text-slate-400 dark:text-slate-500',
-  'text-emerald-900 dark:text-emerald-200',
-  'text-emerald-900 dark:text-emerald-100',
-  'text-emerald-950 dark:text-white',
-  'text-emerald-950 dark:text-white',
-];
-
-const WEEKDAYS = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
-const MONTHS = Array.from({ length: 12 }, (_, i) =>
-  new Date(2000, i, 1).toLocaleDateString('id-ID', { month: 'long' }),
-);
-
-const sameDay = (a: Date, b: Date) =>
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
+  return (
+    <Tooltip open={open} onOpenChange={setOpen}>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={`Info: ${label}`}
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex shrink-0 cursor-pointer items-center justify-center self-center leading-none text-slate-400 transition-colors hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none dark:hover:text-slate-200"
+        >
+          <InfoIcon className="size-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-64 leading-relaxed">
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function HabitCalendar({
   selected,
@@ -72,17 +87,23 @@ export function HabitCalendar({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <m.div
-          key={`${year}-${mo}`}
-          initial={reduce ? false : { opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-        >
-          <CardTitle className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            {MONTHS[mo]}{' '}
-            <span className="font-normal text-slate-400">{year}</span>
-          </CardTitle>
-        </m.div>
+        <div className="flex items-center gap-1.5">
+          <m.div
+            key={`${year}-${mo}`}
+            initial={reduce ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <CardTitle className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+              {MONTHS[mo]}{' '}
+              <span className="font-normal text-slate-400">{year}</span>
+            </CardTitle>
+          </m.div>
+          <InfoHint
+            label="Kalender"
+            text="Tiap kotak adalah satu hari, makin hijau berarti makin banyak dari 4 modul yang selesai. Klik satu tanggal untuk melihat catatannya. Tanggal selain hari ini hanya bisa dibaca."
+          />
+        </div>
         <div className="flex gap-1">
           <button
             type="button"
@@ -105,13 +126,14 @@ export function HabitCalendar({
 
       <CardContent>
         <div className="mb-2 grid grid-cols-7 gap-2.5">
-          {WEEKDAYS.map((d, i) => (
-            <span
-              key={i}
-              className="text-center text-xs font-medium text-slate-400"
+          {WEEKDAYS.map((d) => (
+            <abbr
+              key={d}
+              title={d}
+              className="text-center text-xs font-medium text-slate-400 no-underline"
             >
-              {d}
-            </span>
+              {d[0]}
+            </abbr>
           ))}
         </div>
 
@@ -190,13 +212,15 @@ export function HabitStats({
   const stats = useMemo(() => monthStats([...days.values()]), [days]);
   const series = useMemo(() => dailySeries(days), [days]);
   const rate = useMemo(() => consistency(days), [days]);
+  // Walks back from today across the whole history, so paging the calendar to
+  // another month never resets the count.
   const streak = useMemo(() => streakInfo(new Date()), [days]);
+  const copy = useMemo(() => attendanceCopy(new Date()), []);
   const reduce = useReducedMotion();
 
   const average = series.length
     ? Math.round(series.reduce((a, p) => a + p.value, 0) / series.length)
     : 0;
-  const delta = (series.at(-1)?.value ?? 0) - (series.at(-2)?.value ?? 0);
 
   return (
     <Card>
@@ -212,7 +236,7 @@ export function HabitStats({
               new Date(month.getFullYear(), Number(e.target.value), 1),
             )
           }
-          className="cursor-pointer rounded-lg border border-slate-200 bg-transparent px-2 py-1 text-sm font-medium text-slate-600 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:text-slate-300"
+          className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
         >
           {MONTHS.map((n, i) => (
             <option key={n} value={i}>
@@ -227,19 +251,12 @@ export function HabitStats({
           <span className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
             {average}%
           </span>
-          <span
-            className={cn(
-              'text-sm font-semibold tabular-nums',
-              delta > 0 && 'text-emerald-600 dark:text-emerald-400',
-              delta < 0 && 'text-rose-600 dark:text-rose-400',
-              delta === 0 && 'text-slate-400',
-            )}
-          >
-            {delta > 0 ? '+' : ''}
-            {delta}%
-          </span>
-          <span className="text-sm text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             rata-rata harian
+            <InfoHint
+              label="Rata-rata harian"
+              text="Rata-rata modul yang selesai per hari di bulan ini. Empat modul selesai berarti 100% untuk hari itu."
+            />
           </span>
         </div>
 
@@ -269,25 +286,33 @@ export function HabitStats({
             </m.div>
 
             <div className="min-w-0">
-              <p className="text-2xl leading-none font-bold tabular-nums text-slate-900 dark:text-slate-50">
+              <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-slate-900 dark:text-slate-50">
                 {streak.count}{' '}
                 <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   hari beruntun
                 </span>
+                <InfoHint
+                  label="Hari beruntun"
+                  text={`Jumlah hari berturut-turut kamu ${copy.verb.toLowerCase()} tepat waktu. Dihitung dari riwayat harian, bukan per bulan, jadi tidak ikut berubah saat kamu ganti bulan. Terlambat atau tidak mengisi memutus hitungan.`}
+                />
               </p>
-              <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-slate-400">
                 {streak.todayDone
                   ? `Aman untuk hari ini · terpanjang ${streak.best} hari`
                   : streak.atRisk
-                    ? 'Absen sebelum 07:00 agar streak tidak putus'
-                    : 'Absen sebelum 07:00 untuk memulai streak'}
+                    ? `${copy.verb} sebelum ${copy.deadline} agar streak tidak putus`
+                    : `${copy.verb} sebelum ${copy.deadline} untuk memulai streak`}
               </p>
             </div>
           </div>
 
-          <div className="mt-5 mb-3 flex items-baseline justify-between">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <div className="mt-5 mb-3 flex items-baseline justify-between gap-2">
+            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
               Konsistensi
+              <InfoHint
+                label="Konsistensi"
+                text="Porsi hari di bulan ini yang keempat modulnya selesai semua. Hari yang cuma sebagian terisi tidak dihitung di sini."
+              />
             </span>
             <span className="text-sm text-slate-500 dark:text-slate-400">
               {rate.perfect} dari {rate.total} hari penuh
@@ -309,18 +334,29 @@ export function HabitStats({
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-slate-200/70 pt-5 dark:border-slate-800">
-          {MODULES.map((mod) => (
-            <div key={mod.key} className="flex items-center gap-2">
-              <span className={cn('size-2 shrink-0 rounded-full', mod.dot)} />
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                {mod.label}
-              </span>
-              <span className="ml-auto text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
-                {stats[mod.key]}%
-              </span>
-            </div>
-          ))}
+        <div className="mt-6 border-t border-slate-200/70 pt-5 dark:border-slate-800">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Per modul
+            </span>
+            <InfoHint
+              label="Per modul"
+              text="Porsi hari di bulan ini tiap modul tercatat selesai. Kehadiran memakai batas 07:00 pada hari sekolah, dan pada Sabtu serta Minggu memakai Bangun Pagi dengan batas 06:00."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+            {MODULES.map((mod) => (
+              <div key={mod.key} className="flex items-center gap-2">
+                <span className={cn('size-2 shrink-0 rounded-full', mod.dot)} />
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                  {mod.label}
+                </span>
+                <span className="ml-auto text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+                  {stats[mod.key]}%
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -420,6 +456,7 @@ function TrendChart({ series }: { series: { day: number; value: number }[] }) {
         {series.map((p, i) => (
           <rect
             key={p.day}
+            role="presentation"
             x={x(i) - W / series.length / 2}
             y="0"
             width={W / series.length}
