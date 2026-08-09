@@ -75,11 +75,8 @@ export const User = {
       },
       where: {
         role: {
-          notIn: ['teacher', 'homeroom_teacher'],
+          notIn: ADMIN_ROLES,
         },
-        username: {
-          notIn: ['nnez', 'letsfaywme']
-        }
       },
     });
     return data.map((v) => ({
