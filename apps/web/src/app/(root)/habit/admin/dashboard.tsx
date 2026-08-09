@@ -50,6 +50,7 @@ import {
   fmtTime,
   type HabitDay,
   IBADAH,
+  lateLabel,
   level,
   MODULES,
   MONTHS,
@@ -602,7 +603,7 @@ function MemberDetail({
           value={`${row.late}`}
           hint="absen lewat batas"
           tone="sky"
-          info="Berapa kali anggota ini absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Tetap tercatat hadir, tapi streak putus."
+          info="Berapa kali anggota ini absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu — kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00. Tetap tercatat hadir, tapi streak putus."
         />
         <Stat
           icon={ShieldAlertIcon}
@@ -765,7 +766,7 @@ function DayDetail({
         tone="text-sky-500"
         info={
           copy.title === 'Bangun Pagi'
-            ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi dengan batas 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan dan memutus streak.'
+            ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi dengan batas 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00, dan semuanya memutus streak.'
             : 'Absensi dibuka 06:00. Lewat 07:00 tetap tercatat hadir tapi berstatus terlambat, dan streak anggota putus.'
         }
       >
@@ -779,7 +780,7 @@ function DayDetail({
                   : 'text-emerald-600 dark:text-emerald-400',
               )}
             >
-              {day.hadir.late ? copy.late : copy.ok}
+              {day.hadir.late ? lateLabel(new Date(day.hadir.at)) : copy.ok}
             </span>{' '}
             pada {fmtTime(day.hadir.at)}
           </p>
