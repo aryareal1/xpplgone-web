@@ -42,10 +42,10 @@ import {
   load,
   loadMonth,
   type ModuleKey,
-  parseDate,
   type Photo,
-  save,
+  parseDate,
   SPORT_TYPES,
+  save,
 } from '../../../../data/habit-data';
 import { HabitCalendar, HabitStats, InfoHint } from './widgets';
 

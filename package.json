@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "turbo dev --ui=tui",
+    "dev:api": "bun run --cwd apps/api dev",
+    "dev:web": "bun run --cwd apps/web dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "biome check .",
@@ -23,6 +25,7 @@
   },
   "workspaces": [
     "apps/**",
+    "!apps/web/.next/**",
     "packages/**"
   ],
   "overrides": {

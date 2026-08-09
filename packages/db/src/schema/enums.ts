@@ -10,3 +10,5 @@ export const roles = [
   'member',
 ] as const;
 export const islamicOrgs = ['nu', 'mu'] as const;
+
+export const checkinsType = ['school', 'morning'] as const;

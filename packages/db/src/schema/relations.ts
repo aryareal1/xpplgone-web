@@ -1,6 +1,6 @@
 import { defineRelations } from 'drizzle-orm';
 import { googleIdentitiesTable, sessionsTable, usersTable } from './auth';
-import { attendancesTable, habitJournalsTable } from './journal';
+import { checkinsTable, habitJournalsTable } from './journal';
 
 export default defineRelations(
   {
@@ -8,14 +8,14 @@ export default defineRelations(
     sessionsTable,
     googleIdentitiesTable,
     habitJournalsTable,
-    attendancesTable,
+    checkinsTable,
   },
   (r) => ({
     usersTable: {
       sessions: r.many.sessionsTable(),
       googleIdentities: r.many.googleIdentitiesTable(),
       habitJournals: r.many.habitJournalsTable(),
-      attendances: r.many.attendancesTable(),
+      checkins: r.many.checkinsTable(),
     },
     habitJournalsTable: {
       user: r.one.usersTable({
@@ -23,9 +23,9 @@ export default defineRelations(
         to: r.usersTable.id,
       }),
     },
-    attendancesTable: {
+    checkinsTable: {
       user: r.one.usersTable({
-        from: r.attendancesTable.user_id,
+        from: r.checkinsTable.user_id,
         to: r.usersTable.id,
       }),
     },
