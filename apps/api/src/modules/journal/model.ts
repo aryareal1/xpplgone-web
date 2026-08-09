@@ -1,6 +1,6 @@
+import { t } from 'elysia';
 import { r } from '@/lib/schema';
 import type { DeepUnwrap } from '@/lib/utils';
-import { t } from 'elysia';
 
 const Journal = t.Object({
   prayed_dhuha: t.Nullable(t.Boolean()),

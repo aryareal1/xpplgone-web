@@ -17,17 +17,18 @@ import {
 import { cn } from '@/lib/utils';
 import {
   attendanceCopy,
-  consistency,
+  averageScore,
   dailySeries,
-  type HabitDay,
+  EMPTY_MODULE_AVERAGES,
   HEAT_BG,
   HEAT_TEXT,
-  level,
+  type JournalRecap,
   MODULES,
-  monthStats,
   MONTHS,
+  moduleStats,
+  type StreakData,
   sameDay,
-  streakInfo,
+  toLocalDate,
   WEEKDAYS,
 } from '../../../../data/habit-data';
 
@@ -60,13 +61,13 @@ export function InfoHint({ label, text }: { label: string; text: string }) {
 export function HabitCalendar({
   selected,
   month,
-  days,
+  levels,
   onSelect,
   onMonthChange,
 }: {
   selected: Date;
   month: Date;
-  days: Map<number, HabitDay | null>;
+  levels: Map<number, number>;
   onSelect: (d: Date) => void;
   onMonthChange: (d: Date) => void;
 }) {
@@ -154,7 +155,7 @@ export function HabitCalendar({
                 const day = i + 1;
                 const cell = new Date(year, mo, day);
                 const future = cell > today && !sameDay(cell, today);
-                const lvl = level(days.get(day) ?? null);
+                const lvl = levels.get(day) ?? 0;
 
                 return (
                   <button
@@ -202,25 +203,28 @@ export function HabitCalendar({
 
 export function HabitStats({
   month,
-  days,
+  recap,
+  streak,
   onMonthChange,
 }: {
   month: Date;
-  days: Map<number, HabitDay | null>;
+  recap: JournalRecap | null;
+  streak: StreakData | null;
   onMonthChange: (d: Date) => void;
 }) {
-  const stats = useMemo(() => monthStats([...days.values()]), [days]);
-  const series = useMemo(() => dailySeries(days), [days]);
-  const rate = useMemo(() => consistency(days), [days]);
-  // Walks back from today across the whole history, so paging the calendar to
-  // another month never resets the count.
-  const streak = useMemo(() => streakInfo(new Date()), [days]);
+  const scores = useMemo(() => recap?.scores ?? [], [recap]);
+  const series = useMemo(() => dailySeries(scores), [scores]);
+  const stats = moduleStats(recap?.average_score_each ?? EMPTY_MODULE_AVERAGES);
+  const perfect = scores.filter((s) => s.score === 100).length;
   const copy = useMemo(() => attendanceCopy(new Date()), []);
   const reduce = useReducedMotion();
 
-  const average = series.length
-    ? Math.round(series.reduce((a, p) => a + p.value, 0) / series.length)
-    : 0;
+  const average = recap?.average_score ?? averageScore(scores);
+  const count = streak?.streak ?? 0;
+  // Server mengirim tanggal absen terakhir, jadi hari ini aman bila sama.
+  const since = streak?.since ? toLocalDate(streak.since) : null;
+  const todayDone = !!since && sameDay(since, new Date());
+  const atRisk = !todayDone && count > 0;
 
   return (
     <Card>
@@ -266,7 +270,7 @@ export function HabitStats({
           <div
             className={cn(
               'flex items-center gap-3 rounded-xl p-3',
-              streak.count > 0
+              count > 0
                 ? 'bg-linear-to-r from-orange-50 to-amber-50 dark:from-orange-950/40 dark:to-amber-950/30'
                 : 'bg-slate-50 dark:bg-slate-800/40',
             )}
@@ -277,7 +281,7 @@ export function HabitStats({
               transition={{ type: 'spring', stiffness: 400, damping: 22 }}
               className={cn(
                 'flex size-11 shrink-0 items-center justify-center rounded-xl',
-                streak.count > 0
+                count > 0
                   ? 'bg-orange-500 text-white'
                   : 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500',
               )}
@@ -287,19 +291,19 @@ export function HabitStats({
 
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-slate-900 dark:text-slate-50">
-                {streak.count}{' '}
+                {count}{' '}
                 <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   hari beruntun
                 </span>
                 <InfoHint
                   label="Hari beruntun"
-                  text={`Jumlah hari berturut-turut kamu ${copy.verb.toLowerCase()} tepat waktu. Dihitung dari riwayat harian, bukan per bulan, jadi tidak ikut berubah saat kamu ganti bulan. Terlambat atau tidak mengisi memutus hitungan.`}
+                  text={`Jumlah hari berturut-turut kamu ${copy.verb.toLowerCase()}. Dihitung dari seluruh riwayat di server, bukan per bulan, jadi tidak ikut berubah saat kamu ganti bulan. Satu hari terlewat memutus hitungan.`}
                 />
               </p>
               <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-slate-400">
-                {streak.todayDone
-                  ? `Aman untuk hari ini · terpanjang ${streak.best} hari`
-                  : streak.atRisk
+                {todayDone
+                  ? 'Aman untuk hari ini'
+                  : atRisk
                     ? `${copy.verb} sebelum ${copy.deadline} agar streak tidak putus`
                     : `${copy.verb} sebelum ${copy.deadline} untuk memulai streak`}
               </p>
@@ -315,7 +319,7 @@ export function HabitStats({
               />
             </span>
             <span className="text-sm text-slate-500 dark:text-slate-400">
-              {rate.perfect} dari {rate.total} hari penuh
+              {perfect} dari {scores.length} hari penuh
             </span>
           </div>
 
@@ -323,13 +327,13 @@ export function HabitStats({
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
               <m.div
                 initial={{ width: 0 }}
-                animate={{ width: `${rate.percent}%` }}
+                animate={{ width: `${recap?.rate ?? 0}%` }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
                 className="h-full rounded-full bg-linear-to-r from-emerald-400 to-emerald-600"
               />
             </div>
             <span className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-50">
-              {rate.percent}%
+              {recap?.rate ?? 0}%
             </span>
           </div>
         </div>

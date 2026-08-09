@@ -1,8 +1,8 @@
 import Elysia from 'elysia';
 import { toDateStr } from '@/lib/utils';
+import { requireAdmin } from '../auth/middleware';
 import { User } from '../user/service';
 import { JournalModel } from './model';
-import { requireAdmin } from '../auth/middleware';
 import { Journal } from './service';
 
 export const journalAdmin = new Elysia({ tags: ['Journals'] })
@@ -157,7 +157,7 @@ export const journalAdmin = new Elysia({ tags: ['Journals'] })
           detail: {
             summary: "Get All Students' Monthly Journal Stats",
             description:
-              "Get a monthly journal score summary for every student: average score and per-module averages.",
+              'Get a monthly journal score summary for every student: average score and per-module averages.',
           },
           query: JournalModel.studentsQuery,
           response: {

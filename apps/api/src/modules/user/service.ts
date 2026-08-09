@@ -1,7 +1,7 @@
-import { ADMIN_ROLES } from '@/lib/constants';
-import { isUUID } from '@/lib/utils';
 import { db, usersTable } from '@xirpl/db';
 import { sql } from 'drizzle-orm';
+import { ADMIN_ROLES } from '@/lib/constants';
+import { isUUID } from '@/lib/utils';
 import type { UserModel } from './model';
 
 export const User = {

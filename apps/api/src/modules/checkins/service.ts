@@ -1,4 +1,4 @@
-import { db, checkinsTable } from '@xirpl/db';
+import { checkinsTable, db } from '@xirpl/db';
 import { and, asc, between, eq, inArray, sql } from 'drizzle-orm';
 import { toDateStr, wibHour } from '@/lib/utils';
 
@@ -159,7 +159,9 @@ export const Checkins = {
     }
 
     const checkCount = rows.filter((r) => r.checked_in_at).length;
-    const lateCount = rows.filter((r) => isLate(r.checked_in_at, r.type)).length;
+    const lateCount = rows.filter((r) =>
+      isLate(r.checked_in_at, r.type),
+    ).length;
     return {
       month,
       rate: Math.round((checkCount / cap) * 100) || 0,

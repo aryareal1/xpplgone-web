@@ -20,13 +20,11 @@ import {
 import { cn } from '@/lib/utils';
 import { MODULE_HEX } from '../../../../../data/habit-admin';
 import {
-  type HabitDay,
   HEAT_BG,
   HEAT_TEXT,
-  level,
   MODULES,
-  type ModuleKey,
   MONTHS,
+  type ModuleKey,
   sameDay,
   WEEKDAYS,
 } from '../../../../../data/habit-data';
@@ -273,12 +271,12 @@ function Empty({ height, children }: { height: number; children: ReactNode }) {
  */
 export function HeatCalendar({
   month,
-  days,
+  levels,
   selected,
   onSelect,
 }: {
   month: Date;
-  days: Map<number, HabitDay | null>;
+  levels: Map<number, number>;
   selected: number | null;
   onSelect: (day: number) => void;
 }) {
@@ -309,20 +307,19 @@ export function HeatCalendar({
           const day = i + 1;
           const cell = new Date(year, mo, day);
           const future = cell > today && !sameDay(cell, today);
-          const data = days.get(day) ?? null;
-          const lvl = level(data);
+          const lvl = levels.get(day) ?? 0;
 
           return (
             <button
               key={day}
               type="button"
-              disabled={future || !days.has(day)}
+              disabled={future || !levels.has(day)}
               onClick={() => onSelect(day)}
               aria-label={`${day} ${MONTHS[mo]}, ${lvl} dari 4 modul selesai`}
               aria-pressed={selected === day}
               className={cn(
                 'flex aspect-square items-center justify-center rounded-lg text-sm font-medium transition-all',
-                future || !days.has(day)
+                future || !levels.has(day)
                   ? 'cursor-not-allowed text-slate-300 dark:text-slate-700'
                   : cn('cursor-pointer', HEAT_BG[lvl], HEAT_TEXT[lvl]),
                 sameDay(cell, today) &&

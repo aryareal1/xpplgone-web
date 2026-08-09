@@ -23,7 +23,7 @@ export default function LoginPage() {
     const redirect = encodeURIComponent(
       `/callback?redirect=${encodeURIComponent(searchParams.get('r') || '/')}`,
     );
-    window.location.href = `${API_URL}/auth/oauth?redirect_url=${redirect}`;
+    window.location.href = `${API_URL}/auth/oauth2?redirect_to=${redirect}`;
   };
 
   return (

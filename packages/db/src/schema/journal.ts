@@ -1,7 +1,7 @@
 import { pgTable, unique } from 'drizzle-orm/pg-core';
 import { usersTable } from './auth';
-import { id, timestamps } from './helpers';
 import { checkinsType } from './enums';
+import { id, timestamps } from './helpers';
 
 export const habitJournalsTable = pgTable(
   'habit_journals',
@@ -23,7 +23,7 @@ export const habitJournalsTable = pgTable(
     sport_duration: t.interval(),
     sport_proof_url: t.text(),
     sport_skip_reason: t.text(),
-    
+
     did_study: t.boolean(),
     study_about: t.text(),
     study_media: t.text(),

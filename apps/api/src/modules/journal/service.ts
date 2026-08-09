@@ -56,7 +56,10 @@ const monthlySummary = (
   let sum = 0;
   for (let d = 1; d <= cap; d++) {
     const date = `${month}-${String(d).padStart(2, '0')}`;
-    const m = moduleDone(journals.get(date), !!checkins.get(date)?.checked_in_at);
+    const m = moduleDone(
+      journals.get(date),
+      !!checkins.get(date)?.checked_in_at,
+    );
     const score =
       (Number(m.checkins) +
         Number(m.prays) +
@@ -198,7 +201,10 @@ export const Journal = {
           ),
         ),
       db
-        .select({ date: checkinsTable.date, checked_in_at: checkinsTable.checked_in_at })
+        .select({
+          date: checkinsTable.date,
+          checked_in_at: checkinsTable.checked_in_at,
+        })
         .from(checkinsTable)
         .where(
           and(
@@ -239,9 +245,7 @@ export const Journal = {
     return {
       month,
       rate: pct(scores.filter((s) => s.score === 100).length),
-      average_score: Math.round(
-        scores.reduce((a, s) => a + s.score, 0) / n,
-      ),
+      average_score: Math.round(scores.reduce((a, s) => a + s.score, 0) / n),
       average_score_each: {
         checkins: pct(moduleCounts.checkins),
         prays: pct(moduleCounts.prays),
@@ -261,7 +265,9 @@ export const Journal = {
     const ids = students.map((s) => s.id);
     const { first, last } = monthBounds(month);
     const retroStart = toDateStr(
-      new Date(new Date(`${toDateStr()}T00:00:00`).getTime() - (RETRO - 1) * DAY_MS),
+      new Date(
+        new Date(`${toDateStr()}T00:00:00`).getTime() - (RETRO - 1) * DAY_MS,
+      ),
     );
 
     const [jrows, crows, hrows] = await Promise.all([
@@ -342,7 +348,13 @@ export const Journal = {
     const distribution = { '0-39': 0, '40-59': 0, '60-79': 0, '80-100': 0 };
     for (const s of stats) {
       const k =
-        s.score < 40 ? '0-39' : s.score < 60 ? '40-59' : s.score < 80 ? '60-79' : '80-100';
+        s.score < 40
+          ? '0-39'
+          : s.score < 60
+            ? '40-59'
+            : s.score < 80
+              ? '60-79'
+              : '80-100';
       distribution[k]++;
     }
 

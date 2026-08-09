@@ -1,16 +1,16 @@
 import bearer from '@elysia/bearer';
 import jwt from '@elysia/jwt';
-import oauth2 from 'better-elysia-oauth2';
-import Elysia from 'elysia';
-import { apiUrl } from '@/lib/constants';
 import {
   db,
   googleIdentitiesTable,
   sessionsTable,
   usersTable,
 } from '@xirpl/db';
-import { Token } from '@/lib/utils';
+import oauth2 from 'better-elysia-oauth2';
 import { eq } from 'drizzle-orm';
+import Elysia from 'elysia';
+import { apiUrl } from '@/lib/constants';
+import { Token } from '@/lib/utils';
 
 export const Auth = new Elysia({ name: 'Auth.Service' })
   .use(

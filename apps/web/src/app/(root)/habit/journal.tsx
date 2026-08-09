@@ -10,6 +10,7 @@ import {
   NotebookPenIcon,
   TriangleAlertIcon,
   UploadIcon,
+  XIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
@@ -26,69 +27,64 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/hooks/use-user';
+import api, { fileUrl } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { isAdminRole } from '../../../../data/habit-admin';
 import {
   type Answer,
   attendanceCopy,
   attendanceWindow,
-  emptyDay,
+  type Check,
+  checkinAt,
+  checkinType,
+  emptyJournal,
   fmtDate,
+  fmtMonth,
   fmtTime,
-  type HabitDay,
   IBADAH,
+  isLateCheck,
   isWeekend,
+  type Journal,
+  type JournalRecap,
   lateLabel,
-  load,
-  loadMonth,
+  level,
+  levelsByDay,
   type ModuleKey,
-  type Photo,
+  moduleStatus,
+  PROOF_FIELDS,
   parseDate,
   SPORT_TYPES,
-  save,
+  type StreakData,
+  toJournalBody,
 } from '../../../../data/habit-data';
 import { HabitCalendar, HabitStats, InfoHint } from './widgets';
 
 const MAX_PHOTO = 5 * 1024 * 1024;
-const MAX_EDGE = 1280;
+const SAVE_DELAY = 500;
 
-const readPhoto = (file: File) =>
-  new Promise<Photo>((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      reject(new Error('File harus berupa gambar.'));
-      return;
-    }
-    if (file.size > MAX_PHOTO) {
-      reject(new Error('Ukuran foto maksimal 5MB.'));
-      return;
-    }
+// Unggah bukti ke S3 dan kembalikan nama filenya; server yang mengompres.
+async function uploadPhoto(file: File) {
+  if (!file.type.startsWith('image/'))
+    throw new Error('File harus berupa gambar.');
+  if (file.size > MAX_PHOTO) throw new Error('Ukuran foto maksimal 5MB.');
 
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Gagal membaca file.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('Gagal membaca foto.'));
-      img.onload = () => {
-        const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
+  const { data } = await api.s3.upload.post({ file });
+  const filename = data?.data?.filename;
+  if (!filename) throw new Error('Gagal mengunggah foto. Coba lagi.');
+  return filename;
+}
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Browser tidak mendukung kompresi foto.'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve({
-          data: canvas.toDataURL('image/jpeg', 0.72),
-          at: new Date().toISOString(),
-        });
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  });
+// Hapus bukti yang tidak lagi dirujuk jurnal, supaya file di S3 tidak menumpuk.
+function dropProofs(prev: Journal, next: Journal) {
+  for (const field of PROOF_FIELDS) {
+    const gone = prev[field];
+    if (gone && gone !== next[field])
+      api
+        .s3({ filename: gone })
+        .delete()
+        .catch(() => {});
+  }
+}
 
 export default function HabitJournal() {
   const router = useRouter();
@@ -97,14 +93,16 @@ export default function HabitJournal() {
   const reduce = useReducedMotion();
   const { user } = useUser();
 
-  const [mounted, setMounted] = useState(false);
-  const [data, setData] = useState<HabitDay>(emptyDay);
+  const [data, setData] = useState<Journal>(emptyJournal);
   const dataRef = useRef(data);
+  const [check, setCheck] = useState<Check | null>(null);
+  const [recap, setRecap] = useState<JournalRecap | null>(null);
+  const [streak, setStreak] = useState<StreakData | null>(null);
   const [month, setMonth] = useState(() => new Date());
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [version, setVersion] = useState(0);
   const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => setMounted(true), []);
 
   const today = useMemo(() => new Date(), []);
   const todayStr = fmtDate(today);
@@ -112,77 +110,151 @@ export default function HabitJournal() {
   const selected = parseDate(date) ?? today;
   const editable = date === todayStr;
 
+  // Jurnal dan check-in tanggal terpilih; 404 dari server berarti hari kosong.
   useEffect(() => {
-    if (!mounted) return;
-    const loaded = load(date);
-    dataRef.current = loaded;
-    setData(loaded);
-    setError(null);
-    setMonth((prev) => {
-      const d = parseDate(date);
-      return d &&
-        (d.getMonth() !== prev.getMonth() ||
-          d.getFullYear() !== prev.getFullYear())
-        ? new Date(d.getFullYear(), d.getMonth(), 1)
-        : prev;
-    });
-  }, [date, mounted]);
+    let alive = true;
+    Promise.all([api.journals({ date }).get(), api.checkins({ date }).get()])
+      .then(([j, c]) => {
+        if (!alive) return;
+        const loaded = j.data?.data ?? emptyJournal();
+        dataRef.current = loaded;
+        setData(loaded);
+        setCheck(c.data?.data ?? null);
+      })
+      .catch(() => {
+        if (alive) setError('Gagal memuat catatan. Periksa koneksi kamu.');
+      });
+    return () => {
+      alive = false;
+    };
+  }, [date]);
 
-  const days = useMemo(() => {
-    const map = mounted
-      ? loadMonth(month.getFullYear(), month.getMonth(), today)
-      : new Map<number, HabitDay | null>();
+  useEffect(() => {
+    const d = parseDate(date);
+    if (!d) return;
+    setMonth((prev) =>
+      d.getMonth() !== prev.getMonth() || d.getFullYear() !== prev.getFullYear()
+        ? new Date(d.getFullYear(), d.getMonth(), 1)
+        : prev,
+    );
+  }, [date]);
+
+  // Rekap bulan dan streak; `version` naik tiap simpanan sukses supaya segar.
+  useEffect(() => {
+    let alive = true;
+    Promise.all([
+      api.journals.recap.get({ query: { month: fmtMonth(month) } }),
+      api.checkins.streak.get(),
+    ])
+      .then(([r, s]) => {
+        if (!alive) return;
+        setRecap(r.data?.data ?? null);
+        setStreak(s.data?.data ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [month, version]);
+
+  const levels = useMemo(() => {
+    const map = levelsByDay(recap?.scores ?? []);
     if (
       selected.getMonth() === month.getMonth() &&
       selected.getFullYear() === month.getFullYear()
-    ) {
-      map.set(selected.getDate(), data);
-    }
+    )
+      map.set(selected.getDate(), level(data, check));
     return map;
-  }, [month, today, mounted, selected, data]);
+  }, [recap, selected, month, data, check]);
 
   const setDate = (d: Date) =>
     router.replace(`${pathname}?date=${fmtDate(d)}`, { scroll: false });
 
   const gate = attendanceWindow(now);
   const copy = attendanceCopy(selected);
-  const waitingForOpen = editable && !data.hadir && gate === 'closed';
+  const checkedAt = checkinAt(check);
+  const waitingForOpen = editable && !checkedAt && gate === 'closed';
   useEffect(() => {
     if (!waitingForOpen) return;
     const timer = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(timer);
   }, [waitingForOpen]);
 
-  const update = useCallback(
-    (fn: (prev: HabitDay) => HabitDay) => {
-      const next = fn(dataRef.current);
-      if (!save(date, next)) {
-        setError(
-          'Penyimpanan browser penuh. Hapus catatan foto lama untuk melanjutkan.',
-        );
-        return;
-      }
-      dataRef.current = next;
-      setError(null);
-      setData(next);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
     },
-    [date],
+    [],
   );
+
+  // Ubah state lalu kirim seluruh jurnal hari ini, ditunda agar mengetik tidak
+  // memicu satu request per huruf.
+  const update = useCallback((fn: (prev: Journal) => Journal) => {
+    const prev = dataRef.current;
+    const next = fn(prev);
+    dataRef.current = next;
+    setData(next);
+    dropProofs(prev, next);
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      api.journals
+        .put(toJournalBody(next))
+        .then(({ error: failed }) => {
+          setError(failed ? 'Gagal menyimpan ke server. Coba lagi.' : null);
+          if (!failed) setVersion((v) => v + 1);
+        })
+        .catch(() => setError('Gagal menyimpan ke server. Coba lagi.'));
+    }, SAVE_DELAY);
+  }, []);
 
   const pickPhoto = async (
     file: File | undefined,
-    apply: (prev: HabitDay, photo: Photo) => HabitDay,
+    apply: (prev: Journal, filename: string) => Journal,
   ) => {
     if (!file) return;
+    setBusy(true);
     try {
-      const photo = await readPhoto(file);
-      update((prev) => apply(prev, photo));
+      const filename = await uploadPhoto(file);
+      update((prev) => apply(prev, filename));
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setBusy(false);
     }
   };
 
-  if (!mounted) return null;
+  // Absen hari ini lewat endpoint check-in, bukan lewat jurnal.
+  const checkIn = async () => {
+    const clicked = new Date();
+    if (attendanceWindow(clicked) === 'closed') {
+      setNow(clicked);
+      setError('Absensi baru dibuka pukul 06:00.');
+      return;
+    }
+
+    const type = checkinType(clicked);
+    setBusy(true);
+    const { error: failed } = await api.checkins['check-in'].post({ type });
+    setBusy(false);
+    if (failed) {
+      setError('Gagal mencatat kehadiran. Coba lagi.');
+      return;
+    }
+
+    setError(null);
+    setCheck({
+      date,
+      is_checked: true,
+      type,
+      checked_in_at: clicked,
+      checked_out_at: null,
+    });
+    setVersion((v) => v + 1);
+  };
+
+  const status = moduleStatus(data, check);
 
   return (
     <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white transition-colors duration-300 dark:from-slate-950 dark:to-slate-900">
@@ -251,14 +323,14 @@ export default function HabitJournal() {
               title="Ibadah"
               tone="ibadah"
               index={0}
-              info="Centang tiap salat sunah yang kamu kerjakan hari ini. Modul dihitung selesai hanya kalau keempatnya tercentang, dan nilai Ibadah di statistik memakai rata-rata jumlah centang."
-              done={data.ibadah.every((v) => v === true)}
+              info="Centang tiap salat sunah yang kamu kerjakan hari ini. Modul dihitung selesai hanya kalau keempatnya tercentang."
+              done={status.ibadah}
               reduce={reduce}
               first
             >
               <ul className="divide-y divide-slate-200/70 dark:divide-slate-800">
-                {IBADAH.map((name, i) => (
-                  <li key={name}>
+                {IBADAH.map(({ label, field }) => (
+                  <li key={field}>
                     <div
                       className={cn(
                         'flex items-center gap-3 py-3',
@@ -268,33 +340,28 @@ export default function HabitJournal() {
                       )}
                     >
                       <Checkbox
-                        id={`ibadah-${i}`}
-                        checked={data.ibadah[i] === true}
+                        id={field}
+                        checked={data[field] === true}
                         disabled={!editable}
                         onCheckedChange={(checked) =>
                           update((d) => ({
                             ...d,
-                            ibadah: d.ibadah.map((old, j) =>
-                              j === i
-                                ? typeof checked === 'boolean'
-                                  ? checked
-                                  : null
-                                : old,
-                            ),
+                            [field]:
+                              typeof checked === 'boolean' ? checked : null,
                           }))
                         }
                       />
                       <label
-                        htmlFor={`ibadah-${i}`}
+                        htmlFor={field}
                         className={cn(
                           'text-sm font-medium text-slate-700 dark:text-slate-200',
                           editable && 'cursor-pointer',
                         )}
                       >
-                        {name}
+                        {label}
                       </label>
                       <span className="ml-auto">
-                        <Tick show={data.ibadah[i] === true} />
+                        <Tick show={data[field] === true} />
                       </span>
                     </div>
                   </li>
@@ -312,26 +379,24 @@ export default function HabitJournal() {
                   ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00, dan semuanya memutus streak.'
                   : 'Tekan tombolnya untuk absen. Dibuka 06:00, dan lewat 07:00 tercatat terlambat sehingga streak putus. Waktu absen ikut tersimpan.'
               }
-              done={!!data.hadir}
+              done={status.hadir}
               reduce={reduce}
             >
-              {data.hadir && (
+              {checkedAt && (
                 <p className="mb-4 text-sm">
                   <span
                     className={cn(
                       'font-bold',
-                      data.hadir.late
+                      isLateCheck(check)
                         ? 'text-amber-600 dark:text-amber-400'
                         : 'text-emerald-600 dark:text-emerald-400',
                     )}
                   >
-                    {data.hadir.late
-                      ? lateLabel(new Date(data.hadir.at))
-                      : copy.ok}
+                    {isLateCheck(check) ? lateLabel(checkedAt) : copy.ok}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400">
                     {' '}
-                    pada {fmtTime(data.hadir.at)}
+                    pada {fmtTime(checkedAt)}
                   </span>
                 </p>
               )}
@@ -339,26 +404,11 @@ export default function HabitJournal() {
                 variant="special"
                 size="lg"
                 pointer
-                disabled={!editable || !!data.hadir || gate === 'closed'}
+                disabled={!editable || !!checkedAt || gate === 'closed' || busy}
                 className="w-full sm:w-auto sm:min-w-48"
-                onClick={() => {
-                  const clicked = new Date();
-                  const state = attendanceWindow(clicked);
-                  if (state === 'closed') {
-                    setNow(clicked);
-                    setError('Absensi baru dibuka pukul 06:00.');
-                    return;
-                  }
-                  update((d) => ({
-                    ...d,
-                    hadir: {
-                      at: clicked.toISOString(),
-                      late: state === 'late',
-                    },
-                  }));
-                }}
+                onClick={checkIn}
               >
-                {data.hadir ? (
+                {checkedAt ? (
                   <>
                     <CheckIcon /> {copy.doneAction}
                   </>
@@ -370,7 +420,7 @@ export default function HabitJournal() {
                   copy.action
                 )}
               </Button>
-              {!data.hadir && editable && (
+              {!checkedAt && editable && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {gate === 'closed'
                     ? 'Absensi dibuka pukul 06:00.'
@@ -379,7 +429,7 @@ export default function HabitJournal() {
                       : `Lewat ${copy.deadline}, ${copy.noun} akan tercatat ${lateLabel(now).toLowerCase()}.`}
                 </p>
               )}
-              {!data.hadir && !editable && (
+              {!checkedAt && !editable && (
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Tidak ada catatan {copy.noun} pada tanggal ini.
                 </p>
@@ -391,46 +441,40 @@ export default function HabitJournal() {
               title="Olahraga"
               tone="olahraga"
               index={2}
-              info="Jawab Ya lalu isi jenis, durasi, dan foto bukti. Modul selesai setelah fotonya masuk. Jawab Tidak juga sah selesai asal alasannya diisi."
-              done={
-                data.olahraga.done === true
-                  ? !!data.olahraga.photo
-                  : data.olahraga.done === false &&
-                    data.olahraga.alt.trim().length > 0
-              }
+              info="Jawab Ya lalu isi jenis, durasi, dan foto bukti. Modul dihitung selesai setelah fotonya masuk. Jawab Tidak tetap dicatat beserta alasannya, tapi tidak menambah skor hari itu."
+              done={status.olahraga}
               reduce={reduce}
             >
               <Question
                 text="Apakah kamu berolahraga hari ini?"
-                value={data.olahraga.done}
+                value={data.did_sport}
                 disabled={!editable}
                 onChange={(done) =>
                   update((d) => ({
                     ...d,
-                    olahraga:
-                      done === true
-                        ? { ...d.olahraga, done, alt: '' }
-                        : {
-                            done,
-                            sport: '',
-                            minutes: null,
-                            photo: null,
-                            alt: '',
-                          },
+                    did_sport: done,
+                    sport_skip_reason: null,
+                    ...(done === true
+                      ? {}
+                      : {
+                          sport_type: null,
+                          sport_duration: null,
+                          sport_proof_url: null,
+                        }),
                   }))
                 }
               />
 
-              <Reveal show={data.olahraga.done === true} reduce={reduce}>
+              <Reveal show={data.did_sport === true} reduce={reduce}>
                 <div className="grid gap-4 pt-4 sm:grid-cols-2">
                   <Field label="Olahraga apa yang kamu lakukan?">
                     <select
-                      value={data.olahraga.sport}
+                      value={data.sport_type ?? ''}
                       disabled={!editable}
                       onChange={(e) =>
                         update((d) => ({
                           ...d,
-                          olahraga: { ...d.olahraga, sport: e.target.value },
+                          sport_type: e.target.value || null,
                         }))
                       }
                       className="h-9 w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -461,16 +505,13 @@ export default function HabitJournal() {
                       inputMode="numeric"
                       placeholder="30"
                       disabled={!editable}
-                      value={data.olahraga.minutes ?? ''}
+                      value={data.sport_duration ?? ''}
                       onChange={(e) =>
                         update((d) => ({
                           ...d,
-                          olahraga: {
-                            ...d.olahraga,
-                            minutes: e.target.value
-                              ? Number(e.target.value)
-                              : null,
-                          },
+                          sport_duration: e.target.value
+                            ? Number(e.target.value)
+                            : null,
                         }))
                       }
                       className="h-9"
@@ -480,33 +521,36 @@ export default function HabitJournal() {
                   <div className="sm:col-span-2">
                     <PhotoBox
                       label="Mana bukti olahragamu?"
-                      photo={data.olahraga.photo}
-                      disabled={!editable}
+                      photo={data.sport_proof_url}
+                      disabled={!editable || busy}
                       onPick={(file) =>
-                        pickPhoto(file, (d, photo) => ({
+                        pickPhoto(file, (d, sport_proof_url) => ({
                           ...d,
-                          olahraga: { ...d.olahraga, photo },
+                          sport_proof_url,
                         }))
+                      }
+                      onClear={() =>
+                        update((d) => ({ ...d, sport_proof_url: null }))
                       }
                     />
                   </div>
                 </div>
               </Reveal>
 
-              <Reveal show={data.olahraga.done === false} reduce={reduce}>
+              <Reveal show={data.did_sport === false} reduce={reduce}>
                 <div className="pt-4">
                   <Field
                     label="Kenapa kamu tidak berolahraga?"
-                    done={data.olahraga.alt.trim().length > 0}
+                    done={!!data.sport_skip_reason?.trim()}
                   >
                     <Input
                       placeholder="Contoh: saya capek"
                       disabled={!editable}
-                      value={data.olahraga.alt}
+                      value={data.sport_skip_reason ?? ''}
                       onChange={(e) =>
                         update((d) => ({
                           ...d,
-                          olahraga: { ...d.olahraga, alt: e.target.value },
+                          sport_skip_reason: e.target.value,
                         }))
                       }
                       className="h-9"
@@ -521,50 +565,41 @@ export default function HabitJournal() {
               title="Gemar Belajar"
               tone="belajar"
               index={3}
-              info="Jawab Ya lalu isi topik, media, dan dua foto bukti (mulai dan selesai). Modul baru selesai setelah keduanya terupload. Jawab Tidak sah selesai asal alasannya diisi."
-              done={
-                data.belajar.done === true
-                  ? !!data.belajar.start && !!data.belajar.end
-                  : data.belajar.done === false &&
-                    data.belajar.alt.trim().length > 0
-              }
+              info="Jawab Ya lalu isi topik, media, dan dua foto bukti (mulai dan selesai). Modul baru dihitung selesai setelah keduanya terupload. Jawab Tidak tetap dicatat beserta alasannya, tapi tidak menambah skor hari itu."
+              done={status.belajar}
               reduce={reduce}
               last
             >
               <Question
                 text="Apakah kamu belajar hari ini?"
-                value={data.belajar.done}
+                value={data.did_study}
                 disabled={!editable}
                 onChange={(done) =>
                   update((d) => ({
                     ...d,
-                    belajar:
-                      done === true
-                        ? { ...d.belajar, done, alt: '' }
-                        : {
-                            done,
-                            start: null,
-                            end: null,
-                            alt: '',
-                            topic: '',
-                            media: '',
-                          },
+                    did_study: done,
+                    study_skip_reason: null,
+                    ...(done === true
+                      ? {}
+                      : {
+                          study_about: null,
+                          study_media: null,
+                          study_start_proof_url: null,
+                          study_end_proof_url: null,
+                        }),
                   }))
                 }
               />
 
-              <Reveal show={data.belajar.done === true} reduce={reduce}>
+              <Reveal show={data.did_study === true} reduce={reduce}>
                 <div className="grid gap-4 pt-4 sm:grid-cols-2">
                   <Field label="Kamu belajar tentang apa?">
                     <Input
                       placeholder="Contoh: struktur data - linked list"
                       disabled={!editable}
-                      value={data.belajar.topic}
+                      value={data.study_about ?? ''}
                       onChange={(e) =>
-                        update((d) => ({
-                          ...d,
-                          belajar: { ...d.belajar, topic: e.target.value },
-                        }))
+                        update((d) => ({ ...d, study_about: e.target.value }))
                       }
                       className="h-9"
                     />
@@ -574,12 +609,9 @@ export default function HabitJournal() {
                     <Input
                       placeholder="Contoh: buku paket, video YouTube"
                       disabled={!editable}
-                      value={data.belajar.media}
+                      value={data.study_media ?? ''}
                       onChange={(e) =>
-                        update((d) => ({
-                          ...d,
-                          belajar: { ...d.belajar, media: e.target.value },
-                        }))
+                        update((d) => ({ ...d, study_media: e.target.value }))
                       }
                       className="h-9"
                     />
@@ -587,31 +619,45 @@ export default function HabitJournal() {
 
                   <PhotoBox
                     label="Mana bukti kamu mulai belajar?"
-                    photo={data.belajar.start}
-                    disabled={!editable}
+                    photo={data.study_start_proof_url}
+                    disabled={!editable || busy}
                     onPick={(file) =>
-                      pickPhoto(file, (d, start) => ({
+                      pickPhoto(file, (d, study_start_proof_url) => ({
                         ...d,
-                        belajar: { ...d.belajar, start },
+                        study_start_proof_url,
+                      }))
+                    }
+                    onClear={() =>
+                      update((d) => ({
+                        ...d,
+                        study_start_proof_url: null,
+                        study_end_proof_url: null,
                       }))
                     }
                   />
                   <PhotoBox
                     label="Mana bukti kamu selesai belajar?"
-                    photo={data.belajar.end}
-                    disabled={!editable || !data.belajar.start}
+                    photo={data.study_end_proof_url}
+                    disabled={!editable || busy || !data.study_start_proof_url}
                     lockedHint={
-                      data.belajar.start ? undefined : 'Upload bukti mulai dulu'
+                      data.study_start_proof_url
+                        ? undefined
+                        : 'Upload bukti mulai dulu'
                     }
                     onPick={(file) =>
-                      pickPhoto(file, (d, end) => ({
+                      pickPhoto(file, (d, study_end_proof_url) => ({
                         ...d,
-                        belajar: { ...d.belajar, end },
+                        study_end_proof_url,
                       }))
+                    }
+                    onClear={() =>
+                      update((d) => ({ ...d, study_end_proof_url: null }))
                     }
                   />
 
-                  {!(data.belajar.start && data.belajar.end) && (
+                  {!(
+                    data.study_start_proof_url && data.study_end_proof_url
+                  ) && (
                     <p className="text-xs text-slate-500 sm:col-span-2 dark:text-slate-400">
                       Status belajar baru tercatat setelah kedua bukti
                       terupload.
@@ -620,20 +666,20 @@ export default function HabitJournal() {
                 </div>
               </Reveal>
 
-              <Reveal show={data.belajar.done === false} reduce={reduce}>
+              <Reveal show={data.did_study === false} reduce={reduce}>
                 <div className="pt-4">
                   <Field
                     label="Kenapa kamu tidak belajar?"
-                    done={data.belajar.alt.trim().length > 0}
+                    done={!!data.study_skip_reason?.trim()}
                   >
                     <Input
                       placeholder="Contoh: saya tertidur"
                       disabled={!editable}
-                      value={data.belajar.alt}
+                      value={data.study_skip_reason ?? ''}
                       onChange={(e) =>
                         update((d) => ({
                           ...d,
-                          belajar: { ...d.belajar, alt: e.target.value },
+                          study_skip_reason: e.target.value,
                         }))
                       }
                       className="h-9"
@@ -648,11 +694,16 @@ export default function HabitJournal() {
             <HabitCalendar
               selected={selected}
               month={month}
-              days={days}
+              levels={levels}
               onSelect={setDate}
               onMonthChange={setMonth}
             />
-            <HabitStats month={month} days={days} onMonthChange={setMonth} />
+            <HabitStats
+              month={month}
+              recap={recap}
+              streak={streak}
+              onMonthChange={setMonth}
+            />
           </aside>
         </div>
       </div>
@@ -868,12 +919,14 @@ function PhotoBox({
   disabled,
   lockedHint,
   onPick,
+  onClear,
 }: {
   label: string;
-  photo: Photo | null;
+  photo: string | null;
   disabled: boolean;
   lockedHint?: string;
   onPick: (file: File | undefined) => void;
+  onClear: () => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -881,48 +934,56 @@ function PhotoBox({
         {label}
         <Tick show={!!photo} />
       </span>
-      <label
-        className={cn(
-          'relative flex min-h-36 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50/60 transition-colors dark:border-slate-700 dark:bg-slate-800/40',
-          disabled
-            ? 'cursor-not-allowed opacity-70'
-            : 'cursor-pointer hover:border-slate-400 hover:bg-slate-100/60 dark:hover:border-slate-600',
+      <div className="relative">
+        {photo && !disabled && (
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label={`Hapus ${label.toLowerCase()}`}
+            className="absolute top-2 right-2 z-10 grid size-8 cursor-pointer place-items-center rounded-full bg-slate-900/70 text-white transition-colors hover:bg-slate-900/90 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+          >
+            <XIcon className="size-4" />
+          </button>
         )}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          disabled={disabled}
-          onChange={(e) => onPick(e.target.files?.[0])}
-        />
-        {photo ? (
-          <img
-            src={photo.data}
-            alt={label}
-            className="h-36 w-full object-cover"
+        <label
+          className={cn(
+            'relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50/60 transition-colors dark:border-slate-700 dark:bg-slate-800/40',
+            !photo && 'min-h-36',
+            disabled
+              ? 'cursor-not-allowed opacity-70'
+              : 'cursor-pointer hover:border-slate-400 hover:bg-slate-100/60 dark:hover:border-slate-600',
+          )}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={disabled}
+            onChange={(e) => onPick(e.target.files?.[0])}
           />
-        ) : (
-          <>
-            {lockedHint ? (
-              <LockIcon className="mb-2 size-6 text-slate-400" />
-            ) : (
-              <UploadIcon className="mb-2 size-6 text-slate-400" />
-            )}
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {lockedHint ?? 'Klik untuk upload'}
-            </p>
-            {!lockedHint && (
-              <p className="text-xs text-slate-400">Otomatis dikompres</p>
-            )}
-          </>
-        )}
-      </label>
-      {photo && (
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          Diupload {fmtTime(photo.at)}
-        </span>
-      )}
+          {photo ? (
+            <img
+              src={fileUrl(photo)}
+              alt={label}
+              className="h-auto max-h-[70vh] w-full object-contain"
+            />
+          ) : (
+            <>
+              {lockedHint ? (
+                <LockIcon className="mb-2 size-6 text-slate-400" />
+              ) : (
+                <UploadIcon className="mb-2 size-6 text-slate-400" />
+              )}
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {lockedHint ?? 'Klik untuk upload'}
+              </p>
+              {!lockedHint && (
+                <p className="text-xs text-slate-400">Otomatis dikompres</p>
+              )}
+            </>
+          )}
+        </label>
+      </div>
     </div>
   );
 }

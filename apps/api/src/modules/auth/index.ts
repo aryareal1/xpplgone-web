@@ -1,8 +1,8 @@
 import Elysia from 'elysia';
-import { Auth } from './service';
 import { cookieDefaults, webUrl } from '@/lib/constants';
 import { requireAuth } from './middleware';
 import { AuthModel } from './model';
+import { Auth } from './service';
 
 export const auth = new Elysia({
   tags: ['Authentication'],
@@ -141,7 +141,7 @@ export const auth = new Elysia({
     {
       detail: {
         summary: 'Get Current User',
-        description: 'Return the authenticated user\'s profile information.',
+        description: "Return the authenticated user's profile information.",
       },
       response: {
         200: AuthModel.meResponse,

@@ -112,4 +112,4 @@ export const journal = new Elysia({ prefix: '/journals', tags: ['Journals'] })
         200: JournalModel.recapResponse,
       },
     },
-  )
+  );

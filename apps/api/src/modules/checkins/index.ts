@@ -67,7 +67,7 @@ export const checkins = new Elysia({ prefix: '/checkins', tags: ['Checkins'] })
       response: {
         200: CheckinsModel.checkOutResponse,
         400: CheckinsModel.checkOutNotCheckedIn,
-        409: CheckinsModel.checkOutAlready
+        409: CheckinsModel.checkOutAlready,
       },
     },
   )
@@ -179,4 +179,3 @@ export const checkins = new Elysia({ prefix: '/checkins', tags: ['Checkins'] })
       },
     },
   );
-

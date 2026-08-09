@@ -1,7 +1,7 @@
 import Elysia from 'elysia';
+import { requireDev } from '../auth/middleware';
 import { UserModel } from './model';
 import { User } from './service';
-import { requireDev } from '../auth/middleware';
 
 export const user = new Elysia({ prefix: '/users', tags: ['Users'] })
   // GET /users
@@ -19,7 +19,8 @@ export const user = new Elysia({ prefix: '/users', tags: ['Users'] })
       query: UserModel.getAllQuery,
       detail: {
         summary: 'Get All Users',
-        description: 'Get a list of all users, optionally filtered by a search query.',
+        description:
+          'Get a list of all users, optionally filtered by a search query.',
       },
       response: {
         200: UserModel.getAllResponse,
@@ -95,7 +96,8 @@ export const user = new Elysia({ prefix: '/users', tags: ['Users'] })
       body: UserModel.addUserBody,
       detail: {
         summary: 'Add User',
-        description: 'Create a new user with the provided data. Requires a developer role.',
+        description:
+          'Create a new user with the provided data. Requires a developer role.',
       },
       response: {
         201: UserModel.addUserResponse,

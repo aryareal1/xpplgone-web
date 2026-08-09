@@ -1,33 +1,34 @@
-export type Photo = { data: string; at: string };
+import type { CheckinsModel, JournalModel } from '@xirpl/api/schema';
 
-export type Answer = boolean | null;
+export type Journal = JournalModel['Journal'];
+export type JournalBody = JournalModel['upsertBody'];
 
-export type HabitDay = {
-  ibadah: Answer[];
-  hadir: { at: string; late: boolean } | null;
-  olahraga: {
-    done: Answer;
-    sport: string;
-    minutes: number | null;
-    photo: Photo | null;
-    alt: string;
-  };
-  belajar: {
-    done: Answer;
-    start: Photo | null;
-    end: Photo | null;
-    alt: string;
-    topic: string;
-    media: string;
-  };
-};
+/** Tiga keadaan jawaban modul: ya, tidak, belum dijawab. */
+export type Answer = Journal['did_sport'];
+export type JournalRecap = JournalModel['recapResponse']['data'];
+export type JournalStats = JournalModel['statsResponse']['data'];
+export type ModuleAverages = JournalRecap['average_score_each'];
+export type DayScore = JournalRecap['scores'][number];
 
+export type Check = CheckinsModel['Check'];
+export type CheckinType = CheckinsModel['checkInBody']['type'];
+export type CheckinRecap = CheckinsModel['recapResponse']['data'];
+export type StreakData = CheckinsModel['streakResponse']['data'];
+
+/** Kolom salat, urut sesuai tampilan. `field` menunjuk kolom jurnal di server. */
 export const IBADAH = [
-  'Salat Duha',
-  'Salat Tahajud',
-  'Salat Qobliyah Subuh',
-  "Salat Ba'diah Isya",
-] as const;
+  { label: 'Salat Duha', field: 'prayed_dhuha' },
+  { label: 'Salat Tahajud', field: 'prayed_tahajud' },
+  { label: 'Salat Qobliyah Subuh', field: 'prayed_qabliyah_fajr' },
+  { label: "Salat Ba'diah Isya", field: 'prayed_badiyah_isya' },
+] as const satisfies readonly { label: string; field: keyof Journal }[];
+
+/** Kolom yang isinya nama file di S3, dipakai untuk membersihkan bukti lepas. */
+export const PROOF_FIELDS = [
+  'sport_proof_url',
+  'study_start_proof_url',
+  'study_end_proof_url',
+] as const satisfies readonly (keyof Journal)[];
 
 export const SPORT_TYPES = [
   'Lari',
@@ -73,8 +74,29 @@ export const NIGHT_HOUR = 18;
 
 export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 
+// Tipe check-in mengikuti hari: Sabtu dan Minggu jadi bangun pagi.
+export const checkinType = (d: Date): CheckinType =>
+  isWeekend(d) ? 'morning' : 'school';
+
+/** Batas telat per tipe, angka yang sama dipakai server. */
+export const LATE_HOURS: Record<CheckinType, number> = {
+  school: LATE_HOUR,
+  morning: WAKE_HOUR,
+};
+
+// Jam absen sebagai Date, null kalau hari itu belum tercatat.
+export const checkinAt = (c: Check | null) =>
+  c?.checked_in_at ? new Date(c.checked_in_at) : null;
+
+// Absen lewat batas jam tipenya, dasar label terlambat/kesiangan.
+export function isLateCheck(c: Check | null) {
+  const at = checkinAt(c);
+  return !!at && !!c && at.getHours() >= LATE_HOURS[c.type ?? checkinType(at)];
+}
+
 export type AttendanceWindow = 'closed' | 'open' | 'late';
 
+// Status jendela absen saat ini, dipakai untuk mengunci tombol.
 export const attendanceWindow = (d: Date): AttendanceWindow =>
   isWeekend(d)
     ? d.getHours() < WAKE_HOUR
@@ -86,12 +108,9 @@ export const attendanceWindow = (d: Date): AttendanceWindow =>
         ? 'open'
         : 'late';
 
-export const isLate = (d: Date) => attendanceWindow(d) === 'late';
-
 /**
  * Label untuk catatan yang sudah lewat batas, dihitung dari jam check-in.
  * Bangun pagi bertingkat: kesiangan, lalu kesorean (15:00), lalu kemalaman (18:00).
- * `late` di data tetap satu boolean — tingkat ini cuma soal teks.
  */
 export const lateLabel = (at: Date) =>
   !isWeekend(at)
@@ -102,7 +121,7 @@ export const lateLabel = (at: Date) =>
         ? 'Kesorean'
         : 'Kesiangan';
 
-/** Satu sumber teks untuk jurnal, statistik, dan dasbor admin. */
+// Satu sumber teks untuk jurnal, statistik, dan dasbor admin.
 export function attendanceCopy(d: Date) {
   const w = isWeekend(d);
   return {
@@ -117,27 +136,43 @@ export function attendanceCopy(d: Date) {
   };
 }
 
+/** `api` memetakan modul UI ke nama rata-rata yang dipakai server. */
 export const MODULES = [
   {
     key: 'ibadah',
     label: 'Ibadah',
+    api: 'prays',
     dot: 'bg-violet-500',
     text: 'text-violet-500',
   },
-  { key: 'hadir', label: 'Kehadiran', dot: 'bg-sky-500', text: 'text-sky-500' },
+  {
+    key: 'hadir',
+    label: 'Kehadiran',
+    api: 'checkins',
+    dot: 'bg-sky-500',
+    text: 'text-sky-500',
+  },
   {
     key: 'olahraga',
     label: 'Olahraga',
+    api: 'sports',
     dot: 'bg-emerald-500',
     text: 'text-emerald-500',
   },
   {
     key: 'belajar',
     label: 'Belajar',
+    api: 'studies',
     dot: 'bg-amber-500',
     text: 'text-amber-500',
   },
-] as const;
+] as const satisfies readonly {
+  key: string;
+  label: string;
+  api: keyof ModuleAverages;
+  dot: string;
+  text: string;
+}[];
 
 export type ModuleKey = (typeof MODULES)[number]['key'];
 
@@ -178,25 +213,39 @@ export const sameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 
-export const emptyDay = (): HabitDay => ({
-  ibadah: IBADAH.map(() => null),
-  hadir: null,
-  olahraga: { done: null, sport: '', minutes: null, photo: null, alt: '' },
-  belajar: {
-    done: null,
-    start: null,
-    end: null,
-    alt: '',
-    topic: '',
-    media: '',
-  },
+/** Jurnal kosong: tiap kolom `null`, sama seperti baris yang belum diisi. */
+export const emptyJournal = (): Journal => ({
+  prayed_dhuha: null,
+  prayed_tahajud: null,
+  prayed_qabliyah_fajr: null,
+  prayed_badiyah_isya: null,
+
+  did_sport: null,
+  sport_type: null,
+  sport_duration: null,
+  sport_proof_url: null,
+  sport_skip_reason: null,
+
+  did_study: null,
+  study_about: null,
+  study_media: null,
+  study_start_proof_url: null,
+  study_end_proof_url: null,
+  study_skip_reason: null,
 });
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** `YYYY-MM-DD`, bentuk yang diminta dan dikembalikan tiap endpoint. */
 export const fmtDate = (d: Date) =>
-  `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+/** `YYYY-MM`, bentuk tiap query `month`. */
+export const fmtMonth = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 
 export function parseDate(s?: string | null): Date | null {
-  const m = s?.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  const m = s?.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (!m) return null;
   const [, y, mo, d] = m;
   const dt = new Date(Number(y), Number(mo) - 1, Number(d));
@@ -205,148 +254,79 @@ export function parseDate(s?: string | null): Date | null {
     : null;
 }
 
-export const storageKey = (date: string) => `habit-${date}`;
-
-export const fmtTime = (iso: string) =>
-  `${new Date(iso).toLocaleTimeString('id-ID', {
+export const fmtTime = (at: Date | string) =>
+  `${new Date(at).toLocaleTimeString('id-ID', {
     hour: '2-digit',
     minute: '2-digit',
   })} WIB`;
 
-export const moduleStatus = (d: HabitDay) => ({
-  ibadah: d.ibadah.every((v) => v === true),
-  hadir: !!d.hadir,
-  olahraga:
-    d.olahraga.done === true
-      ? !!d.olahraga.photo
-      : d.olahraga.done === false && d.olahraga.alt.trim().length > 0,
+// `YYYY-MM-DD` dari server jadi Date lokal, jam nol.
+export const toLocalDate = (date: string) => new Date(`${date}T00:00:00`);
+
+// Ambil tanggal (1..31) dari `YYYY-MM-DD`.
+export const dayOf = (date: string) => Number(date.slice(8, 10));
+
+/**
+ * Modul selesai, cerminan `moduleDone` di server: bukti wajib ada, alasan saja
+ * tidak menaikkan skor.
+ */
+export const moduleStatus = (j: Journal | null, c: Check | null) => ({
+  ibadah: !!j && IBADAH.every(({ field }) => j[field] === true),
+  hadir: !!c?.checked_in_at,
+  olahraga: j?.did_sport === true && !!j.sport_proof_url,
   belajar:
-    d.belajar.done === true
-      ? !!d.belajar.start && !!d.belajar.end
-      : d.belajar.done === false && d.belajar.alt.trim().length > 0,
+    j?.did_study === true &&
+    !!j.study_start_proof_url &&
+    !!j.study_end_proof_url,
 });
 
-export const level = (d: HabitDay | null) =>
-  d ? Object.values(moduleStatus(d)).filter(Boolean).length : 0;
+export const level = (j: Journal | null, c: Check | null) =>
+  Object.values(moduleStatus(j, c)).filter(Boolean).length;
 
-const pct = (v: number, n: number) => Math.round((v / n) * 100);
+/** Skor server 0..100 jadi 0..4 modul, satuan yang dipakai peta panas. */
+export const scoreLevel = (score: number) => Math.round(score / 25);
 
-export function monthStats(days: (HabitDay | null)[]) {
-  const n = days.length || 1;
-  const sum = { ibadah: 0, hadir: 0, olahraga: 0, belajar: 0 };
-
-  for (const d of days) {
-    if (!d) continue;
-    sum.ibadah += d.ibadah.filter((v) => v === true).length / d.ibadah.length;
-    const m = moduleStatus(d);
-    if (m.hadir) sum.hadir++;
-    if (m.olahraga) sum.olahraga++;
-    if (m.belajar) sum.belajar++;
-  }
-
-  return {
-    ibadah: pct(sum.ibadah, n),
-    hadir: pct(sum.hadir, n),
-    olahraga: pct(sum.olahraga, n),
-    belajar: pct(sum.belajar, n),
-  };
-}
-
-export function dailySeries(days: Map<number, HabitDay | null>) {
-  return [...days.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([day, data]) => ({ day, value: pct(level(data), 4) }));
-}
-
-export function consistency(days: Map<number, HabitDay | null>) {
-  const total = days.size;
-  let perfect = 0;
-  for (const data of days.values()) if (level(data) === 4) perfect++;
-  return { percent: pct(perfect, total || 1), perfect, total };
-}
-
-const DAY_MS = 86400000;
-const STREAK_WINDOW = 400;
-
-export function streakFrom(done: boolean[]) {
-  const todayDone = done[0] ?? false;
-
-  let count = 0;
-  for (let i = todayDone ? 0 : 1; i < done.length; i++) {
-    if (!done[i]) break;
-    count++;
-  }
-
-  let best = 0;
-  let run = 0;
-  for (const ok of done) {
-    run = ok ? run + 1 : 0;
-    best = Math.max(best, run);
-  }
-
-  return { count, best, todayDone, atRisk: !todayDone && count > 0 };
-}
-
-export function streakInfo(today: Date) {
-  const midnight = +new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-  const done: boolean[] = [];
-
-  for (let i = 0; i < STREAK_WINDOW; i++) {
-    const key = fmtDate(new Date(midnight - i * DAY_MS));
-    const hadir = load(key).hadir;
-    done.push(!!hadir && !hadir.late);
-  }
-
-  return streakFrom(done);
-}
-
-export function load(date: string): HabitDay {
-  if (typeof window === 'undefined') return emptyDay();
-  const raw = localStorage.getItem(storageKey(date));
-  if (!raw) return emptyDay();
-  try {
-    const saved = JSON.parse(raw) as Partial<HabitDay>;
-    const base = emptyDay();
-    return {
-      ...base,
-      ...saved,
-      olahraga: { ...base.olahraga, ...saved.olahraga },
-      belajar: { ...base.belajar, ...saved.belajar },
-    };
-  } catch {
-    return emptyDay();
-  }
-}
-
-export function loadMonth(year: number, month: number, today: Date) {
-  const last = new Date(year, month + 1, 0).getDate();
-  const midnight = +new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-  const cap = Math.min(
-    last,
-    Math.round((midnight - +new Date(year, month, 1)) / 86400000) + 1,
-  );
-  const out = new Map<number, HabitDay | null>();
-
-  for (let d = 1; d <= cap; d++) {
-    const date = fmtDate(new Date(year, month, d));
-    out.set(d, localStorage.getItem(storageKey(date)) ? load(date) : null);
-  }
+// Ubah `scores` dari recap jadi peta tanggal -> level, untuk grid kalender.
+export function levelsByDay(scores: DayScore[]) {
+  const out = new Map<number, number>();
+  for (const s of scores) out.set(dayOf(s.date), scoreLevel(s.score));
   return out;
 }
 
-export function save(date: string, data: HabitDay) {
-  try {
-    localStorage.setItem(storageKey(date), JSON.stringify(data));
-    return true;
-  } catch {
-    return false;
-  }
-}
+// Ubah `scores` jadi seri grafik harian.
+export const dailySeries = (scores: DayScore[]) =>
+  scores.map((s) => ({ day: dayOf(s.date), value: s.score }));
+
+export const averageScore = (scores: DayScore[]) =>
+  scores.length
+    ? Math.round(scores.reduce((a, s) => a + s.score, 0) / scores.length)
+    : 0;
+
+// Petakan rata-rata per modul dari nama server ke kunci yang dipakai UI.
+export const moduleStats = (
+  avg: ModuleAverages,
+): Record<ModuleKey, number> => ({
+  ibadah: avg.prays,
+  hadir: avg.checkins,
+  olahraga: avg.sports,
+  belajar: avg.studies,
+});
+
+export const EMPTY_MODULE_AVERAGES: ModuleAverages = {
+  checkins: 0,
+  prays: 0,
+  sports: 0,
+  studies: 0,
+};
+
+const blank = (s: string) => (s.trim() ? s.trim() : null);
+
+/** Rapikan input teks sebelum dikirim, string kosong disimpan sebagai `null`. */
+export const toJournalBody = (j: Journal): JournalBody => ({
+  ...j,
+  sport_type: j.sport_type && blank(j.sport_type),
+  sport_skip_reason: j.sport_skip_reason && blank(j.sport_skip_reason),
+  study_about: j.study_about && blank(j.study_about),
+  study_media: j.study_media && blank(j.study_media),
+  study_skip_reason: j.study_skip_reason && blank(j.study_skip_reason),
+});

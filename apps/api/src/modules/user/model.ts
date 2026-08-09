@@ -1,6 +1,6 @@
 import { t } from 'elysia';
-import type { DeepUnwrap } from '@/lib/utils';
 import { r } from '@/lib/schema';
+import type { DeepUnwrap } from '@/lib/utils';
 
 const enums = {
   gender: t.Enum({

@@ -41,6 +41,13 @@ const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
 const api = treaty<App>(API_URL, {
   fetch: { credentials: 'include' },
   fetcher,
+  // Eden mengubah string mirip tanggal jadi Date, termasuk kolom `date` yang
+  // di skema bertipe string. Dimatikan supaya respons sama dengan tipenya.
+  parseDate: false,
 });
+
+// Nama file dari POST /s3/upload jadi URL yang bisa dipakai <img src>.
+export const fileUrl = (name: string) =>
+  /^https?:\/\//.test(name) ? name : `${API_URL}/s3/${name}`;
 
 export default api;

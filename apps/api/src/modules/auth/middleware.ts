@@ -1,7 +1,7 @@
 import Elysia from 'elysia';
-import { Auth } from './service';
 import { ADMIN_ROLES, DEV_ROLE } from '@/lib/constants';
 import { AuthModel } from './model';
+import { Auth } from './service';
 
 export const authResolver = new Elysia({ name: 'Auth.authResolver' })
   .use(Auth)

@@ -13,8 +13,7 @@ import {
   SearchIcon,
   ShieldAlertIcon,
   TrendingUpIcon,
-  TriangleAlertIcon,
-  UsersIcon,
+  type UsersIcon,
 } from 'lucide-react';
 import { motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
@@ -31,29 +30,33 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/hooks/use-user';
-import api from '@/lib/api';
+import { fileUrl } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
-  classDaily,
-  classSummary,
-  FALLBACK_MEMBERS,
+  type ClassSummary,
+  fetchClassSummary,
+  fetchMemberDay,
+  fetchMemberDetail,
+  fetchMemberRows,
+  fetchMembers,
   isAdminRole,
-  IS_SIMULATED,
   type Member,
-  type MemberSummary,
-  scoreBuckets,
-  summarize,
+  type MemberDay,
+  type MemberDetail as MemberDetailData,
+  type MemberRow,
 } from '../../../../../data/habit-admin';
 import {
   attendanceCopy,
-  dailySeries,
+  checkinAt,
+  fmtDate,
   fmtTime,
-  type HabitDay,
   IBADAH,
+  isLateCheck,
   lateLabel,
   level,
   MODULES,
   MONTHS,
+  toLocalDate,
 } from '../../../../../data/habit-data';
 import { InfoHint } from '../widgets';
 import {
@@ -64,12 +67,11 @@ import {
   TrendArea,
 } from './charts';
 
-type SortKey = 'score' | 'name' | 'streak' | 'late' | 'absent';
+type SortKey = 'score' | 'name' | 'late' | 'absent';
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: 'score', label: 'Skor tertinggi' },
   { key: 'name', label: 'Nama A–Z' },
-  { key: 'streak', label: 'Streak terpanjang' },
   { key: 'late', label: 'Paling sering telat' },
   { key: 'absent', label: 'Paling sering absen' },
 ];
@@ -82,6 +84,8 @@ export default function AdminDashboard() {
   const reduce = useReducedMotion();
 
   const [members, setMembers] = useState<Member[] | null>(null);
+  const [rows, setRows] = useState<MemberRow[]>([]);
+  const [klass, setKlass] = useState<ClassSummary | null>(null);
   const [month, setMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -95,34 +99,35 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!allowed) return;
     let alive = true;
-    api.users.students
-      .get()
-      .then(({ data }) => {
-        if (!alive) return;
-        const list = data?.data ?? [];
-        setMembers(list.length ? list : FALLBACK_MEMBERS);
-      })
-      .catch(() => {
-        if (alive) setMembers(FALLBACK_MEMBERS);
-      });
+    fetchMembers()
+      .then((list) => alive && setMembers(list))
+      .catch(() => alive && setMembers([]));
     return () => {
       alive = false;
     };
   }, [allowed]);
 
-  const today = useMemo(() => new Date(), []);
+  useEffect(() => {
+    if (!allowed) return;
+    let alive = true;
+    fetchClassSummary(month)
+      .then((s) => alive && setKlass(s))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [allowed, month]);
 
-  const rows = useMemo(
-    () =>
-      (members ?? []).map((mb) =>
-        summarize(mb, month.getFullYear(), month.getMonth(), today),
-      ),
-    [members, month, today],
-  );
-
-  const klass = useMemo(() => classSummary(rows), [rows]);
-  const trend = useMemo(() => classDaily(rows), [rows]);
-  const buckets = useMemo(() => scoreBuckets(rows), [rows]);
+  useEffect(() => {
+    if (!members?.length) return;
+    let alive = true;
+    fetchMemberRows(members, month)
+      .then((list) => alive && setRows(list))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [members, month]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -138,8 +143,6 @@ export default function AdminDashboard() {
       switch (sort) {
         case 'name':
           return a.member.name.localeCompare(b.member.name);
-        case 'streak':
-          return b.streak.count - a.streak.count;
         case 'late':
           return b.late - a.late;
         case 'absent':
@@ -151,8 +154,8 @@ export default function AdminDashboard() {
   }, [rows, query, sort]);
 
   const selected = useMemo(
-    () => rows.find((r) => r.member.id === selectedId) ?? null,
-    [rows, selectedId],
+    () => members?.find((mb) => mb.id === selectedId) ?? null,
+    [members, selectedId],
   );
 
   const setMember = (id: string | null) =>
@@ -202,7 +205,7 @@ export default function AdminDashboard() {
               Dasbor Kebiasaan
             </h1>
             <p className="mt-1.5 text-base text-slate-500 dark:text-slate-400">
-              {klass.members} anggota ·{' '}
+              {members?.length ?? 0} anggota ·{' '}
               {month.toLocaleDateString('id-ID', {
                 month: 'long',
                 year: 'numeric',
@@ -250,20 +253,11 @@ export default function AdminDashboard() {
           </div>
         </m.header>
 
-        {IS_SIMULATED && (
-          <p className="mb-6 flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-            <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" />
-            Catatan kebiasaan masih tersimpan di browser masing-masing anggota,
-            jadi angka di halaman ini adalah simulasi sampai tabel habit di
-            server tersedia.
-          </p>
-        )}
-
-        {!members ? (
+        {!members || !klass ? (
           <DashboardSkeleton bare />
         ) : selected ? (
           <MemberDetail
-            row={selected}
+            member={selected}
             month={month}
             onBack={() => setMember(null)}
           />
@@ -290,9 +284,9 @@ export default function AdminDashboard() {
                 icon={ClockIcon}
                 label="Keterlambatan"
                 value={`${klass.late}`}
-                hint={`${klass.absent} kali tanpa absen`}
+                hint="absen lewat batas bulan ini"
                 tone="sky"
-                info="Total kejadian absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Angka kecil di bawahnya adalah hari yang sama sekali tidak diabsen."
+                info="Total kejadian absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu."
               />
               <Stat
                 icon={ShieldAlertIcon}
@@ -319,7 +313,7 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <TrendArea series={trend} />
+                  <TrendArea series={klass.trend} />
                 </CardContent>
               </Card>
 
@@ -351,7 +345,7 @@ export default function AdminDashboard() {
                   <CardDescription>Jumlah anggota per rentang.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DistributionBars data={buckets} />
+                  <DistributionBars data={klass.buckets} />
                 </CardContent>
               </Card>
 
@@ -381,7 +375,7 @@ export default function AdminDashboard() {
                     Daftar anggota
                     <InfoHint
                       label="Daftar anggota"
-                      text="Kolom Ibadah sampai Belajar adalah persen hari modul itu selesai bulan ini. Hadir memakai batas 07:00 pada hari sekolah dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu. Streak dihitung mundur dari hari ini, bukan per bulan."
+                      text="Kolom Ibadah sampai Belajar adalah persen hari modul itu selesai bulan ini. Hadir memakai batas 07:00 pada hari sekolah dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu."
                     />
                   </CardTitle>
                   <CardDescription>
@@ -430,7 +424,7 @@ function MemberTable({
   rows,
   onPick,
 }: {
-  rows: MemberSummary[];
+  rows: MemberRow[];
   onPick: (id: string) => void;
 }) {
   if (!rows.length)
@@ -451,8 +445,8 @@ function MemberTable({
             <th className="px-4 py-2.5">Hadir</th>
             <th className="px-4 py-2.5">Olahraga</th>
             <th className="px-4 py-2.5">Belajar</th>
-            <th className="px-4 py-2.5">Streak</th>
             <th className="px-4 py-2.5">Telat</th>
+            <th className="px-4 py-2.5">Absen</th>
           </tr>
         </thead>
         <tbody>
@@ -493,21 +487,11 @@ function MemberTable({
                   {r.modules[mod.key]}%
                 </td>
               ))}
-              <td className="px-4 py-3">
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1 font-semibold tabular-nums',
-                    r.streak.count > 0
-                      ? 'text-orange-600 dark:text-orange-400'
-                      : 'text-slate-400',
-                  )}
-                >
-                  <FlameIcon className="size-3.5" />
-                  {r.streak.count}
-                </span>
-              </td>
               <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">
                 {r.late}
+              </td>
+              <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">
+                {r.absent}
               </td>
             </tr>
           ))}
@@ -529,24 +513,45 @@ const scoreBar = (v: number) =>
 // ---------------------------------------------------------------------------
 
 function MemberDetail({
-  row,
+  member,
   month,
   onBack,
 }: {
-  row: MemberSummary;
+  member: Member;
   month: Date;
   onBack: () => void;
 }) {
   const reduce = useReducedMotion();
+  const [row, setRow] = useState<MemberDetailData | null>(null);
   const [day, setDay] = useState<number | null>(null);
-  const series = useMemo(() => dailySeries(row.days), [row.days]);
-  const detail = day === null ? null : (row.days.get(day) ?? null);
+  const [detail, setDetail] = useState<MemberDay | null>(null);
 
-  // Switching member or month resets the inspected day, otherwise it points at
-  // a cell that no longer exists in the grid being shown.
   useEffect(() => {
+    let alive = true;
+    setRow(null);
     setDay(null);
-  }, [row.member.id, month]);
+    fetchMemberDetail(member.id, month)
+      .then((d) => alive && setRow(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [member.id, month]);
+
+  // Rincian per tanggal diambil terpisah supaya rekap bulan tetap ringan.
+  useEffect(() => {
+    if (day === null) return setDetail(null);
+    let alive = true;
+    const date = fmtDate(new Date(month.getFullYear(), month.getMonth(), day));
+    fetchMemberDay(member.id, date)
+      .then((d) => alive && setDetail(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [member.id, month, day]);
+
+  if (!row) return <DashboardSkeleton bare />;
 
   return (
     <m.div
@@ -564,10 +569,10 @@ function MemberDetail({
             <ArrowLeftIcon className="size-4" /> Semua anggota
           </button>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {row.member.name}
+            {member.name}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            NIS {row.member.nis} · {row.logged} dari {row.tracked} hari terisi
+            NIS {member.nis} · {row.logged} dari {row.tracked} hari terisi
           </p>
         </div>
         <div className="flex items-baseline gap-2">
@@ -584,10 +589,17 @@ function MemberDetail({
         <Stat
           icon={FlameIcon}
           label="Streak berjalan"
-          value={`${row.streak.count}`}
-          hint={`terpanjang ${row.streak.best} hari`}
+          value={`${row.streak}`}
+          hint={
+            row.since
+              ? `terakhir absen ${toLocalDate(row.since).toLocaleDateString(
+                  'id-ID',
+                  { day: 'numeric', month: 'long' },
+                )}`
+              : 'belum pernah absen'
+          }
           tone="orange"
-          info="Rentetan hari berturut-turut anggota ini hadir tepat waktu, dihitung mundur dari hari ini lintas bulan. Terlambat atau tidak absen memutusnya."
+          info="Rentetan hari berturut-turut anggota ini punya catatan absen, dihitung mundur dari absen terakhir lintas bulan. Satu hari terlewat memutusnya."
         />
         <Stat
           icon={CalendarDaysIcon}
@@ -603,7 +615,7 @@ function MemberDetail({
           value={`${row.late}`}
           hint="absen lewat batas"
           tone="sky"
-          info="Berapa kali anggota ini absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu — kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00. Tetap tercatat hadir, tapi streak putus."
+          info="Berapa kali anggota ini absen lewat batas bulan ini. Batasnya 07:00 pada hari sekolah, dan 06:00 untuk Bangun Pagi di Sabtu dan Minggu — kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00. Tetap tercatat hadir."
         />
         <Stat
           icon={ShieldAlertIcon}
@@ -630,7 +642,7 @@ function MemberDetail({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <TrendArea series={series} name={row.member.name} />
+            <TrendArea series={row.series} name={member.name} />
           </CardContent>
         </Card>
 
@@ -681,7 +693,7 @@ function MemberDetail({
           <CardContent>
             <HeatCalendar
               month={month}
-              days={row.days}
+              levels={row.levels}
               selected={day}
               onSelect={setDay}
             />
@@ -723,7 +735,7 @@ function DayDetail({
   picked,
   date,
 }: {
-  day: HabitDay | null;
+  day: MemberDay | null;
   picked: boolean;
   date: Date | null;
 }) {
@@ -741,19 +753,21 @@ function DayDetail({
       </p>
     );
 
+  const { journal, check } = day;
   const copy = attendanceCopy(date ?? new Date());
+  const checkedAt = checkinAt(check);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <DetailBlock icon={MoonStarIcon} title="Ibadah" tone="text-violet-500">
         <ul className="space-y-1.5">
-          {IBADAH.map((name, i) => (
-            <li key={name} className="flex items-center justify-between gap-2">
+          {IBADAH.map(({ label, field }) => (
+            <li key={field} className="flex items-center justify-between gap-2">
               <span className="text-sm text-slate-600 dark:text-slate-300">
-                {name}
+                {label}
               </span>
-              <Pill ok={day.ibadah[i] === true}>
-                {day.ibadah[i] === true ? 'Selesai' : 'Belum'}
+              <Pill ok={journal?.[field] === true}>
+                {journal?.[field] === true ? 'Selesai' : 'Belum'}
               </Pill>
             </li>
           ))}
@@ -770,19 +784,19 @@ function DayDetail({
             : 'Absensi dibuka 06:00. Lewat 07:00 tetap tercatat hadir tapi berstatus terlambat, dan streak anggota putus.'
         }
       >
-        {day.hadir ? (
+        {checkedAt ? (
           <p className="text-sm text-slate-600 dark:text-slate-300">
             <span
               className={cn(
                 'font-bold',
-                day.hadir.late
+                isLateCheck(check)
                   ? 'text-amber-600 dark:text-amber-400'
                   : 'text-emerald-600 dark:text-emerald-400',
               )}
             >
-              {day.hadir.late ? lateLabel(new Date(day.hadir.at)) : copy.ok}
+              {isLateCheck(check) ? lateLabel(checkedAt) : copy.ok}
             </span>{' '}
-            pada {fmtTime(day.hadir.at)}
+            pada {fmtTime(checkedAt)}
           </p>
         ) : (
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -792,24 +806,25 @@ function DayDetail({
       </DetailBlock>
 
       <DetailBlock icon={DumbbellIcon} title="Olahraga" tone="text-emerald-500">
-        {day.olahraga.done === true ? (
+        {journal?.did_sport === true ? (
           <dl className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
-            <Row label="Jenis" value={day.olahraga.sport || '—'} />
+            <Row label="Jenis" value={journal.sport_type || '—'} />
             <Row
               label="Durasi"
               value={
-                day.olahraga.minutes ? `${day.olahraga.minutes} menit` : '—'
+                journal.sport_duration ? `${journal.sport_duration} menit` : '—'
               }
             />
-            <Row
-              label="Bukti"
-              value={day.olahraga.photo ? 'Terupload' : 'Belum ada'}
+            <Proofs
+              items={[{ label: 'Bukti', url: journal.sport_proof_url }]}
             />
           </dl>
-        ) : day.olahraga.done === false ? (
+        ) : journal?.did_sport === false ? (
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Tidak olahraga
-            {day.olahraga.alt ? ` — ${day.olahraga.alt}` : '.'}
+            {journal.sport_skip_reason
+              ? ` — ${journal.sport_skip_reason}`
+              : '.'}
           </p>
         ) : (
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -823,25 +838,23 @@ function DayDetail({
         title="Gemar Belajar"
         tone="text-amber-500"
       >
-        {day.belajar.done === true ? (
+        {journal?.did_study === true ? (
           <dl className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
-            <Row label="Topik" value={day.belajar.topic || '—'} />
-            <Row label="Media" value={day.belajar.media || '—'} />
-            <Row
-              label="Bukti"
-              value={
-                day.belajar.start && day.belajar.end
-                  ? 'Mulai & selesai'
-                  : day.belajar.start
-                    ? 'Baru bukti mulai'
-                    : 'Belum ada'
-              }
+            <Row label="Topik" value={journal.study_about || '—'} />
+            <Row label="Media" value={journal.study_media || '—'} />
+            <Proofs
+              items={[
+                { label: 'Mulai', url: journal.study_start_proof_url },
+                { label: 'Selesai', url: journal.study_end_proof_url },
+              ]}
             />
           </dl>
-        ) : day.belajar.done === false ? (
+        ) : journal?.did_study === false ? (
           <p className="text-sm text-slate-600 dark:text-slate-300">
             Tidak belajar
-            {day.belajar.alt ? ` — ${day.belajar.alt}` : '.'}
+            {journal.study_skip_reason
+              ? ` — ${journal.study_skip_reason}`
+              : '.'}
           </p>
         ) : (
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -851,9 +864,39 @@ function DayDetail({
       </DetailBlock>
 
       <p className="text-xs text-slate-500 sm:col-span-2 dark:text-slate-400">
-        {level(day)} dari 4 modul selesai pada tanggal ini.
+        {level(journal, check)} dari 4 modul selesai pada tanggal ini.
       </p>
     </div>
+  );
+}
+
+// Bukti foto disimpan sebagai key S3, jadi tautannya dibangun dari fileUrl.
+function Proofs({ items }: { items: { label: string; url: string | null }[] }) {
+  return (
+    <>
+      {items.map((it) =>
+        it.url ? (
+          <div
+            key={it.label}
+            className="flex items-center justify-between gap-3"
+          >
+            <dt className="text-slate-500 dark:text-slate-400">{it.label}</dt>
+            <dd>
+              <a
+                href={fileUrl(it.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-sky-600 underline-offset-2 hover:underline dark:text-sky-400"
+              >
+                Lihat foto
+              </a>
+            </dd>
+          </div>
+        ) : (
+          <Row key={it.label} label={it.label} value="Belum ada" />
+        ),
+      )}
+    </>
   );
 }
 
