@@ -11,7 +11,7 @@
   },
   "exports": {
     ".": "./src/app.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema.d.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

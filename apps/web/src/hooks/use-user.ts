@@ -1,11 +1,11 @@
-import type { User } from '@xirpl/api/schema';
+import type { AuthModel } from '@xirpl/api/schema';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 
 export function useUser() {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<AuthModel['meResponse']['data']>();
 
   useEffect(() => {
     api.me.get().then(({ data }) => {
