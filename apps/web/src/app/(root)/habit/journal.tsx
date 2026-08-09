@@ -38,6 +38,7 @@ import {
   type HabitDay,
   IBADAH,
   isWeekend,
+  lateLabel,
   load,
   loadMonth,
   type ModuleKey,
@@ -308,7 +309,7 @@ export default function HabitJournal() {
               index={1}
               info={
                 isWeekend(selected)
-                  ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan dan memutus streak.'
+                  ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00, dan semuanya memutus streak.'
                   : 'Tekan tombolnya untuk absen. Dibuka 06:00, dan lewat 07:00 tercatat terlambat sehingga streak putus. Waktu absen ikut tersimpan.'
               }
               done={!!data.hadir}
@@ -324,7 +325,9 @@ export default function HabitJournal() {
                         : 'text-emerald-600 dark:text-emerald-400',
                     )}
                   >
-                    {data.hadir.late ? copy.late : copy.ok}
+                    {data.hadir.late
+                      ? lateLabel(new Date(data.hadir.at))
+                      : copy.ok}
                   </span>
                   <span className="text-slate-500 dark:text-slate-400">
                     {' '}
@@ -373,7 +376,7 @@ export default function HabitJournal() {
                     ? 'Absensi dibuka pukul 06:00.'
                     : gate === 'open'
                       ? `${copy.verb} sebelum ${copy.deadline} supaya tidak tercatat ${copy.late.toLowerCase()}.`
-                      : `Lewat ${copy.deadline}, ${copy.noun} akan tercatat ${copy.late.toLowerCase()}.`}
+                      : `Lewat ${copy.deadline}, ${copy.noun} akan tercatat ${lateLabel(now).toLowerCase()}.`}
                 </p>
               )}
               {!data.hadir && !editable && (

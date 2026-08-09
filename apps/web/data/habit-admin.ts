@@ -1,5 +1,6 @@
 import type { Student } from '@xirpl/api/schema';
 import {
+  AFTERNOON_HOUR,
   emptyDay,
   fmtDate,
   type HabitDay,
@@ -9,6 +10,7 @@ import {
   level,
   type ModuleKey,
   monthStats,
+  NIGHT_HOUR,
   OPEN_HOUR,
   SPORT_TYPES,
   streakFrom,
@@ -137,7 +139,11 @@ export function memberDay(id: string, date: Date): HabitDay | null {
     at.setHours(
       weekend
         ? late
-          ? WAKE_HOUR
+          ? // Sebar ke kesiangan/kesorean/kemalaman supaya label bertingkat kelihatan.
+            pick(
+              [WAKE_HOUR, AFTERNOON_HOUR, NIGHT_HOUR],
+              rand(id, key, 'jam-bangun'),
+            )
           : WAKE_HOUR - 1
         : late
           ? LATE_HOUR

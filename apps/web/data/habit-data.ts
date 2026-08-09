@@ -67,6 +67,10 @@ export const LATE_HOUR = 7;
 /** Weekend: modul kehadiran berganti jadi bangun pagi, batas 06:00. */
 export const WAKE_HOUR = 6;
 
+/** Bangun pagi lewat jam ini tercatat kesorean, lalu kemalaman. */
+export const AFTERNOON_HOUR = 15;
+export const NIGHT_HOUR = 18;
+
 export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 
 export type AttendanceWindow = 'closed' | 'open' | 'late';
@@ -83,6 +87,20 @@ export const attendanceWindow = (d: Date): AttendanceWindow =>
         : 'late';
 
 export const isLate = (d: Date) => attendanceWindow(d) === 'late';
+
+/**
+ * Label untuk catatan yang sudah lewat batas, dihitung dari jam check-in.
+ * Bangun pagi bertingkat: kesiangan, lalu kesorean (15:00), lalu kemalaman (18:00).
+ * `late` di data tetap satu boolean — tingkat ini cuma soal teks.
+ */
+export const lateLabel = (at: Date) =>
+  !isWeekend(at)
+    ? 'Terlambat'
+    : at.getHours() >= NIGHT_HOUR
+      ? 'Kemalaman'
+      : at.getHours() >= AFTERNOON_HOUR
+        ? 'Kesorean'
+        : 'Kesiangan';
 
 /** Satu sumber teks untuk jurnal, statistik, dan dasbor admin. */
 export function attendanceCopy(d: Date) {
