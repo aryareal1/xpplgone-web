@@ -1,6 +1,7 @@
 import { pgTable, unique } from 'drizzle-orm/pg-core';
 import { usersTable } from './auth';
 import { id, timestamps } from './helpers';
+import { checkinsType } from './enums';
 
 export const habitJournalsTable = pgTable(
   'habit_journals',
@@ -21,20 +22,22 @@ export const habitJournalsTable = pgTable(
     sport_type: t.text(),
     sport_duration: t.interval(),
     sport_proof_url: t.text(),
-
+    sport_skip_reason: t.text(),
+    
     did_study: t.boolean(),
     study_about: t.text(),
     study_media: t.text(),
     study_start_proof_url: t.text(),
     study_end_proof_url: t.text(),
+    study_skip_reason: t.text(),
 
     ...timestamps,
   }),
   (c) => [unique().on(c.user_id, c.date)],
 );
 
-export const attendancesTable = pgTable(
-  'attendances',
+export const checkinsTable = pgTable(
+  'checkins',
   (t) => ({
     id,
     user_id: t
@@ -42,8 +45,9 @@ export const attendancesTable = pgTable(
       .references(() => usersTable.id)
       .notNull(),
     date: t.date().notNull(),
+    type: t.text({ enum: checkinsType }).notNull(),
     checked_in_at: t.timestamp({ withTimezone: true }).notNull(),
-    checked_out_at: t.timestamp({ withTimezone: true }).notNull(),
+    checked_out_at: t.timestamp({ withTimezone: true }),
     ...timestamps,
   }),
   (c) => [unique().on(c.user_id, c.date)],

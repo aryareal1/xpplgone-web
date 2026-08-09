@@ -26,6 +26,7 @@
     "@xirpl/shared": "workspace:*",
     "better-elysia-oauth2": "^1.0.0",
     "drizzle-orm": "^1.0.0-rc.4",
-    "elysia": "^1.4.29"
+    "elysia": "^1.4.29",
+    "sharp": "^0.35.3"
   }
 }

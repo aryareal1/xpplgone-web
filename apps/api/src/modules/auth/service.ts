@@ -1,18 +1,18 @@
-import crypto from 'node:crypto';
 import bearer from '@elysia/bearer';
 import jwt from '@elysia/jwt';
+import oauth2 from 'better-elysia-oauth2';
+import Elysia from 'elysia';
+import { apiUrl } from '@/lib/constants';
 import {
   db,
   googleIdentitiesTable,
   sessionsTable,
   usersTable,
 } from '@xirpl/db';
-import oauth2 from 'better-elysia-oauth2';
+import { Token } from '@/lib/utils';
 import { eq } from 'drizzle-orm';
-import Elysia from 'elysia';
-import { apiUrl } from '../utils';
 
-export default new Elysia({ name: 'auth' })
+export const Auth = new Elysia({ name: 'Auth.Service' })
   .use(
     oauth2({
       Google: [
@@ -55,7 +55,7 @@ export default new Elysia({ name: 'auth' })
           });
           if (!user) return null;
 
-          const refreshToken = generateToken();
+          const refreshToken = Token.generate();
 
           const session = (
             await db
@@ -64,7 +64,7 @@ export default new Elysia({ name: 'auth' })
                 user_id: user.id,
                 user_agent: headers['user-agent'],
                 ip: server?.requestIP(request)?.address,
-                refresh_token_hash: hashToken(refreshToken),
+                refresh_token_hash: Token.hash(refreshToken),
               })
               .returning({ id: sessionsTable.id })
           )[0];
@@ -75,7 +75,6 @@ export default new Elysia({ name: 'auth' })
             iat: true,
             exp: Math.floor(Date.now() / 1000 + 60 * 60),
           });
-
           await db
             .update(usersTable)
             .set({
@@ -86,13 +85,6 @@ export default new Elysia({ name: 'auth' })
             })
             .where(eq(usersTable.id, user.id));
 
-          // Upsert google identity for the user.
-          const existingIdentity =
-            await db.query.googleIdentitiesTable.findFirst({
-              where: { user_id: user.id },
-              columns: { id: true },
-            });
-
           const identityData = {
             user_id: user.id,
             sub: openId?.sub as string,
@@ -100,19 +92,17 @@ export default new Elysia({ name: 'auth' })
             given_name: openId?.given_name as string,
             family_name: openId?.family_name as string,
             picture: openId?.picture as string,
-            access_token_hash: hashToken(tokens.accessToken()),
+            access_token_hash: Token.hash(tokens.accessToken()),
             access_token_expired_at: tokens.accessTokenExpiresAt(),
-            refresh_token_hash: hashToken(tokens.refreshToken()),
+            refresh_token_hash: Token.hash(tokens.refreshToken()),
           };
-
-          if (existingIdentity) {
-            await db
-              .update(googleIdentitiesTable)
-              .set(identityData)
-              .where(eq(googleIdentitiesTable.id, existingIdentity.id));
-          } else {
-            await db.insert(googleIdentitiesTable).values(identityData);
-          }
+          await db
+            .insert(googleIdentitiesTable)
+            .values(identityData)
+            .onConflictDoUpdate({
+              target: googleIdentitiesTable.sub,
+              set: identityData,
+            });
 
           return {
             refreshToken,
@@ -141,7 +131,7 @@ export default new Elysia({ name: 'auth' })
       async refresh(refreshToken: string) {
         const session = await db.query.sessionsTable.findFirst({
           where: {
-            refresh_token_hash: hashToken(refreshToken),
+            refresh_token_hash: Token.hash(refreshToken),
           },
           columns: {
             id: true,
@@ -178,47 +168,4 @@ export default new Elysia({ name: 'auth' })
       },
     },
   }))
-  .resolve(async ({ auth, bearer, cookie }) => {
-    const accessToken = (bearer || cookie.access_token?.value) as
-      | string
-      | undefined;
-    if (!accessToken) return { auth: { ...auth, session: null, user: null } };
-
-    const data = await auth.resolveToken(accessToken);
-    if (!data) return { auth: { ...auth, session: null, user: null } };
-
-    const refreshToken = cookie.refresh_token?.value as string | undefined;
-
-    return {
-      auth: {
-        ...auth,
-        user: data.user,
-        session: {
-          ...data.session,
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        },
-      },
-    };
-  })
-  .as('global');
-
-/**
- * Generate a random 64 bytes base64url token.
- * @returns
- */
-export function generateToken() {
-  return crypto.randomBytes(64).toString('base64url');
-}
-
-/**
- * Hash a token using HMAC SHA256.
- * @param token
- * @returns
- */
-export function hashToken(token: string) {
-  return crypto
-    .createHmac('sha256', process.env.HASH_SECRET!)
-    .update(token)
-    .digest('hex');
-}
+  .as('scoped');

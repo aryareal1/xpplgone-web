@@ -8,7 +8,7 @@ export function useUser() {
   const [user, setUser] = useState<User>();
 
   useEffect(() => {
-    api.auth.me.get().then(({ data }) => {
+    api.me.get().then(({ data }) => {
       const u = data?.data;
       if (u) {
         setUser(u);
