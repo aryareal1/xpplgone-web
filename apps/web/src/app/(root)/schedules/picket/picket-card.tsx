@@ -2,8 +2,8 @@
 
 import { CalendarDays, ShieldCheck, User2Icon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@fe/components/ui/card';
+import { cn } from '@fe/lib/utils';
 import type { PicketDay } from '../../../../../data/picket-schedule';
 
 interface PicketCardProps {

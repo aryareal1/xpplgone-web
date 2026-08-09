@@ -1,6 +1,6 @@
 import { checkinsTable, db } from '@xirpl/db';
 import { and, asc, between, eq, inArray, sql } from 'drizzle-orm';
-import { toDateStr, wibHour } from '@/lib/utils';
+import { toDateStr, wibHour } from '@be/lib/utils';
 
 const DAY_MS = 86_400_000;
 

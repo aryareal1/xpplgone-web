@@ -1,4 +1,3 @@
-import type { Readable } from 'node:stream';
 import Elysia from 'elysia';
 import { requireAuth } from '../auth/middleware';
 import { StorageModel } from './model';
@@ -14,9 +13,10 @@ export const storage = new Elysia({ prefix: '/s3', tags: ['Storage'] })
         return new Response(`File not found: ${params.filename}`, {
           status: 404,
         });
-      return new Response(file.body as Readable, {
-        headers: { 'content-type': file.contentType },
-      });
+      return new Response(
+        file.body!.transformToWebStream(),
+        { headers: { 'content-type': file.contentType } },
+      );
     },
     {
       detail: {

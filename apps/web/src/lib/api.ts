@@ -1,5 +1,5 @@
 import { treaty } from '@elysia/eden';
-import type { App } from '@xirpl/api';
+import type { App } from '@be/app';
 
 export const API_URL =
   process.env.NODE_ENV === 'production'

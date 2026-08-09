@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { type MouseEvent, memo, useMemo, type WheelEvent } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 import type { Album } from '../../../../data/albums';
 
 interface AlbumModalProps {

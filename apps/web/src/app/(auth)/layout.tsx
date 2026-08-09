@@ -5,7 +5,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_NAME } from '@xirpl/shared';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { type ReactNode, Suspense } from 'react';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@fe/components/theme-provider';
 
 export const metadata: Metadata = {
   title: `Login | ${SITE_NAME}`,

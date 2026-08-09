@@ -4,8 +4,8 @@ import { SITE_NAME } from '@xirpl/shared';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage } from '@fe/components/ui/avatar';
+import { Button } from '@fe/components/ui/button';
 import {
   Card,
   CardContent,
@@ -13,8 +13,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { API_URL } from '@/lib/api';
+} from '@fe/components/ui/card';
+import { API_URL } from '@fe/lib/api';
 
 export default function LoginPage() {
   const searchParams = useSearchParams();

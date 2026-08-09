@@ -10,7 +10,7 @@ import {
   useState,
   type WheelEvent,
 } from 'react';
-import SectionHeader from '@/components/section-header';
+import SectionHeader from '@fe/components/section-header';
 import { type Album, albums } from '../../../../data/albums';
 import { AlbumCard } from './album-card';
 

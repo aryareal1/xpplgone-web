@@ -2,7 +2,7 @@
 
 import { Check, Clock, MapPin, Users } from 'lucide-react';
 import { motion } from 'motion/react';
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 import type { Lesson, TimeSlot } from '../../../../../data/subject-schedule';
 
 interface TimelineLessonItemProps {

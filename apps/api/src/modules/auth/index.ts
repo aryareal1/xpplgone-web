@@ -1,5 +1,5 @@
 import Elysia from 'elysia';
-import { cookieDefaults, webUrl } from '@/lib/constants';
+import { cookieDefaults, webUrl } from '@be/lib/constants';
 import { requireAuth } from './middleware';
 import { AuthModel } from './model';
 import { Auth } from './service';

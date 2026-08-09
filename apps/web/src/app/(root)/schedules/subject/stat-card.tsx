@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 
 interface StatCardProps {
   icon: LucideIcon;

@@ -2,7 +2,7 @@
 
 import { Calendar, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 import type { Day } from '../../../../../data/subject-schedule';
 
 interface SubjectGridViewProps {

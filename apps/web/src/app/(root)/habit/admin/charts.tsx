@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 import { MODULE_HEX } from '../../../../../data/habit-admin';
 import {
   HEAT_BG,

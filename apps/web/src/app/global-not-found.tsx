@@ -4,8 +4,8 @@ import { HomeIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Button } from '@/components/ui/button';
+import { ThemeProvider } from '@fe/components/theme-provider';
+import { Button } from '@fe/components/ui/button';
 
 const lexend = Lexend({ subsets: ['latin'] });
 const funnel = Funnel_Display({ subsets: ['latin'] });

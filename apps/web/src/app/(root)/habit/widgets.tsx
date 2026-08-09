@@ -8,13 +8,13 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
 import { useId, useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@fe/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+} from '@fe/components/ui/tooltip';
+import { cn } from '@fe/lib/utils';
 import {
   attendanceCopy,
   averageScore,

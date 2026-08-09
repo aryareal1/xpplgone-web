@@ -1,5 +1,9 @@
-import type { CheckinsModel, JournalModel, Student } from '@xirpl/api/schema';
-import api from '@/lib/api';
+import type { CheckinsModel } from '@be/modules/checkins/model';
+import type { JournalModel } from '@be/modules/journal/model';
+import type { UserModel } from '@be/modules/user/model';
+
+type Student = UserModel['Student'];
+import api from '@fe/lib/api';
 import {
   type Check,
   dailySeries,

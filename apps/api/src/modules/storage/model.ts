@@ -1,5 +1,5 @@
 import { t, type UnwrapSchema } from 'elysia';
-import { r } from '@/lib/schema';
+import { r } from '@be/lib/schema';
 
 export const StorageModel = {
   uploadBody: t.Object({

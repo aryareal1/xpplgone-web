@@ -1,6 +1,6 @@
 import { checkinsTable, db, habitJournalsTable } from '@xirpl/db';
 import { and, between, eq, gte, inArray, lte, sql } from 'drizzle-orm';
-import { toDateStr, wibHour } from '@/lib/utils';
+import { toDateStr, wibHour } from '@be/lib/utils';
 import { User } from '../user/service';
 import type { JournalModel } from './model';
 

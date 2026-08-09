@@ -9,8 +9,8 @@ import {
 import oauth2 from 'better-elysia-oauth2';
 import { eq } from 'drizzle-orm';
 import Elysia from 'elysia';
-import { apiUrl } from '@/lib/constants';
-import { Token } from '@/lib/utils';
+import { apiUrl } from '@be/lib/constants';
+import { Token } from '@be/lib/utils';
 
 export const Auth = new Elysia({ name: 'Auth.Service' })
   .use(

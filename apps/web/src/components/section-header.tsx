@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@fe/lib/utils';
 
 export default function SectionHeader(props: {
   color: string;

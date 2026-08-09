@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import SectionHeader from '@/components/section-header';
+import SectionHeader from '@fe/components/section-header';
 
 import { picketSchedule } from '../../../../../data/picket-schedule';
 import { PicketCard } from './picket-card';

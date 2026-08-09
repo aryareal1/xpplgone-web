@@ -2,13 +2,13 @@
 
 import { motion as m, stagger, type Variants } from 'motion/react';
 import Image from 'next/image';
-import SectionHeader from '@/components/section-header';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import SectionHeader from '@fe/components/section-header';
+import { AspectRatio } from '@fe/components/ui/aspect-ratio';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@/components/ui/carousel';
+} from '@fe/components/ui/carousel';
 import Banner from './banner';
 
 const variants = {

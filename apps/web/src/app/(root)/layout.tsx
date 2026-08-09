@@ -5,11 +5,11 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_NAME } from '@xirpl/shared';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { cookies } from 'next/headers';
-import NavBar from '@/components/layout/navbar';
-import AppSidebar from '@/components/layout/sidebar';
-import { ThemeProvider } from '@/components/theme-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import NavBar from '@fe/components/layout/navbar';
+import AppSidebar from '@fe/components/layout/sidebar';
+import { ThemeProvider } from '@fe/components/theme-provider';
+import { SidebarProvider } from '@fe/components/ui/sidebar';
+import { TooltipProvider } from '@fe/components/ui/tooltip';
 
 export const metadata: Metadata = {
   title: `Home | ${SITE_NAME}`,

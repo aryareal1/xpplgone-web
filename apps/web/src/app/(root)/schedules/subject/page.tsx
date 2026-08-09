@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import SectionHeader from '@/components/section-header';
-import { cn } from '@/lib/utils';
+import SectionHeader from '@fe/components/section-header';
+import { cn } from '@fe/lib/utils';
 import {
   fridaySchedule,
   type Lesson,

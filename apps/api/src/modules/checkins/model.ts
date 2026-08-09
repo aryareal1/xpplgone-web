@@ -1,6 +1,6 @@
 import { t } from 'elysia';
-import { r } from '@/lib/schema';
-import type { DeepUnwrap } from '@/lib/utils';
+import { r } from '@be/lib/schema';
+import type { DeepUnwrap } from '@be/lib/utils';
 
 const enums = {
   type: t.Enum({

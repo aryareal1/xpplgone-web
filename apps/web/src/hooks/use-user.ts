@@ -1,6 +1,6 @@
-import type { AuthModel } from '@xirpl/api/schema';
+import type { AuthModel } from '@be/modules/auth/model';
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import api from '@fe/lib/api';
 
 export function useUser() {
   const [loading, setLoading] = useState(true);

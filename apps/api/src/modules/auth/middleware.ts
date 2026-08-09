@@ -1,5 +1,5 @@
 import Elysia from 'elysia';
-import { ADMIN_ROLES, DEV_ROLE } from '@/lib/constants';
+import { ADMIN_ROLES, DEV_ROLE } from '@be/lib/constants';
 import { AuthModel } from './model';
 import { Auth } from './service';
 

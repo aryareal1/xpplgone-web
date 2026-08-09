@@ -1,6 +1,8 @@
-import type { Student } from '@xirpl/api/schema';
+import type { UserModel } from '@be/modules/user/model';
+
+type Student = UserModel['Student'];
 import { useEffect, useState } from 'react';
-import api from '@/lib/api';
+import api from '@fe/lib/api';
 
 export function useStudents() {
   const [loading, setLoading] = useState(true);

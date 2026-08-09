@@ -1,6 +1,8 @@
 'use client';
 
-import type { User as IProfile } from '@xirpl/api/schema';
+import type { UserModel } from '@be/modules/user/model';
+
+type IProfile = UserModel['User'];
 import { SITE_NAME } from '@xirpl/shared';
 import { AlignLeftIcon, LogOutIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { motion as m, stagger, type Variants } from 'motion/react';
@@ -9,9 +11,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { useUser } from '@/hooks/use-user';
-import api from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { useUser } from '@fe/hooks/use-user';
+import api from '@fe/lib/api';
+import { cn } from '@fe/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import {

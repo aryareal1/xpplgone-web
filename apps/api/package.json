@@ -9,10 +9,6 @@
     "start": "PORT=3611 bun dist/index.js",
     "typecheck": "tsc --noEmit"
   },
-  "exports": {
-    ".": "./src/app.ts",
-    "./schema": "./src/schema.d.ts"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },

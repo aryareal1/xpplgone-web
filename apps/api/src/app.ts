@@ -2,7 +2,7 @@ import { cors } from '@elysia/cors';
 import openapi from '@elysia/openapi';
 import { SITE_NAME } from '@xirpl/shared';
 import { Elysia } from 'elysia';
-import { webUrl } from '@/lib/constants';
+import { webUrl } from '@be/lib/constants';
 import { auth } from './modules/auth';
 import { checkins } from './modules/checkins';
 import { checkinsAdmin } from './modules/checkins/admin';

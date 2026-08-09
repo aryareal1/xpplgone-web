@@ -19,19 +19,19 @@ import { motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@fe/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useUser } from '@/hooks/use-user';
-import { fileUrl } from '@/lib/api';
-import { cn } from '@/lib/utils';
+} from '@fe/components/ui/card';
+import { Input } from '@fe/components/ui/input';
+import { Skeleton } from '@fe/components/ui/skeleton';
+import { useUser } from '@fe/hooks/use-user';
+import { fileUrl } from '@fe/lib/api';
+import { cn } from '@fe/lib/utils';
 import {
   type ClassSummary,
   fetchClassSummary,

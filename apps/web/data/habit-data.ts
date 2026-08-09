@@ -1,4 +1,5 @@
-import type { CheckinsModel, JournalModel } from '@xirpl/api/schema';
+import type { CheckinsModel } from '@be/modules/checkins/model';
+import type { JournalModel } from '@be/modules/journal/model';
 
 export type Journal = JournalModel['Journal'];
 export type JournalBody = JournalModel['upsertBody'];

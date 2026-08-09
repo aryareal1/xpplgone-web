@@ -1,5 +1,5 @@
 import Elysia, { t } from 'elysia';
-import { toDateStr } from '@/lib/utils';
+import { toDateStr } from '@be/lib/utils';
 import { requireAdmin } from '../auth/middleware';
 import { User } from '../user/service';
 import { CheckinsModel } from './model';

@@ -23,12 +23,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { useUser } from '@/hooks/use-user';
-import api, { fileUrl } from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { Button } from '@fe/components/ui/button';
+import { Checkbox } from '@fe/components/ui/checkbox';
+import { Input } from '@fe/components/ui/input';
+import { useUser } from '@fe/hooks/use-user';
+import api, { fileUrl } from '@fe/lib/api';
+import { cn } from '@fe/lib/utils';
 import { isAdminRole } from '../../../../data/habit-admin';
 import {
   type Answer,

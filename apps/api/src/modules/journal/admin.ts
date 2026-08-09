@@ -1,5 +1,5 @@
 import Elysia from 'elysia';
-import { toDateStr } from '@/lib/utils';
+import { toDateStr } from '@be/lib/utils';
 import { requireAdmin } from '../auth/middleware';
 import { User } from '../user/service';
 import { JournalModel } from './model';
