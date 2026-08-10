@@ -78,6 +78,9 @@ export const User = {
           notIn: ADMIN_ROLES,
         },
       },
+      orderBy: {
+        nis: 'asc',
+      },
     });
     return data.map((v) => ({
       id: v.id,
