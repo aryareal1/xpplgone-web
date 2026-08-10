@@ -8,13 +8,17 @@ import {
   ClockIcon,
   DumbbellIcon,
   FlameIcon,
+  LoaderCircleIcon,
   MoonStarIcon,
   NotebookPenIcon,
   SearchIcon,
   ShieldAlertIcon,
   TrendingUpIcon,
+  XIcon,
   type UsersIcon,
 } from 'lucide-react';
+import { treaty } from '@elysia/eden';
+import type { App } from '@be/app';
 import { motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -30,7 +34,7 @@ import {
 import { Input } from '@fe/components/ui/input';
 import { Skeleton } from '@fe/components/ui/skeleton';
 import { useUser } from '@fe/hooks/use-user';
-import { fileUrl } from '@fe/lib/api';
+import { API_URL, fileUrl } from '@fe/lib/api';
 import { cn } from '@fe/lib/utils';
 import {
   type ClassSummary,
@@ -75,6 +79,16 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'late', label: 'Paling sering telat' },
   { key: 'absent', label: 'Paling sering absen' },
 ];
+
+// @ts-expect-error Elysia adapter is duplicated across workspace packages.
+const proofApi = treaty<App>(API_URL, {
+  fetch: { credentials: 'include' },
+  parseDate: false,
+  onResponse: async (response) => {
+    if (response.headers.get('content-type')?.startsWith('image/'))
+      return response.blob();
+  },
+});
 
 export default function AdminDashboard() {
   const { user, loading } = useUser();
@@ -154,12 +168,12 @@ export default function AdminDashboard() {
   }, [rows, query, sort]);
 
   const selected = useMemo(
-    () => members?.find((mb) => mb.id === selectedId) ?? null,
+    () => members?.find((mb) => String(mb.nis) === selectedId) ?? null,
     [members, selectedId],
   );
 
-  const setMember = (id: string | null) =>
-    router.replace(id ? `${pathname}?member=${id}` : pathname, {
+  const setMember = (nis: number) =>
+    router.push(`${pathname}?member=${encodeURIComponent(String(nis))}`, {
       scroll: false,
     });
 
@@ -259,7 +273,7 @@ export default function AdminDashboard() {
           <MemberDetail
             member={selected}
             month={month}
-            onBack={() => setMember(null)}
+            onBack={() => router.back()}
           />
         ) : (
           <>
@@ -396,10 +410,14 @@ export default function AdminDashboard() {
                     aria-label="Urutkan"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortKey)}
-                    className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-transparent px-2.5 text-sm text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:text-slate-200"
+                    className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     {SORTS.map((s) => (
-                      <option key={s.key} value={s.key}>
+                      <option
+                        key={s.key}
+                        value={s.key}
+                        className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                      >
                         {s.label}
                       </option>
                     ))}
@@ -425,7 +443,7 @@ function MemberTable({
   onPick,
 }: {
   rows: MemberRow[];
-  onPick: (id: string) => void;
+  onPick: (nis: number) => void;
 }) {
   if (!rows.length)
     return (
@@ -454,8 +472,8 @@ function MemberTable({
             <tr
               key={r.member.id}
               tabIndex={0}
-              onClick={() => onPick(r.member.id)}
-              onKeyDown={(e) => e.key === 'Enter' && onPick(r.member.id)}
+              onClick={() => onPick(r.member.nis)}
+              onKeyDown={(e) => e.key === 'Enter' && onPick(r.member.nis)}
               className="cursor-pointer border-b border-slate-200/50 transition-colors last:border-0 hover:bg-slate-50 focus-visible:bg-slate-50 dark:border-slate-800/60 dark:hover:bg-slate-800/40 dark:focus-visible:bg-slate-800/40"
             >
               <td className="px-4 py-3">
@@ -525,11 +543,16 @@ function MemberDetail({
   const [row, setRow] = useState<MemberDetailData | null>(null);
   const [day, setDay] = useState<number | null>(null);
   const [detail, setDetail] = useState<MemberDay | null>(null);
+  const [proof, setProof] = useState<{
+    label: string;
+    filename: string;
+  } | null>(null);
 
   useEffect(() => {
     let alive = true;
     setRow(null);
     setDay(null);
+    setProof(null);
     fetchMemberDetail(member.id, month)
       .then((d) => alive && setRow(d))
       .catch(() => {});
@@ -722,10 +745,12 @@ function MemberDetail({
                   ? null
                   : new Date(month.getFullYear(), month.getMonth(), day)
               }
+              onProofOpen={setProof}
             />
           </CardContent>
         </Card>
       </div>
+      <ProofModal proof={proof} onClose={() => setProof(null)} />
     </m.div>
   );
 }
@@ -734,10 +759,12 @@ function DayDetail({
   day,
   picked,
   date,
+  onProofOpen,
 }: {
   day: MemberDay | null;
   picked: boolean;
   date: Date | null;
+  onProofOpen: (proof: { label: string; filename: string }) => void;
 }) {
   if (!picked)
     return (
@@ -816,7 +843,8 @@ function DayDetail({
               }
             />
             <Proofs
-              items={[{ label: 'Bukti', url: journal.sport_proof_url }]}
+              items={[{ label: 'Olahraga', url: journal.sport_proof_url }]}
+              onOpen={onProofOpen}
             />
           </dl>
         ) : journal?.did_sport === false ? (
@@ -847,6 +875,7 @@ function DayDetail({
                 { label: 'Mulai', url: journal.study_start_proof_url },
                 { label: 'Selesai', url: journal.study_end_proof_url },
               ]}
+              onOpen={onProofOpen}
             />
           </dl>
         ) : journal?.did_study === false ? (
@@ -871,32 +900,129 @@ function DayDetail({
 }
 
 // Bukti foto disimpan sebagai key S3, jadi tautannya dibangun dari fileUrl.
-function Proofs({ items }: { items: { label: string; url: string | null }[] }) {
+function Proofs({
+  items,
+  onOpen,
+}: {
+  items: { label: string; url: string | null }[];
+  onOpen: (proof: { label: string; filename: string }) => void;
+}) {
   return (
     <>
-      {items.map((it) =>
-        it.url ? (
+      {items.map((it) => {
+        if (!it.url)
+          return <Row key={it.label} label={it.label} value="Belum ada" />;
+        const filename = it.url;
+        return (
           <div
             key={it.label}
             className="flex items-center justify-between gap-3"
           >
             <dt className="text-slate-500 dark:text-slate-400">{it.label}</dt>
             <dd>
+              <button
+                type="button"
+                onClick={() => onOpen({ label: it.label, filename })}
+                className="font-medium text-sky-600 underline-offset-2 hover:underline dark:text-sky-400"
+              >
+                Lihat bukti
+              </button>
+            </dd>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function ProofModal({
+  proof,
+  onClose,
+}: {
+  proof: { label: string; filename: string } | null;
+  onClose: () => void;
+}) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
+  useEffect(() => {
+    if (!proof) return;
+    let active = true;
+    let objectUrl: string | null = null;
+    setImageUrl(null);
+    setImageError(false);
+
+    proofApi
+      .s3({ filename: proof.filename })
+      .get()
+      .then(({ data, error }) => {
+        if (error || !data || !(data instanceof Blob))
+          throw new Error('Bukti tidak dapat dimuat.');
+        objectUrl = URL.createObjectURL(data);
+        if (active) setImageUrl(objectUrl);
+      })
+      .catch(() => active && setImageError(true));
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [proof]);
+
+  if (!proof) return null;
+
+  return (
+    <div
+      role="presentation"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+      onMouseDown={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Bukti ${proof.label}`}
+        className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+            Bukti {proof.label}
+          </h3>
+          <button
+            type="button"
+            aria-label="Tutup bukti"
+            onClick={onClose}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+          >
+            <XIcon className="size-5" />
+          </button>
+        </div>
+        <div className="flex max-h-[calc(90vh-4rem)] justify-center overflow-auto bg-slate-100 p-3 dark:bg-slate-950">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={`Bukti ${proof.label}`}
+              className="max-h-[calc(90vh-6rem)] max-w-full rounded-lg object-contain"
+            />
+          ) : imageError ? (
+            <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center text-sm text-slate-500 dark:text-slate-400">
+              <p>Gambar bukti tidak dapat dimuat.</p>
               <a
-                href={fileUrl(it.url)}
+                href={fileUrl(proof.filename)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-sky-600 underline-offset-2 hover:underline dark:text-sky-400"
               >
-                Lihat foto
+                Buka bukti di tab baru
               </a>
-            </dd>
-          </div>
-        ) : (
-          <Row key={it.label} label={it.label} value="Belum ada" />
-        ),
-      )}
-    </>
+            </div>
+          ) : (
+            <div className="flex min-h-56 items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <LoaderCircleIcon className="size-5 animate-spin" /> Memuat bukti…
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

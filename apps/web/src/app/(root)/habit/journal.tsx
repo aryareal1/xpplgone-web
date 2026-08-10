@@ -26,6 +26,7 @@ import {
 import { Button } from '@fe/components/ui/button';
 import { Checkbox } from '@fe/components/ui/checkbox';
 import { Input } from '@fe/components/ui/input';
+import { Skeleton } from '@fe/components/ui/skeleton';
 import { useUser } from '@fe/hooks/use-user';
 import api, { fileUrl } from '@fe/lib/api';
 import { cn } from '@fe/lib/utils';
@@ -35,6 +36,7 @@ import {
   attendanceCopy,
   attendanceWindow,
   type Check,
+  type CheckinRecap,
   checkinAt,
   checkinType,
   emptyJournal,
@@ -54,6 +56,7 @@ import {
   PROOF_FIELDS,
   parseDate,
   SPORT_TYPES,
+  streakForCheckStatus,
   type StreakData,
   toJournalBody,
 } from '../../../../data/habit-data';
@@ -91,18 +94,20 @@ export default function HabitJournal() {
   const pathname = usePathname();
   const params = useSearchParams();
   const reduce = useReducedMotion();
-  const { user } = useUser();
+  const { user, loading: userLoading } = useUser();
 
   const [data, setData] = useState<Journal>(emptyJournal);
   const dataRef = useRef(data);
   const [check, setCheck] = useState<Check | null>(null);
   const [recap, setRecap] = useState<JournalRecap | null>(null);
   const [streak, setStreak] = useState<StreakData | null>(null);
+  const [streakChecks, setStreakChecks] = useState<Check[]>([]);
   const [month, setMonth] = useState(() => new Date());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [version, setVersion] = useState(0);
   const [now, setNow] = useState(() => new Date());
+  const [journalLoading, setJournalLoading] = useState(true);
 
   const today = useMemo(() => new Date(), []);
   const todayStr = fmtDate(today);
@@ -110,9 +115,21 @@ export default function HabitJournal() {
   const selected = parseDate(date) ?? today;
   const editable = date === todayStr;
 
+  // Jurnal adalah halaman privat. Simpan tujuan awal agar pengguna kembali ke
+  // tanggal yang sedang dibuka setelah login.
+  useEffect(() => {
+    if (userLoading || user) return;
+    const query = params.toString();
+    const destination = query ? `${pathname}?${query}` : pathname;
+    router.replace(`/login?r=${encodeURIComponent(destination)}`);
+  }, [params, pathname, router, user, userLoading]);
+
   // Jurnal dan check-in tanggal terpilih; 404 dari server berarti hari kosong.
   useEffect(() => {
+    if (userLoading || !user) return;
     let alive = true;
+    setJournalLoading(true);
+    setError(null);
     Promise.all([api.journals({ date }).get(), api.checkins({ date }).get()])
       .then(([j, c]) => {
         if (!alive) return;
@@ -123,11 +140,14 @@ export default function HabitJournal() {
       })
       .catch(() => {
         if (alive) setError('Gagal memuat catatan. Periksa koneksi kamu.');
+      })
+      .finally(() => {
+        if (alive) setJournalLoading(false);
       });
     return () => {
       alive = false;
     };
-  }, [date]);
+  }, [date, user, userLoading]);
 
   useEffect(() => {
     const d = parseDate(date);
@@ -141,21 +161,34 @@ export default function HabitJournal() {
 
   // Rekap bulan dan streak; `version` naik tiap simpanan sukses supaya segar.
   useEffect(() => {
+    if (userLoading || !user) return;
     let alive = true;
+    const todayMonth = fmtMonth(today);
+    const previousMonth = fmtMonth(
+      new Date(today.getFullYear(), today.getMonth() - 1, 1),
+    );
     Promise.all([
       api.journals.recap.get({ query: { month: fmtMonth(month) } }),
       api.checkins.streak.get(),
+      api.checkins.recap.get({ query: { month: todayMonth } }),
+      api.checkins.recap.get({ query: { month: previousMonth } }),
     ])
-      .then(([r, s]) => {
+      .then(([r, s, currentChecks, previousChecks]) => {
         if (!alive) return;
         setRecap(r.data?.data ?? null);
         setStreak(s.data?.data ?? null);
+        setStreakChecks([
+          ...((previousChecks.data?.data as CheckinRecap | undefined)
+            ?.recap ?? []),
+          ...((currentChecks.data?.data as CheckinRecap | undefined)?.recap ??
+            []),
+        ]);
       })
       .catch(() => {});
     return () => {
       alive = false;
     };
-  }, [month, version]);
+  }, [month, today, user, userLoading, version]);
 
   const levels = useMemo(() => {
     const map = levelsByDay(recap?.scores ?? []);
@@ -255,6 +288,9 @@ export default function HabitJournal() {
   };
 
   const status = moduleStatus(data, check);
+  const visibleStreak = streakForCheckStatus(streak, streakChecks, today);
+
+  if (userLoading || !user || journalLoading) return <HabitJournalSkeleton />;
 
   return (
     <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white transition-colors duration-300 dark:from-slate-950 dark:to-slate-900">
@@ -701,7 +737,7 @@ export default function HabitJournal() {
             <HabitStats
               month={month}
               recap={recap}
-              streak={streak}
+              streak={visibleStreak}
               onMonthChange={setMonth}
             />
           </aside>
@@ -717,6 +753,34 @@ const TONES: Record<ModuleKey, string> = {
   olahraga: 'text-emerald-500',
   belajar: 'text-amber-500',
 };
+
+function HabitJournalSkeleton() {
+  return (
+    <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <Skeleton className="h-10 w-56 rounded-xl" />
+        <Skeleton className="mt-3 h-5 w-80 max-w-full rounded-lg" />
+        <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="rounded-2xl border border-slate-200/70 p-6 dark:border-slate-800">
+            <Skeleton className="h-7 w-40 rounded-lg" />
+            <div className="mt-6 space-y-5">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="space-y-3 border-t border-slate-200/70 pt-5 first:border-0 first:pt-0 dark:border-slate-800">
+                  <Skeleton className="h-5 w-36 rounded-md" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-8">
+            <Skeleton className="h-80 rounded-2xl" />
+            <Skeleton className="h-72 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** Flat section: hairline divider instead of a card, no elevation. */
 function Section({

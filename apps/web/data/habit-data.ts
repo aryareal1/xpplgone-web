@@ -95,6 +95,54 @@ export function isLateCheck(c: Check | null) {
   return !!at && !!c && at.getHours() >= LATE_HOURS[c.type ?? checkinType(at)];
 }
 
+/**
+ * Streak ditentukan di frontend dari status check-in yang diterima dari API.
+ * Check-in telat tetap hadir, namun selalu mematikan streak yang ditampilkan.
+ */
+export const streakForCheckStatus = (
+  streak: StreakData | null,
+  checks: Check[],
+  today = new Date(),
+): StreakData | null => {
+  const todayDate = fmtDate(today);
+  const byDate = new Map(checks.map((check) => [check.date, check]));
+  const onTime = (check: Check | undefined) =>
+    !!check?.checked_in_at && !isLateCheck(check);
+  const isPastWeekend = (date: string) => {
+    const day = toLocalDate(date);
+    return (
+      isWeekend(day) &&
+      (date < todayDate || today.getHours() >= WAKE_HOUR)
+    );
+  };
+
+  // Telat pada hari apa pun, atau weekend yang lewat tanpa Bangun Pagi,
+  // memutus streak. Hari ini baru dihitung gagal setelah lewat pukul 06:00.
+  const lastBreak = checks
+    .filter((check) => check.date <= todayDate)
+    .filter((check) => isLateCheck(check) || (isPastWeekend(check.date) && !onTime(check)))
+    .map((check) => check.date)
+    .sort()
+    .at(-1);
+
+  if (!lastBreak) return streak;
+
+  const lastOnTime = checks
+    .filter((check) => check.date > lastBreak && onTime(check))
+    .map((check) => check.date)
+    .sort()
+    .at(-1);
+  if (!lastOnTime) return { streak: 0, since: null };
+
+  let count = 0;
+  let cursor = toLocalDate(lastOnTime);
+  while (onTime(byDate.get(fmtDate(cursor)))) {
+    count++;
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - 1);
+  }
+  return { streak: count, since: lastOnTime };
+};
+
 export type AttendanceWindow = 'closed' | 'open' | 'late';
 
 // Status jendela absen saat ini, dipakai untuk mengunci tombol.
