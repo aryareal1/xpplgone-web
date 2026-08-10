@@ -1,7 +1,7 @@
 import type { ElysiaCookie } from 'elysia/cookies';
 
 export const webUrl = process.env.WEB_URL || 'http://localhost:3600';
-export const apiUrl = process.env.WEB_URL || 'http://localhost:3601';
+export const apiUrl = process.env.API_URL || 'http://localhost:3601';
 
 /**
  * Default cookie properties.
