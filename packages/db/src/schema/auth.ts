@@ -9,7 +9,7 @@ export const usersTable = pgTable('users', (t) => ({
   username: t.varchar({ length: 255 }).unique().notNull(),
   display_name: t.varchar({ length: 255 }),
   avatar_url: t.text(),
-  nis: t.integer(),
+  nis: t.integer().unique(),
   bio: t.text(),
   gender: t.text({ enum: genders }),
   role: t.text({ enum: roles }).notNull(),
