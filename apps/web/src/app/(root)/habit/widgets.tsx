@@ -7,7 +7,7 @@ import {
   InfoIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@fe/components/ui/card';
 import {
   Tooltip,
@@ -31,6 +31,9 @@ import {
   toLocalDate,
   WEEKDAYS,
 } from '../../../../data/habit-data';
+// ponytail: same chart the admin dashboard already ships, so the student view
+// and the teacher view can never drift apart.
+import { TrendArea } from './admin/charts';
 
 /**
  * Explains what a number means. Controlled open so a tap works on touch, where
@@ -264,7 +267,7 @@ export function HabitStats({
           </span>
         </div>
 
-        <TrendChart series={series} />
+        <TrendArea series={series} height={150} name="Rata-rata harian" />
 
         <div className="mt-7 border-t border-slate-200/70 pt-5 dark:border-slate-800">
           <div
@@ -364,124 +367,5 @@ export function HabitStats({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-const W = 300;
-const H = 88;
-
-function TrendChart({ series }: { series: { day: number; value: number }[] }) {
-  const gradientId = useId();
-  const reduce = useReducedMotion();
-  const [active, setActive] = useState<number | null>(null);
-
-  if (series.length < 2) {
-    return (
-      <p className="flex h-22 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500 dark:bg-slate-800/40 dark:text-slate-400">
-        Belum cukup data bulan ini.
-      </p>
-    );
-  }
-
-  const x = (i: number) => (i / (series.length - 1)) * W;
-  const y = (v: number) => H - (v / 100) * H;
-
-  const line = series.map((p, i) => `${x(i)},${y(p.value)}`).join(' ');
-  const area = `${x(0)},${H} ${line} ${x(series.length - 1)},${H}`;
-  const point = active === null ? null : series[active];
-
-  return (
-    <div className="relative">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="h-22 w-full overflow-visible"
-        preserveAspectRatio="none"
-        role="img"
-        aria-label="Grafik tren penyelesaian harian"
-      >
-        <title>Tren penyelesaian harian</title>
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="0%"
-              className="text-emerald-500"
-              stopColor="currentColor"
-              stopOpacity="0.3"
-            />
-            <stop
-              offset="100%"
-              className="text-emerald-500"
-              stopColor="currentColor"
-              stopOpacity="0"
-            />
-          </linearGradient>
-        </defs>
-
-        {[0, 50, 100].map((v) => (
-          <line
-            key={v}
-            x1="0"
-            x2={W}
-            y1={y(v)}
-            y2={y(v)}
-            className="stroke-slate-200 dark:stroke-slate-800"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
-
-        <polygon points={area} fill={`url(#${gradientId})`} />
-
-        <m.polyline
-          points={line}
-          fill="none"
-          className="stroke-emerald-500"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-          initial={reduce ? false : { pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
-
-        {point && (
-          <circle
-            cx={x(active as number)}
-            cy={y(point.value)}
-            r="4"
-            className="fill-emerald-500 stroke-white dark:stroke-slate-900"
-            strokeWidth="2"
-            vectorEffect="non-scaling-stroke"
-          />
-        )}
-
-        {/* Hit areas: one invisible column per day, so hover needs no pointer math. */}
-        {series.map((p, i) => (
-          <rect
-            key={p.day}
-            role="presentation"
-            x={x(i) - W / series.length / 2}
-            y="0"
-            width={W / series.length}
-            height={H}
-            fill="transparent"
-            onMouseEnter={() => setActive(i)}
-            onMouseLeave={() => setActive(null)}
-          />
-        ))}
-      </svg>
-
-      {point && (
-        <span
-          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-slate-900 px-2 py-1 text-xs font-medium whitespace-nowrap text-white dark:bg-slate-100 dark:text-slate-900"
-          style={{
-            left: `${((active as number) / (series.length - 1)) * 100}%`,
-          }}
-        >
-          Tgl {point.day}: {point.value}%
-        </span>
-      )}
-    </div>
   );
 }
