@@ -11,7 +11,6 @@ import { eq } from 'drizzle-orm';
 import Elysia from 'elysia';
 import { apiUrl } from '@be/lib/constants';
 import { Token } from '@be/lib/utils';
-import { ip } from 'elysia-ip';
 
 export const Auth = new Elysia({ name: 'Auth.Service' })
   .use(
@@ -25,8 +24,7 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
   )
   .use(jwt({ secret: process.env.JWT_SECRET! }))
   .use(bearer())
-  .use(ip({ headersFirst: true }))
-  .derive(({ oauth2, jwt, headers, ip }) => ({
+  .derive(({ oauth2, jwt, headers, server, request }) => ({
     auth: {
       generateUrl(redirectUrl = '/') {
         const url = oauth2.createURL('Google', ['openid email profile'], {
@@ -65,7 +63,12 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
               .values({
                 user_id: user.id,
                 user_agent: headers['user-agent'],
-                ip,
+                ip:
+                  headers['cf-connecting-ip'] ??
+                  headers['x-real-ip'] ??
+                  headers['x-forwarded-for']?.split(',')[0]?.trim() ??
+                  server?.requestIP(request)?.address ??
+                  null,
                 refresh_token_hash: Token.hash(refreshToken),
               })
               .returning({ id: sessionsTable.id })
