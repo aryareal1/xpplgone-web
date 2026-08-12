@@ -18,7 +18,7 @@ RUN bun run --cwd apps/api build
 # runner
 FROM oven/bun:slim AS api
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=production PORT=3611
 COPY --from=api-build /app/apps/api/dist/index.js .
 CMD ["bun", "index.js"]
 
@@ -44,7 +44,7 @@ RUN bun run --cwd apps/web build
 # runner
 FROM oven/bun:slim AS web
 WORKDIR /app
-ENV NODE_ENV=production
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3610
 COPY --from=web-build /app/apps/web/.next/standalone .
 COPY --from=web-build /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=web-build /app/apps/web/public ./apps/web/public
