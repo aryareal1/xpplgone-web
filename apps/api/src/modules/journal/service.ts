@@ -343,7 +343,6 @@ export const Journal = {
       Math.round(stats.reduce((a, s) => a + f(s), 0) / n);
     const count = (f: (s: (typeof stats)[number]) => number) =>
       stats.reduce((a, s) => a + f(s), 0);
-    const pct2 = (v: number) => Math.round((v / n) * 100);
 
     const distribution = { '0-39': 0, '40-59': 0, '60-79': 0, '80-100': 0 };
     for (const s of stats) {
@@ -371,10 +370,10 @@ export const Journal = {
       month,
       average_score: mean((s) => s.score),
       average_score_each: {
-        checkins: pct2(count((s) => s.counts.checkins)),
-        prays: pct2(count((s) => s.counts.prays)),
-        sports: pct2(count((s) => s.counts.sports)),
-        studies: pct2(count((s) => s.counts.studies)),
+        checkins: mean((s) => s.pct(s.counts.checkins)),
+        prays: mean((s) => s.pct(s.counts.prays)),
+        sports: mean((s) => s.pct(s.counts.sports)),
+        studies: mean((s) => s.pct(s.counts.studies)),
       },
       scores,
       score_distribution: distribution,

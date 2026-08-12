@@ -91,18 +91,19 @@ export const Checkins = {
     return row ? toCheck(row) : null;
   },
 
-  /** Current streak: consecutive days with check-in ending today. */
+  /** Current streak: consecutive on-time days ending at the most recent on-time check-in. */
   async getStreak(userId: string) {
     const rows = await db
       .select({
         date: checkinsTable.date,
         checked_in_at: checkinsTable.checked_in_at,
+        type: checkinsTable.type,
       })
       .from(checkinsTable)
       .where(eq(checkinsTable.user_id, userId))
       .orderBy(asc(checkinsTable.date));
     const done = rows
-      .filter((r) => r.checked_in_at)
+      .filter((r) => r.checked_in_at && !isLate(r.checked_in_at, r.type))
       .map((r) => r.date)
       .reverse();
     const today = toDateStr(new Date());
@@ -200,9 +201,11 @@ export const Checkins = {
       : [];
 
     const students = studentIds.map((id) => {
-      const row = rows.find((r) => r.user_id === id);
-      const checkCount = row?.checked_in_at ? 1 : 0;
-      const lateCount = row && isLate(row.checked_in_at, row.type) ? 1 : 0;
+      const studentRows = rows.filter((r) => r.user_id === id);
+      const checkCount = studentRows.filter((r) => r.checked_in_at).length;
+      const lateCount = studentRows.filter((r) =>
+        isLate(r.checked_in_at, r.type),
+      ).length;
       return {
         user_id: id,
         rate: Math.round((checkCount / cap) * 100) || 0,
