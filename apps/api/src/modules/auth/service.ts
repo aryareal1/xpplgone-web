@@ -155,6 +155,13 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
         await db
           .update(sessionsTable)
           .set({
+            user_agent: headers['user-agent'],
+            ip:
+              headers['cf-connecting-ip'] ??
+              headers['x-real-ip'] ??
+              headers['x-forwarded-for']?.split(',')[0]?.trim() ??
+              server?.requestIP(request)?.address ??
+              null,
             refreshed_at: new Date(),
             expired_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           })

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_NAME } from '@xirpl/shared';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { cookies } from 'next/headers';
@@ -10,6 +8,7 @@ import AppSidebar from '@fe/components/layout/sidebar';
 import { ThemeProvider } from '@fe/components/theme-provider';
 import { SidebarProvider } from '@fe/components/ui/sidebar';
 import { TooltipProvider } from '@fe/components/ui/tooltip';
+import { Analytics } from '@fe/components/analytics';
 
 export const metadata: Metadata = {
   title: `Home | ${SITE_NAME}`,
@@ -35,7 +34,9 @@ export default async function RootLayout({
 
   return (
     <html lang="id" suppressHydrationWarning>
-      <head />
+      <head>
+        <Analytics />
+      </head>
       <body className={`antialiased ${robotoSlab.variable} ${outfit.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
@@ -48,8 +49,6 @@ export default async function RootLayout({
             </SidebarProvider>
           </TooltipProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

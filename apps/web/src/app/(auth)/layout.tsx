@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import { SITE_NAME } from '@xirpl/shared';
 import { Outfit, Roboto_Slab } from 'next/font/google';
 import { type ReactNode, Suspense } from 'react';
 import { ThemeProvider } from '@fe/components/theme-provider';
+import { Analytics } from '@fe/components/analytics';
 
 export const metadata: Metadata = {
   title: `Login | ${SITE_NAME}`,
@@ -28,15 +27,15 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <head />
+      <head>
+        <Analytics />
+      </head>
       <body
         className={`antialiased ${robotoSlab.variable} ${outfit.variable} flex h-dvh items-center justify-center`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Suspense>{children}</Suspense>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

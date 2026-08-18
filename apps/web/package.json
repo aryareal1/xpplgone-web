@@ -9,8 +9,6 @@
   },
   "dependencies": {
     "@elysia/eden": "^1.4.10",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
     "@xirpl/api": "workspace:*",
     "@xirpl/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",

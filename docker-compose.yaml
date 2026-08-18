@@ -1,8 +1,12 @@
 name: xirpl
 
+networks:
+  public_net:
+    external: true
+  internal:
+
 services:
   db:
-    container_name: xirpl_db
     image: postgres:18.4
     restart: unless-stopped
     environment:
@@ -10,9 +14,9 @@ services:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_DB: $POSTGRES_DB
     volumes:
-      - pg-data:/var/lib/postgresql
-    ports:
-      - "5432:5432"
+      - ./data/postgresql:/var/lib/postgresql
+    networks:
+      - internal
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 10s
@@ -23,7 +27,6 @@ services:
         target: /docker-entrypoint-initdb.d/init.sql
       
   s3:
-    container_name: xirpl_s3
     image: pgsty/silo
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -31,31 +34,17 @@ services:
       MINIO_ROOT_USER: $S3_ACCESS_KEY_ID
       MINIO_ROOT_PASSWORD: $S3_SECRET_ACCESS_KEY
     volumes:
-      - minio-data:/data
-    ports:
-      - "127.0.0.1:9000:9000"
-      - "9001:9001"
+      - ./data/minio:/data
+    networks:
+      - public_net
+      - internal
     healthcheck:
       test: ["CMD-SHELL", "silo healthcheck ready"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  caddy:
-    container_name: xirpl_caddy
-    image: caddy
-    restart: unless-stopped
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy-data:/data
-      - caddy-config:/config
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-
   api:
-    container_name: xirpl_api
     image: aryareal/api-xirpl
     restart: unless-stopped
     pull_policy: always
@@ -71,8 +60,9 @@ services:
       S3_ACCESS_KEY_ID: $S3_ACCESS_KEY_ID
       S3_SECRET_ACCESS_KEY: $S3_SECRET_ACCESS_KEY
       S3_BUCKET: $S3_BUCKET
-    ports:
-      - "127.0.0.1:3611:3611"
+    networks:
+      - public_net
+      - internal
     depends_on:
       db:
         condition: service_healthy
@@ -80,27 +70,26 @@ services:
         condition: service_healthy
 
   web:
-    container_name: xirpl_web
     image: aryareal/web-xirpl
     restart: unless-stopped
     pull_policy: always
     environment:
       NEXT_PUBLIC_API_URL: $API_URL
-    ports:
-      - "127.0.0.1:3610:3610"
+    networks:
+      - public_net
     depends_on:
       - api
 
   umami:
-    container_name: xirpl_umami
     image: ghcr.io/umami-software/umami:latest
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    init: true
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/umami
       APP_SECRET: $UMAMI_SECRET
-    init: true
+    networks:
+      - public_net
+      - internal
     depends_on:
       db:
         condition: service_healthy
@@ -109,12 +98,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-volumes:
-  pg-data:
-  minio-data:
-  caddy-data:
-  caddy-config:
 
 configs:
   init-db:
