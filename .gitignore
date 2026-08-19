@@ -14,6 +14,7 @@ coverage
 out
 dist
 *.tgz
+__pycache__
 
 # production
 build

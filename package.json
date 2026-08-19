@@ -26,7 +26,8 @@
   "workspaces": [
     "apps/**",
     "!apps/web/.next/**",
-    "packages/**"
+    "packages/**",
+    "services/**"
   ],
   "overrides": {
     "elysia": "1.4.29"
