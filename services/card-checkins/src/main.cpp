@@ -1,10 +1,11 @@
+#include "secrets.h"
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <MFRC522.h>
 #include <SPI.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
-#include <MFRC522.h>
-#include "secrets.h"
+
 
 #define SS_PIN 5
 #define RST_PIN 4
@@ -13,8 +14,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 #define LED_PIN 2
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
@@ -24,8 +24,7 @@ void setup()
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
@@ -33,11 +32,9 @@ void setup()
   Serial.println("RFID ready. Tap card...");
 }
 
-String readUID()
-{
+String readUID() {
   String uid = "";
-  for (byte i = 0; i < mfrc522.uid.size; i++)
-  {
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
     uid += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
     uid += String(mfrc522.uid.uidByte[i], HEX);
   }
@@ -47,10 +44,8 @@ String readUID()
 }
 
 // POST /iots/attendance, returns true on HTTP 200.
-bool sendAttendance(String uid)
-{
-  if (WiFi.status() != WL_CONNECTED)
-  {
+bool sendAttendance(String uid) {
+  if (WiFi.status() != WL_CONNECTED) {
     Serial.println("✗ WiFi not connected");
     return false;
   }
@@ -63,8 +58,7 @@ bool sendAttendance(String uid)
   String body = "{\"uid\":\"" + uid + "\"}";
   int code = http.POST(body);
 
-  if (code <= 0)
-  {
+  if (code <= 0) {
     Serial.println("✗ Request failed: " + http.errorToString(code));
     http.end();
     return false;
@@ -79,19 +73,17 @@ bool sendAttendance(String uid)
 
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, resp);
-  if (err)
-  {
+  if (err) {
     Serial.println("✗ Bad JSON: " + String(err.c_str()));
     return false;
   }
-  Serial.println("✓ " + String(doc["message"].as<const char *>()) + " — " + String(doc["data"]["name"].as<const char *>()));
+  Serial.println("✓ " + String(doc["message"].as<const char *>()) + " — " +
+                 String(doc["data"]["name"].as<const char *>()));
   return true;
 }
 
-void blink(int times)
-{
-  for (int i = 0; i < times; i++)
-  {
+void blink(int times) {
+  for (int i = 0; i < times; i++) {
     digitalWrite(LED_PIN, HIGH);
     delay(150);
     digitalWrite(LED_PIN, LOW);
@@ -99,8 +91,7 @@ void blink(int times)
   }
 }
 
-void loop()
-{
+void loop() {
   if (!mfrc522.PICC_IsNewCardPresent())
     return;
   if (!mfrc522.PICC_ReadCardSerial())
