@@ -79,6 +79,10 @@
         "@types/bun": "latest",
       },
     },
+    "services/ocr": {
+      "name": "@xirpl/ocr",
+      "version": "1.0.0",
+    },
   },
   "trustedDependencies": [
     "sharp",
@@ -652,6 +656,8 @@
     "@xirpl/api": ["@xirpl/api@workspace:apps/api"],
 
     "@xirpl/db": ["@xirpl/db@workspace:packages/db"],
+
+    "@xirpl/ocr": ["@xirpl/ocr@workspace:services/ocr"],
 
     "@xirpl/shared": ["@xirpl/shared@workspace:packages/shared"],
 

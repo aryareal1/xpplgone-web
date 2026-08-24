@@ -1,6 +1,7 @@
 import { defineRelations } from 'drizzle-orm';
 import { googleIdentitiesTable, sessionsTable, usersTable } from './auth';
 import { checkinsTable, habitJournalsTable } from './journal';
+import { rfidUidsTable } from './iot';
 
 export default defineRelations(
   {
@@ -9,6 +10,7 @@ export default defineRelations(
     googleIdentitiesTable,
     habitJournalsTable,
     checkinsTable,
+    rfidUidsTable,
   },
   (r) => ({
     usersTable: {
@@ -16,6 +18,7 @@ export default defineRelations(
       googleIdentities: r.many.googleIdentitiesTable(),
       habitJournals: r.many.habitJournalsTable(),
       checkins: r.many.checkinsTable(),
+      rfidUids: r.many.rfidUidsTable(),
     },
     habitJournalsTable: {
       user: r.one.usersTable({
@@ -38,6 +41,12 @@ export default defineRelations(
     googleIdentitiesTable: {
       user: r.one.usersTable({
         from: r.googleIdentitiesTable.user_id,
+        to: r.usersTable.id,
+      }),
+    },
+    rfidUidsTable: {
+      user: r.one.usersTable({
+        from: r.rfidUidsTable.user_id,
         to: r.usersTable.id,
       }),
     },

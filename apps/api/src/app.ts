@@ -10,6 +10,7 @@ import { journal } from './modules/journal';
 import { journalAdmin } from './modules/journal/admin';
 import { storage } from './modules/storage';
 import { user } from './modules/user';
+import { iot } from './modules/iot';
 
 const app = new Elysia()
   .use(cors({ origin: webUrl, credentials: true }))
@@ -31,6 +32,9 @@ const app = new Elysia()
           },
           {
             name: 'Users',
+          },
+          {
+            name: 'Internet of Things',
           },
           {
             name: 'Checkins',
@@ -75,7 +79,7 @@ const app = new Elysia()
       });
   })
 
-  .use([auth, user, checkins, checkinsAdmin, journal, journalAdmin, storage])
+  .use([auth, user, iot, checkins, checkinsAdmin, journal, journalAdmin, storage])
   .get('/', ({ redirect }) => redirect('/docs'), { detail: { hide: true } });
 
 export default app;
