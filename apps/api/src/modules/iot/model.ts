@@ -20,5 +20,11 @@ export const IOTModel = {
     r.Failed('Already checked out')
   ]),
   attendanceInvalidUid: r.Failed('RFID uid not found'),
-  attendanceNoCheckIn: r.Failed('Not checked in before')
+  attendanceNoCheckIn: r.Failed('Not checked in before'),
+
+  cardBody: t.Object({
+    uid: t.String(),
+    user: t.String()
+  }),
+  cardResponse: r.Success('Set RFID card successful')
 }

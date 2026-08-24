@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db, rfidUidsTable, usersTable } from '@xirpl/db';
 import { toDateStr, wibHour } from '@be/lib/utils';
 import { Checkins } from '../checkins/service';
+import { User } from '../user/service';
 
 const ATTENDANCE_TYPE: 'school' | 'morning' = 'school';
 const CHECKOUT_FROM_HOUR = 15;
@@ -50,5 +51,15 @@ export const Iot = {
       return { ok: false, status: 'already-checked-in' };
 
     return { ok: true, status: 'checkin-success', actor };
+  },
+
+  async setCard(uid: string, user: string) {
+    const found = await User.getByIdentifier(user);
+    if (!found) return null;
+    await db
+      .insert(rfidUidsTable)
+      .values({ uid, user_id: found.id })
+      .onConflictDoUpdate({ target: rfidUidsTable.uid, set: { user_id: found.id } });
+    return found.id;
   },
 };
