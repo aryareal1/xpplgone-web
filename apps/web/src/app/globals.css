@@ -188,17 +188,6 @@
   }
   body {
     @apply bg-background text-foreground font-sans transition-colors duration-300;
-    scrollbar-width: none;
-  }
-  ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.show-scrollbar {
-  scrollbar-width: auto;
-  &::-webkit-scrollbar {
-    display: block;
   }
 }
 
