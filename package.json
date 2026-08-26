@@ -4,9 +4,11 @@
   "packageManager": "bun@1.3.14",
   "private": true,
   "scripts": {
-    "dev": "turbo dev --ui=tui",
+    "dev": "turbo dev --ui=tui --filter=!@xirpl/ocr",
+    "dev:full": "turbo dev --ui=tui",
     "dev:api": "bun run --cwd apps/api dev",
     "dev:web": "bun run --cwd apps/web dev",
+    "dev:ocr": "bun run --cwd services/ocr dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "biome check .",
