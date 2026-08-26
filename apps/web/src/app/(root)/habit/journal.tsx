@@ -1,7 +1,15 @@
 'use client';
 
+import { Button } from '@fe/components/ui/button';
+import { Checkbox } from '@fe/components/ui/checkbox';
+import { Input } from '@fe/components/ui/input';
+import { Skeleton } from '@fe/components/ui/skeleton';
+import { useUser } from '@fe/hooks/use-user';
+import api, { fileUrl } from '@fe/lib/api';
+import { cn } from '@fe/lib/utils';
 import {
   CheckIcon,
+  ChevronRightIcon,
   ClockIcon,
   DumbbellIcon,
   LayoutDashboardIcon,
@@ -9,6 +17,7 @@ import {
   MoonStarIcon,
   NotebookPenIcon,
   TriangleAlertIcon,
+  TrophyIcon,
   UploadIcon,
   XIcon,
 } from 'lucide-react';
@@ -23,13 +32,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Button } from '@fe/components/ui/button';
-import { Checkbox } from '@fe/components/ui/checkbox';
-import { Input } from '@fe/components/ui/input';
-import { Skeleton } from '@fe/components/ui/skeleton';
-import { useUser } from '@fe/hooks/use-user';
-import api, { fileUrl } from '@fe/lib/api';
-import { cn } from '@fe/lib/utils';
 import { isAdminRole } from '../../../../data/habit-admin';
 import {
   type Answer,
@@ -56,8 +58,8 @@ import {
   PROOF_FIELDS,
   parseDate,
   SPORT_TYPES,
-  streakForCheckStatus,
   type StreakData,
+  streakForCheckStatus,
   toJournalBody,
 } from '../../../../data/habit-data';
 import { HabitCalendar, HabitStats, InfoHint } from './widgets';
@@ -178,8 +180,8 @@ export default function HabitJournal() {
         setRecap(r.data?.data ?? null);
         setStreak(s.data?.data ?? null);
         setStreakChecks([
-          ...((previousChecks.data?.data as CheckinRecap | undefined)
-            ?.recap ?? []),
+          ...((previousChecks.data?.data as CheckinRecap | undefined)?.recap ??
+            []),
           ...((currentChecks.data?.data as CheckinRecap | undefined)?.recap ??
             []),
         ]);
@@ -293,7 +295,7 @@ export default function HabitJournal() {
   if (userLoading || !user || journalLoading) return <HabitJournalSkeleton />;
 
   return (
-    <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white transition-colors duration-300 dark:from-slate-950 dark:to-slate-900">
+    <div className="bg-background min-h-screen transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <m.header
           initial={reduce ? false : { opacity: 0, y: -16 }}
@@ -301,10 +303,10 @@ export default function HabitJournal() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-10"
         >
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl dark:text-white">
             Jurnal Kebiasaan
           </h1>
-          <p className="mt-1.5 text-base text-slate-500 dark:text-slate-400">
+          <p className="mt-1.5 text-base text-muted-foreground">
             {selected.toLocaleDateString('id-ID', {
               weekday: 'long',
               day: 'numeric',
@@ -364,7 +366,7 @@ export default function HabitJournal() {
               reduce={reduce}
               first
             >
-              <ul className="divide-y divide-slate-200/70 dark:divide-slate-800">
+              <ul className="divide-y divide-border/70 dark:divide-border">
                 {IBADAH.map(({ label, field }) => (
                   <li key={field}>
                     <div
@@ -390,7 +392,7 @@ export default function HabitJournal() {
                       <label
                         htmlFor={field}
                         className={cn(
-                          'text-sm font-medium text-slate-700 dark:text-slate-200',
+                          'text-sm font-medium text-foreground dark:text-foreground',
                           editable && 'cursor-pointer',
                         )}
                       >
@@ -430,7 +432,7 @@ export default function HabitJournal() {
                   >
                     {isLateCheck(check) ? lateLabel(checkedAt) : copy.ok}
                   </span>
-                  <span className="text-slate-500 dark:text-slate-400">
+                  <span className="text-muted-foreground">
                     {' '}
                     pada {fmtTime(checkedAt)}
                   </span>
@@ -441,7 +443,7 @@ export default function HabitJournal() {
                 size="lg"
                 pointer
                 disabled={!editable || !!checkedAt || gate === 'closed' || busy}
-                className="w-full sm:w-auto sm:min-w-48"
+                className="w-full border-[#1565c0] sm:w-auto sm:min-w-48"
                 onClick={checkIn}
               >
                 {checkedAt ? (
@@ -457,7 +459,7 @@ export default function HabitJournal() {
                 )}
               </Button>
               {!checkedAt && editable && (
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-2 text-xs text-muted-foreground">
                   {gate === 'closed'
                     ? 'Absensi dibuka pukul 06:00.'
                     : gate === 'open'
@@ -466,7 +468,7 @@ export default function HabitJournal() {
                 </p>
               )}
               {!checkedAt && !editable && (
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-2 text-xs text-muted-foreground">
                   Tidak ada catatan {copy.noun} pada tanggal ini.
                 </p>
               )}
@@ -513,11 +515,11 @@ export default function HabitJournal() {
                           sport_type: e.target.value || null,
                         }))
                       }
-                      className="h-9 w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      className="h-9 w-full cursor-pointer rounded-lg border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border dark:bg-secondary dark:text-foreground"
                     >
                       <option
                         value=""
-                        className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                        className="bg-card text-foreground dark:bg-secondary dark:text-foreground"
                       >
                         Pilih jenis olahraga
                       </option>
@@ -525,7 +527,7 @@ export default function HabitJournal() {
                         <option
                           key={s}
                           value={s}
-                          className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                          className="bg-card text-foreground dark:bg-secondary dark:text-foreground"
                         >
                           {s}
                         </option>
@@ -694,7 +696,7 @@ export default function HabitJournal() {
                   {!(
                     data.study_start_proof_url && data.study_end_proof_url
                   ) && (
-                    <p className="text-xs text-slate-500 sm:col-span-2 dark:text-slate-400">
+                    <p className="text-xs text-muted-foreground sm:col-span-2">
                       Status belajar baru tercatat setelah kedua bukti
                       terupload.
                     </p>
@@ -756,16 +758,19 @@ const TONES: Record<ModuleKey, string> = {
 
 function HabitJournalSkeleton() {
   return (
-    <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Skeleton className="h-10 w-56 rounded-xl" />
         <Skeleton className="mt-3 h-5 w-80 max-w-full rounded-lg" />
         <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="rounded-2xl border border-slate-200/70 p-6 dark:border-slate-800">
+          <div className="rounded-2xl border border-border/70 p-6 dark:border-border">
             <Skeleton className="h-7 w-40 rounded-lg" />
             <div className="mt-6 space-y-5">
               {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="space-y-3 border-t border-slate-200/70 pt-5 first:border-0 first:pt-0 dark:border-slate-800">
+                <div
+                  key={item}
+                  className="space-y-3 border-t border-border/70 pt-5 first:border-0 first:pt-0 dark:border-border"
+                >
                   <Skeleton className="h-5 w-36 rounded-md" />
                   <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
@@ -775,6 +780,7 @@ function HabitJournalSkeleton() {
           <div className="space-y-8">
             <Skeleton className="h-80 rounded-2xl" />
             <Skeleton className="h-72 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -812,7 +818,7 @@ function Section({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.4 }}
       className={cn(
-        'border-slate-200/70 py-8 dark:border-slate-800',
+        'border-border/70 py-8 dark:border-border',
         !first && 'border-t',
         first && 'pt-0',
         last && 'pb-0',
@@ -820,7 +826,7 @@ function Section({
     >
       <h2 className="mb-5 flex items-center gap-2.5">
         <Icon className={cn('size-5', TONES[tone])} />
-        <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+        <span className="text-xl font-bold tracking-tight text-foreground dark:text-foreground">
           {title}
         </span>
         <InfoHint label={title} text={info} />
@@ -866,7 +872,7 @@ function TriState({
     <div
       role="group"
       aria-label={label}
-      className="flex shrink-0 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700"
+      className="flex shrink-0 overflow-hidden rounded-lg border border-border dark:border-border"
     >
       {[true, false].map((choice) => {
         const active = value === choice;
@@ -881,13 +887,11 @@ function TriState({
               'px-3 py-1.5 text-xs font-semibold transition-colors',
               !disabled && 'cursor-pointer',
               disabled && 'cursor-not-allowed opacity-60',
-              choice
-                ? 'border-r border-slate-200 dark:border-slate-700'
-                : undefined,
+              choice ? 'border-r border-border dark:border-border' : undefined,
               active && choice && 'bg-emerald-500 text-white',
-              active && !choice && 'bg-slate-600 text-white dark:bg-slate-500',
+              active && !choice && 'bg-muted-foreground text-white',
               !active &&
-                'bg-transparent text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800',
+                'bg-transparent text-muted-foreground hover:bg-secondary',
             )}
           >
             {choice ? 'Ya' : 'Tidak'}
@@ -911,7 +915,7 @@ function Question({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+      <p className="text-sm font-medium text-foreground dark:text-foreground">
         {text}
       </p>
       <TriState
@@ -963,16 +967,12 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+      <span className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
         {label}
         <Tick show={!!done} />
       </span>
       {children}
-      {hint && (
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          {hint}
-        </span>
-      )}
+      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
     </div>
   );
 }
@@ -994,7 +994,7 @@ function PhotoBox({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+      <span className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-foreground">
         {label}
         <Tick show={!!photo} />
       </span>
@@ -1004,18 +1004,18 @@ function PhotoBox({
             type="button"
             onClick={onClear}
             aria-label={`Hapus ${label.toLowerCase()}`}
-            className="absolute top-2 right-2 z-10 grid size-8 cursor-pointer place-items-center rounded-full bg-slate-900/70 text-white transition-colors hover:bg-slate-900/90 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+            className="absolute top-2 right-2 z-10 grid size-8 cursor-pointer place-items-center rounded-full bg-brand-navy/70 text-white transition-colors hover:bg-brand-navy/90 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
           >
             <XIcon className="size-4" />
           </button>
         )}
         <label
           className={cn(
-            'relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50/60 transition-colors dark:border-slate-700 dark:bg-slate-800/40',
+            'relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-secondary/60 transition-colors dark:border-border dark:bg-secondary/40',
             !photo && 'min-h-36',
             disabled
               ? 'cursor-not-allowed opacity-70'
-              : 'cursor-pointer hover:border-slate-400 hover:bg-slate-100/60 dark:hover:border-slate-600',
+              : 'cursor-pointer hover:border-border hover:bg-secondary/60 dark:hover:border-border',
           )}
         >
           <input
@@ -1034,15 +1034,17 @@ function PhotoBox({
           ) : (
             <>
               {lockedHint ? (
-                <LockIcon className="mb-2 size-6 text-slate-400" />
+                <LockIcon className="mb-2 size-6 text-muted-foreground" />
               ) : (
-                <UploadIcon className="mb-2 size-6 text-slate-400" />
+                <UploadIcon className="mb-2 size-6 text-muted-foreground" />
               )}
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 {lockedHint ?? 'Klik untuk upload'}
               </p>
               {!lockedHint && (
-                <p className="text-xs text-slate-400">Otomatis dikompres</p>
+                <p className="text-xs text-muted-foreground">
+                  Otomatis dikompres
+                </p>
               )}
             </>
           )}

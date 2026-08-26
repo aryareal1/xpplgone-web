@@ -1,26 +1,26 @@
 import type { Metadata } from 'next';
 import '../globals.css';
-import { SITE_NAME } from '@xirpl/shared';
-import { Outfit, Roboto_Slab } from 'next/font/google';
-import { cookies } from 'next/headers';
+import { Analytics } from '@fe/components/analytics';
 import NavBar from '@fe/components/layout/navbar';
 import AppSidebar from '@fe/components/layout/sidebar';
 import { ThemeProvider } from '@fe/components/theme-provider';
 import { SidebarProvider } from '@fe/components/ui/sidebar';
 import { TooltipProvider } from '@fe/components/ui/tooltip';
-import { Analytics } from '@fe/components/analytics';
+import { SITE_NAME } from '@xirpl/shared';
+import { DM_Sans, Fredoka } from 'next/font/google';
+import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
   title: `Home | ${SITE_NAME}`,
   description: `Website for class ${SITE_NAME} of SMK N 1 Kandeman`,
 };
 
-const robotoSlab = Roboto_Slab({
-  variable: '--font-roboto-slab',
+const fredoka = Fredoka({
+  variable: '--font-fredoka',
   subsets: ['latin'],
 });
-const outfit = Outfit({
-  variable: '--font-outfit',
+const dmSans = DM_Sans({
+  variable: '--font-dm-sans',
   subsets: ['latin'],
 });
 
@@ -37,12 +37,12 @@ export default async function RootLayout({
       <head>
         <Analytics />
       </head>
-      <body className={`antialiased ${robotoSlab.variable} ${outfit.variable}`}>
+      <body className={`antialiased ${fredoka.variable} ${dmSans.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
             <SidebarProvider defaultOpen={defaultOpen}>
               <AppSidebar />
-              <main className="w-full">
+              <main className="min-w-0 flex-1">
                 <NavBar />
                 {children}
               </main>

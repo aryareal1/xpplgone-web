@@ -47,9 +47,9 @@ function ChartTip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-900">
+    <div className="border-border bg-card duo-card rounded-xl px-3 py-2 text-xs">
       {label !== undefined && (
-        <p className="mb-1 font-semibold text-slate-900 dark:text-slate-50">
+        <p className="mb-1 font-semibold text-foreground dark:text-foreground">
           {labelPrefix}
           {label}
         </p>
@@ -57,14 +57,14 @@ function ChartTip({
       {payload.map((p) => (
         <p
           key={p.name}
-          className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300"
+          className="flex items-center gap-1.5 text-muted-foreground dark:text-foreground"
         >
           <span
             className="size-2 rounded-full"
             style={{ background: p.color }}
           />
           {p.name}:{' '}
-          <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+          <span className="font-semibold tabular-nums text-foreground dark:text-foreground">
             {p.value}
             {suffix}
           </span>
@@ -104,7 +104,7 @@ export function TrendArea({
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          className="stroke-slate-200 dark:stroke-slate-800"
+          className="stroke-border dark:stroke-border"
           vertical={false}
         />
         <XAxis
@@ -112,7 +112,7 @@ export function TrendArea({
           tick={AXIS}
           tickLine={false}
           axisLine={false}
-          className="text-slate-400"
+          className="text-muted-foreground"
         />
         <YAxis
           domain={[0, 100]}
@@ -120,7 +120,7 @@ export function TrendArea({
           tickLine={false}
           axisLine={false}
           width={44}
-          className="text-slate-400"
+          className="text-muted-foreground"
         />
         <Tooltip
           content={<ChartTip labelPrefix="Tgl " />}
@@ -151,11 +151,11 @@ export function ModuleRadar({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
-        <PolarGrid className="stroke-slate-200 dark:stroke-slate-800" />
+        <PolarGrid className="stroke-border dark:stroke-border" />
         <PolarAngleAxis
           dataKey="label"
           tick={AXIS}
-          className="text-slate-500"
+          className="text-muted-foreground"
         />
         <Tooltip content={<ChartTip />} />
         <Radar
@@ -188,7 +188,7 @@ export function ModuleBars({
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
         <CartesianGrid
           strokeDasharray="3 3"
-          className="stroke-slate-200 dark:stroke-slate-800"
+          className="stroke-border dark:stroke-border"
           vertical={false}
         />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
@@ -224,7 +224,7 @@ export function DistributionBars({
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -22 }}>
         <CartesianGrid
           strokeDasharray="3 3"
-          className="stroke-slate-200 dark:stroke-slate-800"
+          className="stroke-border dark:stroke-border"
           vertical={false}
         />
         <XAxis dataKey="range" tick={AXIS} tickLine={false} axisLine={false} />
@@ -253,7 +253,7 @@ function Empty({ height, children }: { height: number; children: ReactNode }) {
   return (
     <p
       style={{ height }}
-      className="flex items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500 dark:bg-slate-800/40 dark:text-slate-400"
+      className="flex items-center justify-center rounded-xl bg-secondary text-sm text-muted-foreground dark:bg-secondary/40"
     >
       {children}
     </p>
@@ -293,7 +293,7 @@ export function HeatCalendar({
           <abbr
             key={d}
             title={d}
-            className="text-center text-xs font-medium text-slate-400 no-underline"
+            className="text-center text-xs font-medium text-muted-foreground no-underline"
           >
             {d[0]}
           </abbr>
@@ -320,13 +320,13 @@ export function HeatCalendar({
               className={cn(
                 'flex aspect-square items-center justify-center rounded-lg text-sm font-medium transition-all',
                 future || !levels.has(day)
-                  ? 'cursor-not-allowed text-slate-300 dark:text-slate-700'
+                  ? 'cursor-not-allowed text-muted-foreground/40'
                   : cn('cursor-pointer', HEAT_BG[lvl], HEAT_TEXT[lvl]),
                 sameDay(cell, today) &&
                   'ring-2 ring-orange-400 ring-offset-2 ring-offset-background',
                 selected === day &&
                   !sameDay(cell, today) &&
-                  'ring-2 ring-slate-400 ring-offset-2 ring-offset-background dark:ring-slate-500',
+                  'ring-2 ring-ring ring-offset-2 ring-offset-background dark:ring-ring',
               )}
             >
               {day}
@@ -334,7 +334,7 @@ export function HeatCalendar({
           );
         })}
       </div>
-      <div className="mt-4 flex items-center justify-end gap-1.5 text-xs text-slate-400">
+      <div className="mt-4 flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
         <span>Sedikit</span>
         {HEAT_BG.map((c, i) => (
           <span

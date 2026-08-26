@@ -1,87 +1,28 @@
-'use client';
-
-import { motion as m, stagger, type Variants } from 'motion/react';
-import Image from 'next/image';
 import SectionHeader from '@fe/components/section-header';
-import { AspectRatio } from '@fe/components/ui/aspect-ratio';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@fe/components/ui/carousel';
+import AlbumPreview from './album-preview';
 import Banner from './banner';
-
-const variants = {
-  albumImage: [
-    {
-      hidden: { opacity: 0 },
-      show: {
-        opacity: 1,
-        transition: {
-          delayChildren: stagger(0.2),
-        },
-      },
-    },
-    {
-      hidden: { opacity: 0, y: 20 },
-      show: { opacity: 1, y: 0 },
-    },
-  ],
-} satisfies Record<string, Variants[]>;
+import TodaySchedule from './today-schedule';
 
 export default function Home() {
   return (
     <>
       <Banner />
-      <div className="mx-auto flex max-w-360 flex-col gap-8 px-4">
-        <section id="pictures">
-          <SectionHeader
-            color="bg-indigo-500"
-            title="Album"
-            desc="Foto kita adalah kenangan kita di masa lampau. Bernostalgialah!"
-          />
-          <m.div
-            variants={variants.albumImage[0]}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            <Carousel>
-              <CarouselContent>
-                {['/images/banner-1.jpg', '/images/banner-2.jpg'].map(
-                  (img, i) => (
-                    <CarouselItem
-                      key={img}
-                      className="basis-1/3 md:basis-1/5 lg:basis-1/6"
-                    >
-                      <m.div variants={variants.albumImage[1]}>
-                        <AspectRatio ratio={16 / 9}>
-                          <Image
-                            src={img}
-                            alt={`Image #${i + 1}`}
-                            fill
-                            className="rounded-lg object-cover object-center"
-                            sizes="(max-width: 768px) 33vw, (max-width: 1024px) 20vw, 16vw"
-                          />
-                        </AspectRatio>
-                      </m.div>
-                    </CarouselItem>
-                  ),
-                )}
-              </CarouselContent>
-            </Carousel>
-          </m.div>
-        </section>
+      <div className="mx-auto flex max-w-360 flex-col gap-10 px-4 pb-16">
+        <TodaySchedule />
+
+        <AlbumPreview />
 
         <section id="assigments">
           <SectionHeader
-            color="bg-emerald-700"
             title="Tugas"
             desc="Tetap tenang! Kita pasti dapat menyelesaikan semuanya."
           />
-          <div></div>
+          {/* Belum ada sumber data tugas di aplikasi, jadi tampilkan keadaan
+              kosong yang jujur ketimbang contoh palsu. */}
+          <p className="text-muted-foreground border-border bg-card rounded-3xl border-2 border-dashed px-6 py-10 text-center font-bold uppercase">
+            Belum ada tugas yang tercatat.
+          </p>
         </section>
-        {/* <div className="bg-white h-500" /> */}
       </div>
     </>
   );

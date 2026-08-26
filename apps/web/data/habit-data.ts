@@ -1,5 +1,6 @@
 import type { CheckinsModel } from '@be/modules/checkins/model';
 import type { JournalModel } from '@be/modules/journal/model';
+import type { LeaderboardModel } from '@be/modules/leaderboard/model';
 
 export type Journal = JournalModel['Journal'];
 export type JournalBody = JournalModel['upsertBody'];
@@ -15,6 +16,9 @@ export type Check = CheckinsModel['Check'];
 export type CheckinType = CheckinsModel['checkInBody']['type'];
 export type CheckinRecap = CheckinsModel['recapResponse']['data'];
 export type StreakData = CheckinsModel['streakResponse']['data'];
+
+export type LeaderboardEntry =
+  LeaderboardModel['response']['data']['entries'][number];
 
 /** Kolom salat, urut sesuai tampilan. `field` menunjuk kolom jurnal di server. */
 export const IBADAH = [
@@ -111,8 +115,7 @@ export const streakForCheckStatus = (
   const isPastWeekend = (date: string) => {
     const day = toLocalDate(date);
     return (
-      isWeekend(day) &&
-      (date < todayDate || today.getHours() >= WAKE_HOUR)
+      isWeekend(day) && (date < todayDate || today.getHours() >= WAKE_HOUR)
     );
   };
 
@@ -120,7 +123,10 @@ export const streakForCheckStatus = (
   // memutus streak. Hari ini baru dihitung gagal setelah lewat pukul 06:00.
   const lastBreak = checks
     .filter((check) => check.date <= todayDate)
-    .filter((check) => isLateCheck(check) || (isPastWeekend(check.date) && !onTime(check)))
+    .filter(
+      (check) =>
+        isLateCheck(check) || (isPastWeekend(check.date) && !onTime(check)),
+    )
     .map((check) => check.date)
     .sort()
     .at(-1);
@@ -138,7 +144,11 @@ export const streakForCheckStatus = (
   let cursor = toLocalDate(lastOnTime);
   while (onTime(byDate.get(fmtDate(cursor)))) {
     count++;
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - 1);
+    cursor = new Date(
+      cursor.getFullYear(),
+      cursor.getMonth(),
+      cursor.getDate() - 1,
+    );
   }
   return { streak: count, since: lastOnTime };
 };

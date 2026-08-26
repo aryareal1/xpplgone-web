@@ -1,16 +1,17 @@
+import { webUrl } from '@be/lib/constants';
 import { cors } from '@elysia/cors';
 import openapi from '@elysia/openapi';
 import { SITE_NAME } from '@xirpl/shared';
 import { Elysia } from 'elysia';
-import { webUrl } from '@be/lib/constants';
 import { auth } from './modules/auth';
 import { checkins } from './modules/checkins';
 import { checkinsAdmin } from './modules/checkins/admin';
+import { iot } from './modules/iot';
 import { journal } from './modules/journal';
 import { journalAdmin } from './modules/journal/admin';
+import { leaderboard } from './modules/leaderboard';
 import { storage } from './modules/storage';
 import { user } from './modules/user';
-import { iot } from './modules/iot';
 
 const app = new Elysia()
   .use(cors({ origin: webUrl, credentials: true }))
@@ -41,6 +42,9 @@ const app = new Elysia()
           },
           {
             name: 'Journals',
+          },
+          {
+            name: 'Leaderboard',
           },
           {
             name: 'Storage',
@@ -79,7 +83,17 @@ const app = new Elysia()
       });
   })
 
-  .use([auth, user, iot, checkins, checkinsAdmin, journal, journalAdmin, storage])
+  .use([
+    auth,
+    user,
+    iot,
+    checkins,
+    checkinsAdmin,
+    journal,
+    journalAdmin,
+    leaderboard,
+    storage,
+  ])
   .get('/', ({ redirect }) => redirect('/docs'), { detail: { hide: true } });
 
 export default app;

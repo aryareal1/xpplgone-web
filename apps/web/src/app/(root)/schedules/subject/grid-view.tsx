@@ -1,75 +1,158 @@
 'use client';
 
-import { Calendar, MapPin } from 'lucide-react';
-import { motion } from 'motion/react';
 import { cn } from '@fe/lib/utils';
-import type { Day } from '../../../../../data/subject-schedule';
+import { MapPin } from 'lucide-react';
+import { motion } from 'motion/react';
+import {
+  type Day,
+  TIMETABLE_PERIODS,
+  timetableCells,
+} from '../../../../../data/subject-schedule';
 
 interface SubjectGridViewProps {
   scheduleData: Day[];
 }
 
+const PERIODS = Array.from({ length: TIMETABLE_PERIODS }, (_, i) => i + 1);
+
 export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {scheduleData.map((day, dayIndex) => (
-        <motion.div
-          key={day.name}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ y: -8, scale: 1.02 }}
-          transition={{
-            opacity: { delay: dayIndex * 0.05, duration: 0.4 },
-            scale: { delay: dayIndex * 0.05, duration: 0.4 },
-            y: { type: 'spring', stiffness: 300, damping: 20 },
-          }}
-          className="group relative flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all hover:border-blue-400 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-600"
-        >
-          {/* Day Header */}
-          <div className="relative overflow-hidden rounded-xl bg-slate-100 p-4 text-white dark:bg-slate-950">
-            <div className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 transform text-slate-200/50 dark:text-slate-800/20">
-              <Calendar className="h-24 w-24" />
-            </div>
-            <h3 className="relative z-10 text-xl font-bold tracking-widest text-slate-900 uppercase dark:text-slate-100">
-              {day.name}
-            </h3>
-            <p className="relative z-10 text-xs font-bold text-blue-400 uppercase">
-              {day.subtitle}
-            </p>
-          </div>
+    <>
+      {/* Tabel jadwal ala papan kelas: baris = hari, kolom = jam ke-. */}
+      <div className="border-border bg-card duo-card hidden overflow-hidden rounded-3xl md:block">
+        <table className="w-full table-fixed border-collapse">
+          <caption className="sr-only">
+            Jadwal pelajaran satu minggu, baris hari dan kolom jam pelajaran
+          </caption>
+          <thead>
+            <tr>
+              <th className="border-border bg-secondary text-muted-foreground w-24 border-b-2 p-3 text-xs font-extrabold tracking-widest uppercase">
+                Hari
+              </th>
+              {PERIODS.map((p) => (
+                <th
+                  key={p}
+                  scope="col"
+                  className="border-border bg-secondary text-foreground border-b-2 border-l-2 p-3 text-base font-extrabold tabular-nums"
+                >
+                  {p}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {scheduleData.map((day, dayIndex) => {
+              // Baris terakhir tidak perlu garis bawah, sudah ada tepi kartu.
+              const rowLine =
+                dayIndex < scheduleData.length - 1 && 'border-b-2';
 
-          {/* Lessons List */}
-          <div className="flex flex-1 flex-col gap-3 p-2">
-            {day.lessons.map((lesson, lessonIndex) => (
+              return (
+                <motion.tr
+                  key={day.name}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: dayIndex * 0.06, duration: 0.35 }}
+                >
+                  <th
+                    scope="row"
+                    className={cn(
+                      'border-border bg-pastel-blue text-brand-navy p-3 text-left text-lg font-extrabold tracking-wide uppercase dark:bg-blue-500/20 dark:text-white',
+                      rowLine,
+                    )}
+                  >
+                    {day.name}
+                  </th>
+                  {timetableCells(day.lessons).map((cell) =>
+                    cell.lesson ? (
+                      <td
+                        key={cell.period}
+                        colSpan={cell.span}
+                        className={cn(
+                          'border-border border-l-2 p-2 align-top',
+                          cell.lesson.bg,
+                          rowLine,
+                        )}
+                      >
+                        <p className="text-foreground text-center text-sm leading-tight font-extrabold text-balance">
+                          {cell.lesson.subject}
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-center text-[11px] leading-tight font-bold text-balance">
+                          {cell.lesson.teacher}
+                        </p>
+                        {cell.lesson.room && (
+                          <p className="text-muted-foreground mt-2 flex items-center gap-1 text-[10px] font-extrabold uppercase">
+                            <MapPin className="size-2.5 shrink-0" />
+                            {cell.lesson.room}
+                          </p>
+                        )}
+                      </td>
+                    ) : (
+                      <td
+                        key={cell.period}
+                        className={cn(
+                          'border-border bg-secondary/40 border-l-2',
+                          rowLine,
+                        )}
+                      />
+                    ),
+                  )}
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile: tabel 11 kolom tidak terbaca, jadi ditumpuk per hari. */}
+      <div className="flex flex-col gap-5 md:hidden">
+        {scheduleData.map((day, dayIndex) => (
+          <motion.section
+            key={day.name}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: dayIndex * 0.06, duration: 0.35 }}
+            className="border-border bg-card duo-card flex flex-col gap-3 rounded-3xl p-3"
+          >
+            <div className="bg-pastel-blue border-border flex items-baseline justify-between rounded-2xl border-2 px-4 py-3 dark:bg-blue-500/15">
+              <h3 className="text-brand-navy text-lg font-extrabold tracking-widest uppercase dark:text-white">
+                {day.name}
+              </h3>
+              <p className="text-brand-blue text-[11px] font-extrabold uppercase dark:text-blue-200">
+                {day.subtitle}
+              </p>
+            </div>
+
+            {day.lessons.map((lesson) => (
               <div
-                key={lessonIndex}
+                key={lesson.time}
                 className={cn(
-                  'relative rounded-xl border-l-[3px] bg-slate-50 p-4 transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/50 dark:hover:bg-slate-800',
+                  'border-border rounded-2xl border-l-[6px] p-4',
                   lesson.color,
+                  lesson.bg,
                 )}
               >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase dark:text-slate-400">
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground text-[10px] font-extrabold uppercase">
                     {lesson.time}
                   </span>
                   {lesson.room && (
-                    <div className="flex items-center gap-1 rounded-sm bg-slate-200 px-1.5 py-0.5 text-[9px] font-bold dark:bg-slate-700">
-                      <MapPin className="h-2.5 w-2.5" />
+                    <span className="border-border bg-card flex items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[9px] font-extrabold uppercase">
+                      <MapPin className="size-2.5" />
                       {lesson.room}
-                    </div>
+                    </span>
                   )}
                 </div>
-                <h4 className="mb-1 text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
+                <h4 className="text-foreground text-base leading-tight font-extrabold">
                   {lesson.subject}
                 </h4>
-                <p className="line-clamp-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                <p className="text-muted-foreground text-[11px] font-bold">
                   {lesson.teacher}
                 </p>
               </div>
             ))}
-          </div>
-        </motion.div>
-      ))}
-    </div>
+          </motion.section>
+        ))}
+      </div>
+    </>
   );
 }

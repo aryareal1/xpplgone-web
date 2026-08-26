@@ -12,11 +12,16 @@ import {
 } from 'react';
 import SectionHeader from '@fe/components/section-header';
 import { type Album, albums } from '../../../../data/albums';
-import { AlbumCard } from './album-card';
+import { PhotoTile } from './photo-tile';
 
 const AlbumModal = dynamic(
   () => import('./album-modal').then((mod) => ({ default: mod.AlbumModal })),
   { ssr: false },
+);
+
+// Semua foto dipecah jadi tile sendiri; urutannya tetap mengikuti album.
+const tiles = albums.flatMap((album) =>
+  album.photos.map((photo, photoIndex) => ({ album, photo, photoIndex })),
 );
 
 export default function AlbumLayout() {
@@ -28,9 +33,9 @@ export default function AlbumLayout() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 
-  const openAlbum = useCallback((album: Album) => {
+  const openAlbum = useCallback((album: Album, photoIndex = 0) => {
     setSelectedAlbum(album);
-    setCurrentImageIndex(0);
+    setCurrentImageIndex(photoIndex);
   }, []);
 
   const closeAlbum = useCallback(() => {
@@ -145,7 +150,7 @@ export default function AlbumLayout() {
   }, [selectedAlbum]);
 
   return (
-    <div className="font-outfit min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+    <div className="bg-background text-foreground min-h-screen transition-colors duration-300">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -159,28 +164,8 @@ export default function AlbumLayout() {
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <SectionHeader
             title="Album"
-            desc={[
-              'Kelas X PPLG 1 - SMKN 1 Kandeman',
-              'Galeri Momen & Kenangan',
-            ]}
-            color="bg-blue-600"
+            desc={['Kelas XI RPL - SMKN 1 Kandeman', 'Galeri Momen & Kenangan']}
           />
-
-          <div className="flex items-center gap-4">
-            <motion.div className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:border-slate-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition-transform dark:bg-indigo-900/30 dark:text-indigo-400">
-                <ImageIcon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
-                  Total Momen
-                </p>
-                <p className="font-bold text-slate-900 dark:text-slate-100">
-                  {albums.length} Album
-                </p>
-              </div>
-            </motion.div>
-          </div>
         </div>
       </motion.div>
 
@@ -193,21 +178,23 @@ export default function AlbumLayout() {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="mb-10 text-center"
         >
-          <h2 className="mb-2 text-2xl font-bold text-slate-900 md:text-3xl dark:text-white">
+          <h2 className="mb-2 text-2xl font-bold text-foreground md:text-3xl dark:text-white">
             Foto Kita Adalah Kenangan Kita
           </h2>
-          <p className="mx-auto max-w-2xl text-slate-600 dark:text-slate-400">
+          <p className="mx-auto max-w-2xl text-muted-foreground dark:text-muted-foreground">
             Bernostalgialah dengan momen-momen indah yang telah kita lalui
             bersama
           </p>
         </motion.div>
 
-        {/* Albums Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {albums.map((album, index) => (
-            <AlbumCard
-              key={album.id}
-              album={album}
+        {/* Kolase masonry: tinggi tile ikut rasio asli foto, tanpa jarak */}
+        <div className="border-border bg-secondary duo-card columns-2 gap-0 overflow-hidden rounded-2xl sm:columns-3 lg:columns-4">
+          {tiles.map((tile, index) => (
+            <PhotoTile
+              key={tile.photo}
+              album={tile.album}
+              photo={tile.photo}
+              photoIndex={tile.photoIndex}
               index={index}
               onClick={openAlbum}
             />

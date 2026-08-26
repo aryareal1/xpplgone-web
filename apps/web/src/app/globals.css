@@ -13,13 +13,50 @@
   --color-gray-875: oklch(0.2325 0.03 263);
 }
 
+/* Palet maskot XI RPL: biru + kuning + navy, plus pastel untuk aksen seksi. */
+@theme inline {
+  --color-brand-blue: #1e88e5;
+  --color-brand-yellow: #ffc93c;
+  --color-brand-navy: #0a2540;
+  --color-pastel-yellow: #ffe8a3;
+  --color-pastel-blue: #bfdfff;
+  --color-pastel-pink: #ffc9de;
+  --color-pastel-green: #c8f2d0;
+  --color-pastel-purple: #d8ccff;
+  --shadow-soft: 0 4px 0 0 var(--duo-shade);
+}
+
+/*
+ * Bahasa bentuk ala Duolingo: garis tebal, bayangan padat tanpa blur, dan
+ * tombol/kartu yang bisa "ditekan". Warna tetap dari palet maskot.
+ */
+@utility duo-card {
+  border-width: 2px;
+  box-shadow: 0 var(--duo-depth, 4px) 0 0 var(--duo-shade);
+}
+
+@utility duo-press {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+
+  &:hover {
+    --duo-depth: 6px;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    --duo-depth: 1px;
+    transform: translateY(3px);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-outfit);
-  --font-serif: var(--font-roboto-slab);
-  --font-slab: var(--font-roboto-slab);
-  --font-outfit: var(--font-outfit);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-fredoka);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -64,38 +101,39 @@
 
 :root {
   color-scheme: light;
-  --radius: 0.625rem;
-  --background: oklch(0.97 0 265);
-  --foreground: oklch(0.13 0.028 261.692);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.028 261.692);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.028 261.692);
-  --primary: oklch(0.21 0.034 264.665);
-  --primary-foreground: oklch(0.985 0.002 247.839);
-  --secondary: oklch(0.967 0.003 264.542);
-  --secondary-foreground: oklch(0.21 0.034 264.665);
-  --muted: oklch(0.967 0.003 264.542);
-  --muted-foreground: oklch(0.551 0.027 264.364);
-  --accent: oklch(0.967 0.003 264.542);
-  --accent-foreground: oklch(0.21 0.034 264.665);
+  --radius: 1rem;
+  --duo-shade: rgb(10 37 64 / 0.15);
+  --background: #fffdf7;
+  --foreground: #0a2540;
+  --card: #ffffff;
+  --card-foreground: #0a2540;
+  --popover: #ffffff;
+  --popover-foreground: #0a2540;
+  --primary: #1e88e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f0e3;
+  --secondary-foreground: #0a2540;
+  --muted: #f5f0e3;
+  --muted-foreground: #5b7086;
+  --accent: #e8f4ff;
+  --accent-foreground: #0b5aa5;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.928 0.006 264.531);
-  --input: oklch(0.928 0.006 264.531);
-  --ring: oklch(0.707 0.022 261.325);
+  --border: #e6ddcb;
+  --input: #e6ddcb;
+  --ring: #1e88e5;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0.002 247.839);
-  --sidebar-foreground: oklch(0.13 0.028 261.692);
-  --sidebar-primary: oklch(0.21 0.034 264.665);
-  --sidebar-primary-foreground: oklch(0.985 0.002 247.839);
-  --sidebar-accent: oklch(0.967 0.003 264.542);
-  --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
-  --sidebar-border: oklch(0.928 0.006 264.531);
-  --sidebar-ring: oklch(0.707 0.022 261.325);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a2540;
+  --sidebar-primary: #1e88e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8f4ff;
+  --sidebar-accent-foreground: #0b5aa5;
+  --sidebar-border: #e6ddcb;
+  --sidebar-ring: #1e88e5;
   --grid: oklch(0.96 0.0025 265);
   --grid-header: oklch(0.95 0.005 265);
   --grid-foreground: oklch(0.13 0.028 261.692);
@@ -104,37 +142,38 @@
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.16 0.04 280);
-  --foreground: oklch(0.95 0.008 250);
-  --card: oklch(0.2 0.045 278);
-  --card-foreground: oklch(0.95 0.008 250);
-  --popover: oklch(0.2 0.045 278);
-  --popover-foreground: oklch(0.95 0.008 250);
-  --primary: oklch(0.82 0.17 70);
-  --primary-foreground: oklch(0.14 0.04 50);
-  --secondary: oklch(0.25 0.055 275);
-  --secondary-foreground: oklch(0.9 0.01 250);
-  --muted: oklch(0.25 0.055 275);
-  --muted-foreground: oklch(0.65 0.025 265);
-  --accent: oklch(0.28 0.07 165);
-  --accent-foreground: oklch(0.9 0.05 165);
+  --duo-shade: rgb(0 0 0 / 0.55);
+  --background: #08192b;
+  --foreground: #eaf2fb;
+  --card: #0d2338;
+  --card-foreground: #eaf2fb;
+  --popover: #0d2338;
+  --popover-foreground: #eaf2fb;
+  --primary: #3fa9f5;
+  --primary-foreground: #06192b;
+  --secondary: #14314b;
+  --secondary-foreground: #eaf2fb;
+  --muted: #14314b;
+  --muted-foreground: #9db4cc;
+  --accent: #14344f;
+  --accent-foreground: #bfdfff;
   --destructive: oklch(0.68 0.2 22);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.82 0.17 70 / 60%);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: #3fa9f5;
   --chart-1: oklch(0.82 0.17 70);
   --chart-2: oklch(0.7 0.17 165);
   --chart-3: oklch(0.6 0.18 290);
   --chart-4: oklch(0.65 0.2 30);
   --chart-5: oklch(0.72 0.18 240);
-  --sidebar: oklch(0.14 0.05 280);
-  --sidebar-foreground: oklch(0.95 0.008 250);
-  --sidebar-primary: oklch(0.82 0.17 70);
-  --sidebar-primary-foreground: oklch(0.14 0.04 50);
-  --sidebar-accent: oklch(0.22 0.055 275);
-  --sidebar-accent-foreground: oklch(0.9 0.01 250);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.82 0.17 70 / 50%);
+  --sidebar: #0a1f33;
+  --sidebar-foreground: #eaf2fb;
+  --sidebar-primary: #3fa9f5;
+  --sidebar-primary-foreground: #06192b;
+  --sidebar-accent: #14344f;
+  --sidebar-accent-foreground: #bfdfff;
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: #3fa9f5;
 
   /* Grid */
   --grid: oklch(0.22 0.05 277);
@@ -160,5 +199,19 @@
   scrollbar-width: auto;
   &::-webkit-scrollbar {
     display: block;
+  }
+}
+
+/* Hormati preferensi pengguna: matikan animasi dekoratif. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: harus mengalahkan utility animasi Tailwind */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: selesai */
   }
 }

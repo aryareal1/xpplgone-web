@@ -1,20 +1,20 @@
 'use client';
 
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  FlameIcon,
-  InfoIcon,
-} from 'lucide-react';
-import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
-import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@fe/components/ui/card';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@fe/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@fe/components/ui/tooltip';
 import { cn } from '@fe/lib/utils';
+import { ChevronLeftIcon, ChevronRightIcon, FlameIcon, InfoIcon } from 'lucide-react';
+import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
+import { useMemo, useState } from 'react';
 import {
   attendanceCopy,
   averageScore,
@@ -49,7 +49,7 @@ export function InfoHint({ label, text }: { label: string; text: string }) {
           type="button"
           aria-label={`Info: ${label}`}
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex shrink-0 cursor-pointer items-center justify-center self-center leading-none text-slate-400 transition-colors hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none dark:hover:text-slate-200"
+          className="inline-flex shrink-0 cursor-pointer items-center justify-center self-center leading-none text-muted-foreground transition-colors hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none dark:hover:text-foreground"
         >
           <InfoIcon className="size-4" />
         </button>
@@ -98,9 +98,9 @@ export function HabitCalendar({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <CardTitle className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            <CardTitle className="text-lg font-bold tracking-tight text-foreground dark:text-foreground">
               {MONTHS[mo]}{' '}
-              <span className="font-normal text-slate-400">{year}</span>
+              <span className="font-normal text-muted-foreground">{year}</span>
             </CardTitle>
           </m.div>
           <InfoHint
@@ -113,7 +113,7 @@ export function HabitCalendar({
             type="button"
             aria-label="Bulan sebelumnya"
             onClick={() => step(-1)}
-            className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
           >
             <ChevronLeftIcon className="size-4" />
           </button>
@@ -121,7 +121,7 @@ export function HabitCalendar({
             type="button"
             aria-label="Bulan berikutnya"
             onClick={() => step(1)}
-            className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
           >
             <ChevronRightIcon className="size-4" />
           </button>
@@ -134,7 +134,7 @@ export function HabitCalendar({
             <abbr
               key={d}
               title={d}
-              className="text-center text-xs font-medium text-slate-400 no-underline"
+              className="text-center text-xs font-medium text-muted-foreground no-underline"
             >
               {d[0]}
             </abbr>
@@ -171,13 +171,13 @@ export function HabitCalendar({
                     className={cn(
                       'flex aspect-square items-center justify-center rounded-lg text-sm font-medium transition-all',
                       future
-                        ? 'cursor-not-allowed text-slate-300 dark:text-slate-700'
+                        ? 'cursor-not-allowed text-muted-foreground/40'
                         : cn('cursor-pointer', HEAT_BG[lvl], HEAT_TEXT[lvl]),
                       sameDay(cell, today) &&
                         'ring-2 ring-orange-400 ring-offset-2 ring-offset-background',
                       sameDay(cell, selected) &&
                         !sameDay(cell, today) &&
-                        'ring-2 ring-slate-400 ring-offset-2 ring-offset-background dark:ring-slate-500',
+                        'ring-2 ring-ring ring-offset-2 ring-offset-background dark:ring-ring',
                     )}
                   >
                     {day}
@@ -188,7 +188,7 @@ export function HabitCalendar({
           </AnimatePresence>
         </div>
 
-        <div className="mt-4 flex items-center justify-end gap-1.5 text-xs text-slate-400">
+        <div className="mt-4 flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
           <span>Sedikit</span>
           {HEAT_BG.map((c, i) => (
             <span
@@ -232,7 +232,7 @@ export function HabitStats({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-3">
-        <CardTitle className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+        <CardTitle className="text-lg font-bold tracking-tight text-foreground dark:text-foreground">
           Statistik
         </CardTitle>
         <select
@@ -243,7 +243,7 @@ export function HabitStats({
               new Date(month.getFullYear(), Number(e.target.value), 1),
             )
           }
-          className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          className="cursor-pointer rounded-lg border border-border bg-card px-2 py-1 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-border dark:bg-secondary dark:text-foreground"
         >
           {MONTHS.map((n, i) => (
             <option key={n} value={i}>
@@ -255,10 +255,10 @@ export function HabitStats({
 
       <CardContent>
         <div className="mb-2 flex items-baseline gap-2">
-          <span className="text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
+          <span className="text-3xl font-bold tabular-nums text-foreground dark:text-foreground">
             {average}%
           </span>
-          <span className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             rata-rata harian
             <InfoHint
               label="Rata-rata harian"
@@ -269,13 +269,13 @@ export function HabitStats({
 
         <TrendArea series={series} height={150} name="Rata-rata harian" />
 
-        <div className="mt-7 border-t border-slate-200/70 pt-5 dark:border-slate-800">
+        <div className="mt-7 border-t border-border/70 pt-5 dark:border-border">
           <div
             className={cn(
               'flex items-center gap-3 rounded-xl p-3',
               count > 0
                 ? 'bg-linear-to-r from-orange-50 to-amber-50 dark:from-orange-950/40 dark:to-amber-950/30'
-                : 'bg-slate-50 dark:bg-slate-800/40',
+                : 'bg-secondary dark:bg-secondary/40',
             )}
           >
             <m.div
@@ -286,16 +286,16 @@ export function HabitStats({
                 'flex size-11 shrink-0 items-center justify-center rounded-xl',
                 count > 0
                   ? 'bg-orange-500 text-white'
-                  : 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500',
+                  : 'bg-secondary text-muted-foreground dark:bg-secondary',
               )}
             >
               <FlameIcon className="size-5" />
             </m.div>
 
             <div className="min-w-0">
-              <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-slate-900 dark:text-slate-50">
+              <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-foreground dark:text-foreground">
                 {count}{' '}
-                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                <span className="text-sm font-medium text-muted-foreground">
                   hari beruntun
                 </span>
                 <InfoHint
@@ -303,7 +303,7 @@ export function HabitStats({
                   text={`Jumlah hari berturut-turut kamu ${copy.verb.toLowerCase()}. Dihitung dari seluruh riwayat di server, bukan per bulan, jadi tidak ikut berubah saat kamu ganti bulan. Satu hari terlewat memutus hitungan.`}
                 />
               </p>
-              <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
                 {todayDone
                   ? 'Aman untuk hari ini'
                   : atRisk
@@ -314,20 +314,20 @@ export function HabitStats({
           </div>
 
           <div className="mt-5 mb-3 flex items-baseline justify-between gap-2">
-            <span className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <span className="flex items-center gap-2 text-sm font-semibold text-foreground dark:text-foreground">
               Konsistensi
               <InfoHint
                 label="Konsistensi"
                 text="Porsi hari di bulan ini yang keempat modulnya selesai semua. Hari yang cuma sebagian terisi tidak dihitung di sini."
               />
             </span>
-            <span className="text-sm text-slate-500 dark:text-slate-400">
+            <span className="text-sm text-muted-foreground">
               {perfect} dari {scores.length} hari penuh
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary dark:bg-secondary">
               <m.div
                 initial={{ width: 0 }}
                 animate={{ width: `${recap?.rate ?? 0}%` }}
@@ -335,15 +335,15 @@ export function HabitStats({
                 className="h-full rounded-full bg-linear-to-r from-emerald-400 to-emerald-600"
               />
             </div>
-            <span className="text-sm font-bold tabular-nums text-slate-900 dark:text-slate-50">
+            <span className="text-sm font-bold tabular-nums text-foreground dark:text-foreground">
               {recap?.rate ?? 0}%
             </span>
           </div>
         </div>
 
-        <div className="mt-6 border-t border-slate-200/70 pt-5 dark:border-slate-800">
+        <div className="mt-6 border-t border-border/70 pt-5 dark:border-border">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <span className="text-sm font-semibold text-foreground dark:text-foreground">
               Per modul
             </span>
             <InfoHint
@@ -355,10 +355,10 @@ export function HabitStats({
             {MODULES.map((mod) => (
               <div key={mod.key} className="flex items-center gap-2">
                 <span className={cn('size-2 shrink-0 rounded-full', mod.dot)} />
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                   {mod.label}
                 </span>
-                <span className="ml-auto text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+                <span className="ml-auto text-sm font-semibold tabular-nums text-foreground dark:text-foreground">
                   {stats[mod.key]}%
                 </span>
               </div>

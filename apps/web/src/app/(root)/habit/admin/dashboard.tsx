@@ -99,6 +99,7 @@ export default function AdminDashboard() {
 
   const [members, setMembers] = useState<Member[] | null>(null);
   const [rows, setRows] = useState<MemberRow[]>([]);
+  const [rowsLoading, setRowsLoading] = useState(true);
   const [klass, setKlass] = useState<ClassSummary | null>(null);
   const [month, setMonth] = useState(() => {
     const now = new Date();
@@ -133,11 +134,20 @@ export default function AdminDashboard() {
   }, [allowed, month]);
 
   useEffect(() => {
-    if (!members?.length) return;
+    if (!members) return;
+    // Kelas kosong: tidak ada yang perlu dimuat.
+    if (!members.length) {
+      setRowsLoading(false);
+      return;
+    }
     let alive = true;
+    setRowsLoading(true);
     fetchMemberRows(members, month)
       .then((list) => alive && setRows(list))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setRowsLoading(false);
+      });
     return () => {
       alive = false;
     };
@@ -206,7 +216,7 @@ export default function AdminDashboard() {
     );
 
   return (
-    <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white transition-colors duration-300 dark:from-slate-950 dark:to-slate-900">
+    <div className="bg-background min-h-screen transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <m.header
           initial={reduce ? false : { opacity: 0, y: -16 }}
@@ -215,10 +225,10 @@ export default function AdminDashboard() {
           className="mb-8 flex flex-wrap items-end justify-between gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl dark:text-white">
               Dasbor Kebiasaan
             </h1>
-            <p className="mt-1.5 text-base text-slate-500 dark:text-slate-400">
+            <p className="mt-1.5 text-base text-muted-foreground">
               {members?.length ?? 0} anggota ·{' '}
               {month.toLocaleDateString('id-ID', {
                 month: 'long',
@@ -227,12 +237,12 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1 rounded-xl border border-slate-200 p-1 dark:border-slate-800">
+          <div className="flex items-center gap-1 rounded-xl border border-border p-1 dark:border-border">
             <button
               type="button"
               aria-label="Bulan sebelumnya"
               onClick={() => stepMonth(-1)}
-              className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+              className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
             >
               <ChevronLeftIcon className="size-4" />
             </button>
@@ -244,13 +254,13 @@ export default function AdminDashboard() {
                   new Date(month.getFullYear(), Number(e.target.value), 1),
                 )
               }
-              className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="cursor-pointer rounded-lg border border-border bg-card px-2 py-1 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-border dark:bg-secondary dark:text-foreground"
             >
               {MONTHS.map((n, i) => (
                 <option
                   key={n}
                   value={i}
-                  className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                  className="bg-card text-foreground dark:bg-secondary dark:text-foreground"
                 >
                   {n}
                 </option>
@@ -260,7 +270,7 @@ export default function AdminDashboard() {
               type="button"
               aria-label="Bulan berikutnya"
               onClick={() => stepMonth(1)}
-              className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+              className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
             >
               <ChevronRightIcon className="size-4" />
             </button>
@@ -398,7 +408,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative">
-                    <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-slate-400" />
+                    <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -410,13 +420,13 @@ export default function AdminDashboard() {
                     aria-label="Urutkan"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortKey)}
-                    className="h-9 cursor-pointer rounded-lg border border-slate-200 bg-white px-2.5 text-sm text-slate-700 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="h-9 cursor-pointer rounded-lg border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50 dark:border-border dark:bg-secondary dark:text-foreground"
                   >
                     {SORTS.map((s) => (
                       <option
                         key={s.key}
                         value={s.key}
-                        className="bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                        className="bg-card text-foreground dark:bg-secondary dark:text-foreground"
                       >
                         {s.label}
                       </option>
@@ -426,7 +436,11 @@ export default function AdminDashboard() {
               </CardHeader>
 
               <CardContent className="px-0">
-                <MemberTable rows={visible} onPick={setMember} />
+                {rowsLoading ? (
+                  <MemberTableSkeleton />
+                ) : (
+                  <MemberTable rows={visible} onPick={setMember} />
+                )}
               </CardContent>
             </Card>
           </>
@@ -447,7 +461,7 @@ function MemberTable({
 }) {
   if (!rows.length)
     return (
-      <p className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="px-4 py-10 text-center text-sm text-muted-foreground">
         Tidak ada anggota yang cocok.
       </p>
     );
@@ -456,7 +470,7 @@ function MemberTable({
     <div className="overflow-x-auto">
       <table className="w-full min-w-3xl text-sm">
         <thead>
-          <tr className="border-b border-slate-200/70 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase dark:border-slate-800 dark:text-slate-400">
+          <tr className="border-b border-border/70 text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase dark:border-border">
             <th className="px-4 py-2.5">Anggota</th>
             <th className="px-4 py-2.5">Skor</th>
             <th className="px-4 py-2.5">Ibadah</th>
@@ -474,25 +488,25 @@ function MemberTable({
               tabIndex={0}
               onClick={() => onPick(r.member.nis)}
               onKeyDown={(e) => e.key === 'Enter' && onPick(r.member.nis)}
-              className="cursor-pointer border-b border-slate-200/50 transition-colors last:border-0 hover:bg-slate-50 focus-visible:bg-slate-50 dark:border-slate-800/60 dark:hover:bg-slate-800/40 dark:focus-visible:bg-slate-800/40"
+              className="cursor-pointer border-b border-border/50 transition-colors last:border-0 hover:bg-secondary focus-visible:bg-secondary dark:border-border/60 dark:hover:bg-secondary/40 dark:focus-visible:bg-secondary/40"
             >
               <td className="px-4 py-3">
-                <p className="font-semibold text-slate-900 dark:text-slate-50">
+                <p className="font-semibold text-foreground dark:text-foreground">
                   {r.member.name}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   NIS {r.member.nis}
                 </p>
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="h-1.5 w-16 overflow-hidden rounded-full bg-secondary dark:bg-secondary">
                     <div
                       className={cn('h-full rounded-full', scoreBar(r.score))}
                       style={{ width: `${r.score}%` }}
                     />
                   </div>
-                  <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+                  <span className="font-semibold tabular-nums text-foreground dark:text-foreground">
                     {r.score}%
                   </span>
                 </div>
@@ -500,15 +514,15 @@ function MemberTable({
               {MODULES.map((mod) => (
                 <td
                   key={mod.key}
-                  className="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300"
+                  className="px-4 py-3 tabular-nums text-muted-foreground dark:text-foreground"
                 >
                   {r.modules[mod.key]}%
                 </td>
               ))}
-              <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">
+              <td className="px-4 py-3 tabular-nums text-muted-foreground dark:text-foreground">
                 {r.late}
               </td>
-              <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-slate-300">
+              <td className="px-4 py-3 tabular-nums text-muted-foreground dark:text-foreground">
                 {r.absent}
               </td>
             </tr>
@@ -527,6 +541,19 @@ const scoreBar = (v: number) =>
       : v >= 40
         ? 'bg-amber-500'
         : 'bg-rose-500';
+
+function MemberTableSkeleton() {
+  return (
+    <div className="overflow-x-auto px-4 py-3">
+      <Skeleton className="mb-4 h-7 w-full max-w-3xl rounded-lg" />
+      <div className="space-y-2.5">
+        {Array.from({ length: 8 }, (_, i) => (
+          <Skeleton key={i} className="h-11 w-full rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 
@@ -587,24 +614,22 @@ function MemberDetail({
           <button
             type="button"
             onClick={onBack}
-            className="mb-2 flex cursor-pointer items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            className="mb-2 flex cursor-pointer items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="size-4" /> Semua anggota
           </button>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground dark:text-white">
             {member.name}
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground">
             NIS {member.nis} · {row.logged} dari {row.tracked} hari terisi
           </p>
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
+          <span className="text-4xl font-bold tabular-nums text-foreground dark:text-foreground">
             {row.score}%
           </span>
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            skor bulan ini
-          </span>
+          <span className="text-sm text-muted-foreground">skor bulan ini</span>
         </div>
       </div>
 
@@ -682,16 +707,16 @@ function MemberDetail({
           </CardHeader>
           <CardContent>
             <ModuleRadar stats={row.modules} />
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-slate-200/70 pt-4 dark:border-slate-800">
+            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5 border-t border-border/70 pt-4 dark:border-border">
               {MODULES.map((mod) => (
                 <div key={mod.key} className="flex items-center gap-2">
                   <span
                     className={cn('size-2 shrink-0 rounded-full', mod.dot)}
                   />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                     {mod.label}
                   </span>
-                  <span className="ml-auto text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+                  <span className="ml-auto text-sm font-semibold tabular-nums text-foreground dark:text-foreground">
                     {row.modules[mod.key]}%
                   </span>
                 </div>
@@ -768,14 +793,14 @@ function DayDetail({
 }) {
   if (!picked)
     return (
-      <p className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500 dark:bg-slate-800/40 dark:text-slate-400">
+      <p className="flex h-40 items-center justify-center rounded-xl bg-secondary text-sm text-muted-foreground dark:bg-secondary/40">
         Belum ada tanggal yang dipilih.
       </p>
     );
 
   if (!day)
     return (
-      <p className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500 dark:bg-slate-800/40 dark:text-slate-400">
+      <p className="flex h-40 items-center justify-center rounded-xl bg-secondary text-sm text-muted-foreground dark:bg-secondary/40">
         Tidak ada catatan pada tanggal ini.
       </p>
     );
@@ -790,7 +815,7 @@ function DayDetail({
         <ul className="space-y-1.5">
           {IBADAH.map(({ label, field }) => (
             <li key={field} className="flex items-center justify-between gap-2">
-              <span className="text-sm text-slate-600 dark:text-slate-300">
+              <span className="text-sm text-muted-foreground dark:text-foreground">
                 {label}
               </span>
               <Pill ok={journal?.[field] === true}>
@@ -812,7 +837,7 @@ function DayDetail({
         }
       >
         {checkedAt ? (
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-sm text-muted-foreground dark:text-foreground">
             <span
               className={cn(
                 'font-bold',
@@ -826,15 +851,13 @@ function DayDetail({
             pada {fmtTime(checkedAt)}
           </p>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Tidak absen.
-          </p>
+          <p className="text-sm text-muted-foreground">Tidak absen.</p>
         )}
       </DetailBlock>
 
       <DetailBlock icon={DumbbellIcon} title="Olahraga" tone="text-emerald-500">
         {journal?.did_sport === true ? (
-          <dl className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+          <dl className="space-y-1 text-sm text-muted-foreground dark:text-foreground">
             <Row label="Jenis" value={journal.sport_type || '—'} />
             <Row
               label="Durasi"
@@ -848,16 +871,14 @@ function DayDetail({
             />
           </dl>
         ) : journal?.did_sport === false ? (
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-sm text-muted-foreground dark:text-foreground">
             Tidak olahraga
             {journal.sport_skip_reason
               ? ` — ${journal.sport_skip_reason}`
               : '.'}
           </p>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Belum dijawab.
-          </p>
+          <p className="text-sm text-muted-foreground">Belum dijawab.</p>
         )}
       </DetailBlock>
 
@@ -867,7 +888,7 @@ function DayDetail({
         tone="text-amber-500"
       >
         {journal?.did_study === true ? (
-          <dl className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+          <dl className="space-y-1 text-sm text-muted-foreground dark:text-foreground">
             <Row label="Topik" value={journal.study_about || '—'} />
             <Row label="Media" value={journal.study_media || '—'} />
             <Proofs
@@ -879,20 +900,18 @@ function DayDetail({
             />
           </dl>
         ) : journal?.did_study === false ? (
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="text-sm text-muted-foreground dark:text-foreground">
             Tidak belajar
             {journal.study_skip_reason
               ? ` — ${journal.study_skip_reason}`
               : '.'}
           </p>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Belum dijawab.
-          </p>
+          <p className="text-sm text-muted-foreground">Belum dijawab.</p>
         )}
       </DetailBlock>
 
-      <p className="text-xs text-slate-500 sm:col-span-2 dark:text-slate-400">
+      <p className="text-xs text-muted-foreground sm:col-span-2">
         {level(journal, check)} dari 4 modul selesai pada tanggal ini.
       </p>
     </div>
@@ -918,7 +937,7 @@ function Proofs({
             key={it.label}
             className="flex items-center justify-between gap-3"
           >
-            <dt className="text-slate-500 dark:text-slate-400">{it.label}</dt>
+            <dt className="text-muted-foreground">{it.label}</dt>
             <dd>
               <button
                 type="button"
@@ -973,30 +992,30 @@ function ProofModal({
   return (
     <div
       role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-navy/70 p-4 backdrop-blur-sm"
       onMouseDown={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Bukti ${proof.label}`}
-        className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
+        className="border-border bg-card duo-card relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
-          <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3 dark:border-border">
+          <h3 className="font-semibold text-foreground dark:text-foreground">
             Bukti {proof.label}
           </h3>
           <button
             type="button"
             aria-label="Tutup bukti"
             onClick={onClose}
-            className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
           >
             <XIcon className="size-5" />
           </button>
         </div>
-        <div className="flex max-h-[calc(90vh-4rem)] justify-center overflow-auto bg-slate-100 p-3 dark:bg-slate-950">
+        <div className="flex max-h-[calc(90vh-4rem)] justify-center overflow-auto bg-secondary p-3 dark:bg-card">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -1004,7 +1023,7 @@ function ProofModal({
               className="max-h-[calc(90vh-6rem)] max-w-full rounded-lg object-contain"
             />
           ) : imageError ? (
-            <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
               <p>Gambar bukti tidak dapat dimuat.</p>
               <a
                 href={fileUrl(proof.filename)}
@@ -1016,7 +1035,7 @@ function ProofModal({
               </a>
             </div>
           ) : (
-            <div className="flex min-h-56 items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex min-h-56 items-center gap-2 text-sm text-muted-foreground">
               <LoaderCircleIcon className="size-5 animate-spin" /> Memuat bukti…
             </div>
           )}
@@ -1029,8 +1048,8 @@ function ProofModal({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-slate-500 dark:text-slate-400">{label}</dt>
-      <dd className="truncate font-medium text-slate-800 dark:text-slate-100">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="truncate font-medium text-foreground dark:text-foreground">
         {value}
       </dd>
     </div>
@@ -1044,7 +1063,7 @@ function Pill({ ok, children }: { ok: boolean; children: ReactNode }) {
         'rounded-full px-2 py-0.5 text-xs font-semibold',
         ok
           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+          : 'bg-secondary text-muted-foreground dark:bg-secondary',
       )}
     >
       {children}
@@ -1066,8 +1085,8 @@ function DetailBlock({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/40">
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-50">
+    <div className="rounded-xl bg-secondary p-4 dark:bg-secondary/40">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-foreground dark:text-foreground">
         <Icon className={cn('size-4', tone)} />
         {title}
         {info && <InfoHint label={title} text={info} />}
@@ -1113,16 +1132,14 @@ function Stat({
           <Icon className="size-4.5" />
         </span>
         <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             {label}
             <InfoHint label={label} text={info} />
           </p>
-          <p className="text-2xl leading-tight font-bold tabular-nums text-slate-900 dark:text-slate-50">
+          <p className="text-2xl leading-tight font-bold tabular-nums text-foreground dark:text-foreground">
             {value}
           </p>
-          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-            {hint}
-          </p>
+          <p className="truncate text-xs text-muted-foreground">{hint}</p>
         </div>
       </CardContent>
     </Card>
@@ -1139,16 +1156,16 @@ function Guard({
   action: ReactNode;
 }) {
   return (
-    <div className="font-outfit flex min-h-screen items-center justify-center bg-linear-to-b from-slate-50 to-white px-4 dark:from-slate-950 dark:to-slate-900">
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <Card className="max-w-md text-center">
         <CardContent className="flex flex-col items-center gap-3 py-6">
           <span className="flex size-12 items-center justify-center rounded-2xl bg-rose-500 text-white">
             <ShieldAlertIcon className="size-6" />
           </span>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-xl font-bold text-foreground dark:text-white">
             {title}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{body}</p>
+          <p className="text-sm text-muted-foreground">{body}</p>
           <div className="mt-2">{action}</div>
         </CardContent>
       </Card>
@@ -1175,7 +1192,7 @@ function DashboardSkeleton({ bare }: { bare?: boolean }) {
   if (bare) return body;
 
   return (
-    <div className="font-outfit min-h-screen bg-linear-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <Skeleton className="mb-8 h-10 w-64 rounded-xl" />
         {body}

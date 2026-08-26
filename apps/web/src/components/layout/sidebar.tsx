@@ -1,45 +1,32 @@
 'use client';
 
+import { cn } from '@fe/lib/utils';
 import { SITE_NAME } from '@xirpl/shared';
 import {
   AlbumIcon,
-  AlignLeftIcon,
   AlignRightIcon,
   BookOpenCheckIcon,
-  ChevronDownIcon,
-  ClipboardClockIcon,
+  CalendarDaysIcon,
+  ClipboardListIcon,
   Code2Icon,
   HomeIcon,
-  NewspaperIcon,
-  NotepadTextIcon,
-  PiggyBankIcon,
-  UsersRoundIcon,
+  TrophyIcon,
 } from 'lucide-react';
-import { motion as m } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@fe/lib/utils';
 import { Button } from '../ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '../ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from '../ui/sidebar';
 
@@ -49,180 +36,155 @@ type Bars = {
     name: string;
     icon: typeof HomeIcon;
     path?: string;
-    sub?: { name: string; path: string }[];
   }[];
 }[];
 
 const bars: Bars = [
   {
+    title: 'Menu',
     items: [
       { name: 'Home', icon: HomeIcon, path: '/' },
       { name: 'Album', icon: AlbumIcon, path: '/albums' },
       { name: 'Jurnal Kebiasaan', icon: BookOpenCheckIcon, path: '/habit' },
+      { name: 'Peringkat', icon: TrophyIcon, path: '/leaderboard' },
     ],
   },
   {
     title: 'Administrasi Kelas',
     items: [
-      {
-        name: 'Jadwal',
-        icon: ClipboardClockIcon,
-        sub: [
-          { name: 'Pelajaran', path: '/schedules/subject' },
-          { name: 'Piket', path: '/schedules/picket' },
-        ],
-      },
+      { name: 'Pelajaran', icon: CalendarDaysIcon, path: '/schedules/subject' },
+      { name: 'Piket', icon: ClipboardListIcon, path: '/schedules/picket' },
     ],
-  },
-  {
-    title: 'Developer',
-    items: [{ name: 'API Documentation', icon: Code2Icon, path: '/api' }],
   },
 ];
 
+const active =
+  'bg-pastel-blue border-brand-blue/50 text-brand-blue shadow-[0_3px_0_0_var(--duo-shade)] hover:bg-pastel-blue hover:text-brand-blue dark:bg-blue-500/20 dark:text-blue-300';
+
+const itemBase =
+  'h-11 rounded-2xl border-2 border-transparent text-base font-extrabold';
+
 export default function AppSidebar() {
-  const { open, isMobile, toggleSidebar } = useSidebar();
+  const { toggleSidebar } = useSidebar();
   const path = usePathname();
-  const o = isMobile || open;
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="offcanvas">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <m.div
-              initial={{ opacity: 0, display: 'none' }}
-              animate={{ opacity: o ? 1 : 0, display: o ? 'flex' : 'none' }}
-              transition={{ duration: o ? 0.4 : 0 }}
-              className="mt-1 justify-between"
-            >
-              <Link
-                href="/"
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
-                <h1 className="font-slab bg-linear-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
-                  {SITE_NAME}
-                </h1>
-              </Link>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={toggleSidebar}
-                pointer
-              >
-                {' '}
-                <AlignRightIcon />{' '}
-              </Button>
-            </m.div>
-            <m.div
-              initial={{ opacity: 0, display: 'none' }}
-              animate={{ opacity: o ? 0 : 1, display: o ? 'none' : 'flex' }}
-              transition={{ duration: o ? 0 : 0.4 }}
-              className="mt-2 items-center justify-center"
-            >
-              <SidebarMenuButton
-                className="cursor-pointer bg-linear-to-r from-cyan-500 to-sky-600 dark:from-violet-600 dark:to-indigo-600"
-                onClick={toggleSidebar}
-              >
-                <AlignLeftIcon />
-              </SidebarMenuButton>
-            </m.div>
-            <m.div
-              initial={{ display: 'flex' }}
-              animate={{ display: 'none' }}
-              transition={{ duration: 0 }}
-              className="h-10"
+        <div className="flex items-start justify-between gap-2 px-2 py-1">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/favicon.ico"
+              alt=""
+              width={36}
+              height={36}
+              className="rounded-xl"
             />
-          </SidebarMenuItem>
-        </SidebarMenu>
+            <span className="flex flex-col leading-tight">
+              <span className="font-display text-brand-navy text-lg font-extrabold dark:text-white">
+                {SITE_NAME}
+              </span>
+              <span className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
+                SMK N 1 Kandeman
+              </span>
+            </span>
+          </Link>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-10 rounded-2xl"
+            aria-label="Tutup menu"
+            onClick={toggleSidebar}
+            pointer
+          >
+            <AlignRightIcon />
+          </Button>
+        </div>
       </SidebarHeader>
 
-      <SidebarContent className="font-outfit whitespace-nowrap">
+      <SidebarContent className="whitespace-nowrap">
         {bars.map((v, i) => (
-          <SidebarGroup key={i}>
+          <SidebarGroup key={v.title ?? `group-${i}`}>
             {v.title && (
-              <SidebarGroupLabel className="text-sm">
+              <SidebarGroupLabel className="text-xs font-extrabold tracking-widest uppercase">
                 {v.title}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu>
-                {v.items.map((w, j) =>
-                  w.sub ? (
-                    <Collapsible key={j} className="group/sub">
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <div>
-                            <SidebarMenuButton
-                              asChild
-                              className={cn(
-                                'text-base',
-                                path === w.path ||
-                                  (w.sub.some((s) => s.path === w.path) &&
-                                    'bg-blue-100 text-blue-600 dark:bg-blue-800/10 dark:text-blue-500'),
-                              )}
-                            >
-                              {w.path ? (
-                                <Link href={w.path}>
-                                  {' '}
-                                  <w.icon /> {w.name}
-                                </Link>
-                              ) : (
-                                <div>
-                                  {' '}
-                                  <w.icon /> {w.name}{' '}
-                                </div>
-                              )}
-                            </SidebarMenuButton>
-                            <SidebarMenuBadge>
-                              <ChevronDownIcon className="size-4 transition-transform group-data-[state=open]/sub:rotate-180" />
-                            </SidebarMenuBadge>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {w.sub.map((x, k) => (
-                              <SidebarMenuSubItem key={k}>
-                                <SidebarMenuSubButton asChild>
-                                  <Link href={x.path}>{x.name}</Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  ) : (
-                    <SidebarMenuItem key={j}>
-                      <SidebarMenuButton
-                        asChild
-                        className={cn(
-                          'text-base',
-                          path === w.path &&
-                            'bg-blue-100 text-blue-600 dark:bg-blue-800/10 dark:text-blue-500',
-                        )}
-                      >
-                        {w.path ? (
-                          <Link href={w.path}>
-                            {' '}
-                            <w.icon /> {w.name}
-                          </Link>
-                        ) : (
-                          <div>
-                            {' '}
-                            <w.icon /> {w.name}{' '}
-                          </div>
-                        )}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ),
-                )}
+              <SidebarMenu className="gap-1.5">
+                {v.items.map((w) => (
+                  <SidebarMenuItem key={w.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={path === w.path}
+                      className={cn(itemBase, path === w.path && active)}
+                    >
+                      {w.path ? (
+                        <Link href={w.path}>
+                          <w.icon /> {w.name}
+                        </Link>
+                      ) : (
+                        <div>
+                          <w.icon /> {w.name}
+                        </div>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
       </SidebarContent>
+
+      <SidebarFooter>
+        <div className="border-border/70 flex flex-col gap-1 px-2 pt-3 pb-1">
+          <div className="flex items-center justify-center gap-1">
+            <a
+              href="https://github.com/tiga-searah/xirpl"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub XI RPL"
+              className="text-muted-foreground hover:bg-secondary hover:text-foreground flex size-9 items-center justify-center rounded-xl border-2 border-transparent transition-colors"
+            >
+              <GithubMark className="size-4.5" />
+            </a>
+            <a
+              href="https://api-xirpl.tigasearah.my.id"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Dokumentasi API XI RPL"
+              className="text-muted-foreground hover:bg-secondary hover:text-foreground flex size-9 items-center justify-center rounded-xl border-2 border-transparent transition-colors"
+            >
+              <Code2Icon className="size-4.5" />
+            </a>
+          </div>
+          <p className="text-muted-foreground mt-1 text-center text-[11px] font-semibold tracking-wide">
+            © 2026 TigaSearah
+          </p>
+        </div>
+      </SidebarFooter>
     </Sidebar>
+  );
+}
+
+// Ikon GitHub dari https://thesvg.org/icons/github/default.svg
+function GithubMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 1024 1024"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className={cn('size-4 shrink-0', className)}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z"
+        transform="scale(64)"
+        fill="currentColor"
+      />
+    </svg>
   );
 }

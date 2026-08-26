@@ -1,6 +1,6 @@
-import { t } from 'elysia';
 import { r } from '@be/lib/schema';
 import type { DeepUnwrap } from '@be/lib/utils';
+import { t } from 'elysia';
 
 const enums = {
   gender: t.Enum({
@@ -41,6 +41,7 @@ const Student = t.Object({
   id: t.String(),
   nis: t.Number(),
   name: t.String(),
+  avatar_url: t.Optional(t.Nullable(t.String())),
   gender: t.Optional(t.Nullable(enums.gender)),
   role: enums.role,
   islamic_org: t.Optional(t.Nullable(enums.islamicOrg)),

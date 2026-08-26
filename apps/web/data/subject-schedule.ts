@@ -11,6 +11,8 @@ export interface Lesson {
   teacher: string;
   room?: string;
   color: string;
+  /** Isian sel untuk tampilan tabel jadwal (opsional, timeline hanya pakai `color`). */
+  bg?: string;
   startTime: string;
   endTime: string;
 }
@@ -19,6 +21,43 @@ export interface Day {
   name: string;
   subtitle: string;
   lessons: Lesson[];
+}
+
+/** Jumlah kolom jam pelajaran pada tabel jadwal (Jam 0 tampil sebagai event di timeline). */
+export const TIMETABLE_PERIODS = 11;
+
+export interface TimetableCell {
+  period: number;
+  span: number;
+  lesson: Lesson | null;
+}
+
+/** 'Jam 6-10' -> [6, 10]; 'Jam 5' -> [5, 5]. */
+export function periodSpan(time: string): [number, number] {
+  const [start, end] = (time.match(/\d+/g) ?? []).map(Number);
+  return start ? [start, end ?? start] : [0, 0];
+}
+
+/** Satu baris tabel: sel pelajaran ber-colSpan diselingi sel kosong. */
+export function timetableCells(lessons: Lesson[]): TimetableCell[] {
+  const starts = new Map<number, TimetableCell>();
+  for (const lesson of lessons) {
+    const [from, to] = periodSpan(lesson.time);
+    if (from < 1 || from > TIMETABLE_PERIODS) continue;
+    starts.set(from, {
+      period: from,
+      span: Math.min(to, TIMETABLE_PERIODS) - from + 1,
+      lesson,
+    });
+  }
+
+  const cells: TimetableCell[] = [];
+  for (let period = 1; period <= TIMETABLE_PERIODS; ) {
+    const hit = starts.get(period);
+    cells.push(hit ?? { period, span: 1, lesson: null });
+    period += hit?.span ?? 1;
+  }
+  return cells;
 }
 
 export const mondaySchedule: TimeSlot[] = [
@@ -77,108 +116,97 @@ export const fridaySchedule: TimeSlot[] = [
 export const scheduleData: Day[] = [
   {
     name: 'Senin',
-    subtitle: 'Hari Produktif',
+    subtitle: 'Hari Umum',
     lessons: [
       {
-        time: 'Jam 1-10',
-        subject: 'RPL - Dasar PPLG',
-        teacher: 'Mukti Widodo, S.T',
-        room: 'RPL-GV',
-        color: 'border-amber-500',
+        time: 'Jam 1-2',
+        subject: 'Bahasa Inggris',
+        teacher: 'Yuli Rahayu, S.Pd.',
+        room: 'R 1',
+        color: 'border-orange-400',
+        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
         startTime: '07:40',
+        endTime: '09:00',
+      },
+      {
+        time: 'Jam 3-5',
+        subject: 'PABP',
+        teacher: 'Laely Hilalliyah, S.Fil.I, M.Pd.',
+        room: 'R 1',
+        color: 'border-pink-400',
+        bg: 'bg-pink-200/70 dark:bg-pink-500/20',
+        startTime: '09:30',
+        endTime: '11:30',
+      },
+      {
+        time: 'Jam 6-10',
+        subject: 'KIK',
+        teacher: 'Yunida, S.Si., M.Pd.',
+        room: 'R 1',
+        color: 'border-amber-400',
+        bg: 'bg-amber-200/70 dark:bg-amber-500/20',
+        startTime: '12:30',
         endTime: '15:25',
       },
     ],
   },
   {
     name: 'Selasa',
-    subtitle: 'Hari Umum',
+    subtitle: 'Hari Produktif',
     lessons: [
       {
-        time: 'Jam 1-2',
-        subject: 'RPL - Dasar PPLG',
-        teacher: 'Mukti Widodo, S.T',
-        room: 'RPL-GV',
-        color: 'border-amber-500',
+        time: 'Jam 1-9',
+        subject: 'RPL-PTGM',
+        teacher: 'Alfian Faiz, S.Pd.',
+        room: 'Lab RPL',
+        color: 'border-green-500',
+        bg: 'bg-green-200/70 dark:bg-green-500/20',
         startTime: '07:00',
-        endTime: '08:20',
+        endTime: '14:15',
       },
       {
-        time: 'Jam 3-4',
-        subject: 'Bahasa Inggris',
-        teacher: 'Yuli Rahayu, S.Pd',
-        color: 'border-orange-400',
-        startTime: '08:20',
-        endTime: '10:10',
-      },
-      {
-        time: 'Jam 5-6',
-        subject: 'Sejarah',
-        teacher: 'Wahyu Dwi Yulianti, S.Pd',
+        time: 'Jam 10-11',
+        subject: 'Desain Grafis',
+        teacher: 'Sigit Purnomo, S.Pd.',
+        room: 'Lab RPL',
         color: 'border-sky-400',
-        startTime: '10:10',
-        endTime: '11:30',
-      },
-      {
-        time: 'Jam 7-8',
-        subject: 'Matematika',
-        teacher: 'Dwi Herni Noviyanti S.Pd',
-        color: 'border-emerald-400',
-        startTime: '12:30',
-        endTime: '13:40',
-      },
-      {
-        time: 'Jam 9-11',
-        subject: 'PIPAS',
-        teacher: 'Satria Nur Karim Amrullah, S.Pd',
-        color: 'border-fuchsia-500',
-        startTime: '13:40',
+        bg: 'bg-sky-200/70 dark:bg-sky-500/20',
+        startTime: '14:15',
         endTime: '15:25',
       },
     ],
   },
   {
     name: 'Rabu',
-    subtitle: 'Hari Umum',
+    subtitle: 'Hari Produktif',
     lessons: [
       {
         time: 'Jam 1-3',
-        subject: 'PJOK',
-        teacher: 'Drs. Budi Setiyadi',
-        color: 'border-green-400',
+        subject: 'RPL-PTGM',
+        teacher: 'Alfian Faiz, S.Pd.',
+        room: 'Lab RPL',
+        color: 'border-green-500',
+        bg: 'bg-green-200/70 dark:bg-green-500/20',
         startTime: '07:00',
         endTime: '09:00',
       },
       {
-        time: 'Jam 4-5',
-        subject: 'Seni Budaya',
-        teacher: 'Sigit Purnomo, S.Pd',
-        color: 'border-indigo-400',
+        time: 'Jam 4-9',
+        subject: 'RPL-PWeb',
+        teacher: 'Abdul Adjis, S.Kom.',
+        room: 'Lab RPL',
+        color: 'border-violet-500',
+        bg: 'bg-violet-200/70 dark:bg-violet-500/20',
         startTime: '09:30',
-        endTime: '10:50',
-      },
-      {
-        time: 'Jam 6-7',
-        subject: 'Bahasa Jawa',
-        teacher: 'Rinta Dwi Jayanti, S.Pd',
-        color: 'border-orange-500',
-        startTime: '10:50',
-        endTime: '13:05',
-      },
-      {
-        time: 'Jam 8-9',
-        subject: 'Bahasa Indonesia',
-        teacher: 'Chanifah Ulfah, S.Pd',
-        color: 'border-blue-500',
-        startTime: '13:05',
         endTime: '14:15',
       },
       {
         time: 'Jam 10-11',
-        subject: 'Koding dan Kecerdasan Artifisial',
-        teacher: 'Riris Yuniaratri, S.Pd',
-        color: 'border-blue-500',
-        room: 'Lab Kom 3',
+        subject: 'Bahasa Jepang',
+        teacher: 'Santi Ihtiarini, S.Pd.',
+        room: 'Lab RPL',
+        color: 'border-yellow-400',
+        bg: 'bg-yellow-200/70 dark:bg-yellow-500/20',
         startTime: '14:15',
         endTime: '15:25',
       },
@@ -190,34 +218,51 @@ export const scheduleData: Day[] = [
     lessons: [
       {
         time: 'Jam 1-3',
-        subject: 'PABP',
-        teacher: 'Laely Hilalliyah, S.Fil.I, M.Pd',
-        color: 'border-pink-400',
+        subject: 'Bahasa Indonesia',
+        teacher: 'Chanifah Ulfah, S.Pd.',
+        room: 'R 1',
+        color: 'border-blue-500',
+        bg: 'bg-blue-200/70 dark:bg-blue-500/20',
         startTime: '07:00',
         endTime: '09:00',
       },
       {
-        time: 'Jam 4-7',
-        subject: 'Informatika',
-        teacher: 'Riris Yuniaratri, S.Pd',
-        color: 'border-blue-500',
-        room: 'RPL-Lab RPL',
+        time: 'Jam 4-5',
+        subject: 'Sejarah',
+        teacher: 'Solekha, S.Pd.',
+        room: 'R 1',
+        color: 'border-amber-700',
+        bg: 'bg-amber-300/70 dark:bg-amber-700/25',
         startTime: '09:30',
+        endTime: '10:50',
+      },
+      {
+        time: 'Jam 6-7',
+        subject: 'Pendidikan Pancasila',
+        teacher: 'Maria Ulfa, S.Pd.',
+        room: 'R 1',
+        color: 'border-sky-400',
+        bg: 'bg-sky-200/70 dark:bg-sky-500/20',
+        startTime: '10:50',
         endTime: '13:05',
       },
       {
         time: 'Jam 8-9',
-        subject: 'Matematika',
-        teacher: 'Dwi Herni Noviyanti S.Pd',
-        color: 'border-emerald-400',
+        subject: 'Bahasa Inggris',
+        teacher: 'Yuli Rahayu, S.Pd.',
+        room: 'R 1',
+        color: 'border-orange-400',
+        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
         startTime: '13:05',
         endTime: '14:15',
       },
       {
         time: 'Jam 10-11',
-        subject: 'Pendidikan Pancasila',
-        teacher: 'Maria Ulfa, S.Pd',
-        color: 'border-sky-400',
+        subject: 'Bahasa Jawa',
+        teacher: 'Suharti, S.Pd.',
+        room: 'R 1',
+        color: 'border-emerald-400',
+        bg: 'bg-emerald-200/70 dark:bg-emerald-500/20',
         startTime: '14:15',
         endTime: '15:25',
       },
@@ -229,26 +274,32 @@ export const scheduleData: Day[] = [
     lessons: [
       {
         time: 'Jam 1-2',
-        subject: 'Bahasa Indonesia',
-        teacher: 'Chanifah Ulfah, S.Pd',
-        color: 'border-blue-500',
+        subject: 'PJOK',
+        teacher: 'Anggara Indra Prasetyadi, S.Pd.',
+        room: 'R 1',
+        color: 'border-orange-400',
+        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
         startTime: '07:45',
         endTime: '09:05',
       },
       {
-        time: 'Jam 3-4',
-        subject: 'Bahasa Inggris',
-        teacher: 'Yuli Rahayu, S.Pd',
-        color: 'border-orange-400',
+        time: 'Jam 3-5',
+        subject: 'Matematika',
+        teacher: 'Nur Anisa Nika Ismawati, S.Pd.',
+        room: 'R 1',
+        color: 'border-rose-700',
+        bg: 'bg-rose-300/70 dark:bg-rose-700/25',
         startTime: '09:25',
-        endTime: '10:45',
+        endTime: '11:15',
       },
       {
-        time: 'Jam 5-7',
-        subject: 'PIPAS',
-        teacher: 'Satria Nur Karim Amrullah, S.Pd',
-        color: 'border-fuchsia-500',
-        startTime: '10:45',
+        time: 'Jam 6-7',
+        subject: 'Bimbingan Konseling',
+        teacher: 'Yeni Sri Utami, S.Pd.',
+        room: 'R 1',
+        color: 'border-yellow-400',
+        bg: 'bg-yellow-200/70 dark:bg-yellow-500/20',
+        startTime: '12:30',
         endTime: '13:55',
       },
     ],

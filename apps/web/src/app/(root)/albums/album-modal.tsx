@@ -96,15 +96,15 @@ export const AlbumModal = memo(function AlbumModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex flex-col bg-slate-950/95 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex flex-col bg-brand-navy/95 backdrop-blur-md"
         >
           {/* Header */}
-          <div className="z-50 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
+          <div className="z-50 border-b border-white/10 bg-brand-navy/50 backdrop-blur-md">
             <div className="mx-auto max-w-[1920px] px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between">
                 <div className="text-white">
                   <h2 className="text-xl font-bold">{selectedAlbum.title}</h2>
-                  <p className="mt-0.5 text-sm font-medium text-slate-400">
+                  <p className="mt-0.5 text-sm font-medium text-white/70">
                     {currentImageIndex + 1} dari {selectedAlbum.photos.length}{' '}
                     Foto
                     {zoom > 1 && (
@@ -181,7 +181,7 @@ export const AlbumModal = memo(function AlbumModal({
           </div>
 
           {/* Thumbnail Strip */}
-          <div className="z-50 border-t border-white/10 bg-slate-900/80 py-4 backdrop-blur-md">
+          <div className="z-50 border-t border-white/10 bg-brand-navy/80 py-4 backdrop-blur-md">
             <div className="mx-auto max-w-7xl overflow-x-auto px-4">
               <div className="flex min-w-max justify-center gap-3 sm:justify-start">
                 {selectedAlbum.photos.map((photo, idx) => (

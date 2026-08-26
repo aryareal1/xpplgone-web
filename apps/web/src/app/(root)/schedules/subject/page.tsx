@@ -114,6 +114,21 @@ export default function TimelineSchedule() {
   const dayWeekend = useMemo(() => (today === 6 ? 'Sabtu' : 'Minggu'), [today]);
   const isGrid = viewMode === 'grid';
 
+  // Statistik diturunkan dari data jadwal supaya tidak basi saat jadwal berubah.
+  const stats = useMemo(() => {
+    const all = scheduleData.flatMap((d) => d.lessons);
+    const subjects = new Set(all.map((l) => l.subject));
+    const start = all.reduce(
+      (min, l) => (l.startTime < min ? l.startTime : min),
+      '23:59',
+    );
+    const end = all.reduce(
+      (max, l) => (l.endTime > max ? l.endTime : max),
+      '00:00',
+    );
+    return { count: subjects.size, range: `${start} - ${end} WIB` };
+  }, []);
+
   const currentSchedule = useMemo(() => {
     if (dayName === 'Senin') return mondaySchedule;
     if (dayName === 'Jumat') return fridaySchedule;
@@ -252,7 +267,7 @@ export default function TimelineSchedule() {
 
   if (viewMode === 'grid') {
     return (
-      <div className="font-outfit min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <div className="bg-background text-foreground min-h-screen transition-colors duration-300">
         <div
           className={`mx-auto max-w-[1400px] px-4 py-8 transition-all duration-500 sm:px-6 lg:px-8 ${
             isTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
@@ -271,13 +286,12 @@ export default function TimelineSchedule() {
             <SectionHeader
               title={`Jadwal Pelajaran`}
               desc={[
-                'Kelas X PPLG 1 - SMKN 1 Kandeman',
-                'Semester Genap Tahun Ajaran 2025/2026',
+                'Kelas XI RPL - SMKN 1 Kandeman',
+                'Semester Gasal Tahun Ajaran 2026/2027',
               ]}
-              color="bg-sky-500"
             />
 
-            <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800">
+            <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
               {[
                 { label: 'Timeline', icon: LayoutList, grid: false },
                 { label: 'Semua Hari', icon: Grid3x3, grid: true },
@@ -289,14 +303,14 @@ export default function TimelineSchedule() {
                     'group relative flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all duration-300 outline-none',
                     isGrid === item.grid
                       ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                   type="button"
                 >
                   {isGrid === item.grid && (
                     <motion.div
                       layoutId="active-tab-grid"
-                      className="absolute inset-0 rounded-xl bg-white shadow-sm dark:bg-slate-700"
+                      className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
                       transition={{
                         type: 'spring',
                         bounce: 0.15,
@@ -310,7 +324,7 @@ export default function TimelineSchedule() {
                         'h-4 w-4 transition-transform group-hover:scale-110',
                         isGrid === item.grid
                           ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-slate-500 dark:text-slate-400',
+                          : 'text-muted-foreground',
                       )}
                     />
                     <span className="text-sm font-bold">{item.label}</span>
@@ -330,13 +344,13 @@ export default function TimelineSchedule() {
             <StatCard
               icon={Clock}
               label="Jam Pelajaran"
-              value="07:30 - 14:45 WIB"
+              value={stats.range}
               color="indigo"
             />
             <StatCard
               icon={BookOpen}
               label="Total Pelajaran"
-              value="13 Mata Pelajaran"
+              value={`${stats.count} Mata Pelajaran`}
               color="purple"
             />
           </div>
@@ -348,7 +362,7 @@ export default function TimelineSchedule() {
   }
 
   return (
-    <div className="font-outfit min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+    <div className="bg-background text-foreground min-h-screen transition-colors duration-300">
       <div
         className={`mx-auto max-w-4xl px-4 py-8 transition-all duration-500 sm:px-6 lg:px-8 ${
           isTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
@@ -367,13 +381,12 @@ export default function TimelineSchedule() {
           <SectionHeader
             title="Jadwal Hari Ini"
             desc={[
-              'Kelas X PPLG 1 - SMKN 1 Kandeman',
-              'Semester Genap Tahun Ajaran 2025/2026',
+              'Kelas XI RPL - SMKN 1 Kandeman',
+              'Semester Gasal Tahun Ajaran 2026/2027',
             ]}
-            color="bg-sky-500"
           />
 
-          <div className="flex items-center gap-1 rounded-2xl bg-slate-100 p-1.5 dark:bg-slate-800">
+          <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
             {[
               { label: 'Hari Ini', icon: LayoutList, grid: false },
               { label: 'Grid', icon: Grid3x3, grid: true },
@@ -385,14 +398,14 @@ export default function TimelineSchedule() {
                   'group relative flex items-center gap-2 rounded-xl px-4 py-2 transition-all duration-300 outline-none',
                   isGrid === item.grid
                     ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200',
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 type="button"
               >
                 {isGrid === item.grid && (
                   <motion.div
                     layoutId="active-tab-timeline"
-                    className="absolute inset-0 rounded-xl bg-white shadow-sm dark:bg-slate-700"
+                    className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
                   />
                 )}
@@ -402,7 +415,7 @@ export default function TimelineSchedule() {
                       'h-4 w-4 transition-transform group-hover:scale-110',
                       isGrid === item.grid
                         ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-slate-500 dark:text-slate-400',
+                        : 'text-muted-foreground',
                     )}
                   />
                   <span className="text-sm font-bold">{item.label}</span>
@@ -469,7 +482,7 @@ export default function TimelineSchedule() {
 
             <div className="relative">
               {/* Connecting Line */}
-              <div className="absolute top-4 bottom-4 left-6 w-1 bg-slate-200 md:left-8 dark:bg-slate-800"></div>
+              <div className="absolute top-4 bottom-4 left-6 w-1 bg-secondary md:left-8 dark:bg-secondary"></div>
 
               <div className="space-y-8">
                 <AnimatePresence mode="popLayout">

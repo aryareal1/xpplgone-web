@@ -30,33 +30,37 @@ export default function LoginPage() {
     <>
       <header className="absolute top-5 flex scale-110 items-center gap-2 lg:scale-120">
         <Image src="/favicon.ico" alt="Logo" width={35} height={35} />
-        <h1 className="font-slab bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-xl font-bold text-transparent">
+        <h1 className="font-display text-brand-navy text-xl font-extrabold uppercase dark:text-white">
           {SITE_NAME}
         </h1>
       </header>
-      <Card className="font-outfit w-80 scale-120 bg-gray-100 dark:bg-gray-800">
+      <Card className="border-border duo-card w-80 scale-120 rounded-3xl">
         <CardHeader>
-          <CardTitle>Login ke {SITE_NAME}</CardTitle>
-          <CardDescription>Dapatkan akses fitur khusus kelas.</CardDescription>
+          <CardTitle className="text-lg font-extrabold">
+            Login ke {SITE_NAME}
+          </CardTitle>
+          <CardDescription className="font-medium">
+            Dapatkan akses fitur khusus kelas.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Button
             variant="secondary"
-            className="w-full bg-gray-50 dark:bg-gray-700"
+            className="h-11 w-full rounded-2xl"
             pointer
             onClick={handleLogin}
           >
             <Avatar className="size-5">
               <AvatarImage src="/images/google_icon.webp" />
             </Avatar>
-            <p className="font-outfit">Lanjutkan dengan Google</p>
+            <p className="">Lanjutkan dengan Google</p>
           </Button>
           <p className="mt-1 text-xs">
             *Pastikan untuk menggunakan akun sekolah
           </p>
         </CardContent>
         <CardFooter>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground text-xs">
             Dengan melanjutkan, pastikan kamu menyetujui{' '}
             <Link href="/guideline/privacy-police" className="underline">
               persyaratan pengguna
