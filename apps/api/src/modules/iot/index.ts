@@ -72,7 +72,6 @@ export const iot = new Elysia({ prefix: '/iots', tags: ['Internet of Things'] })
     response: {
       200: IOTModel.cardResponse,
       404: UserModel.getIdNotFound,
-      403: AuthModel.forbidden,
     },
   });
   
