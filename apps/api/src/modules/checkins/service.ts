@@ -1,6 +1,6 @@
+import { toDateStr, wibHour } from '@be/lib/utils';
 import { checkinsTable, db } from '@xirpl/db';
 import { and, asc, between, eq, inArray, sql } from 'drizzle-orm';
-import { toDateStr, wibHour } from '@be/lib/utils';
 
 const DAY_MS = 86_400_000;
 
@@ -102,17 +102,22 @@ export const Checkins = {
       .from(checkinsTable)
       .where(eq(checkinsTable.user_id, userId))
       .orderBy(asc(checkinsTable.date));
-    const done = rows
-      .filter((r) => r.checked_in_at && !isLate(r.checked_in_at, r.type))
-      .map((r) => r.date)
-      .reverse();
+    const done = new Set(
+      rows
+        .filter((r) => r.checked_in_at && !isLate(r.checked_in_at, r.type))
+        .map((r) => r.date),
+    );
     const today = toDateStr(new Date());
-    const since = done.find((d) => d <= today);
+    const since = [...done]
+      .filter((d) => d <= today)
+      .sort()
+      .at(-1);
     if (!since) return { streak: 0, since: null };
 
     let streak = 0;
     let cur = since;
-    while (done.includes(cur)) {
+    // Bound traversal so malformed date data cannot occupy the event loop forever.
+    while (done.has(cur) && streak < done.size) {
       streak++;
       cur = toDateStr(new Date(new Date(`${cur}T00:00:00`).getTime() - DAY_MS));
     }

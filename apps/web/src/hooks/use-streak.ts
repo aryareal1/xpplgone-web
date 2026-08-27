@@ -1,12 +1,6 @@
-import { useEffect, useState } from 'react';
 import api from '@fe/lib/api';
-import {
-  type Check,
-  type CheckinRecap,
-  fmtMonth,
-  type StreakData,
-  streakForCheckStatus,
-} from '../../data/habit-data';
+import { useEffect, useState } from 'react';
+import type { StreakData } from '../../data/habit-data';
 
 /**
  * The streak shown in the header. Uses the same endpoint and rules as the
@@ -18,21 +12,10 @@ export function useStreak(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     let alive = true;
-    const today = new Date();
-    const previous = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-
-    Promise.all([
-      api.checkins.streak.get(),
-      api.checkins.recap.get({ query: { month: fmtMonth(today) } }),
-      api.checkins.recap.get({ query: { month: fmtMonth(previous) } }),
-    ])
-      .then(([s, current, prev]) => {
-        if (!alive) return;
-        const checks: Check[] = [
-          ...((prev.data?.data as CheckinRecap | undefined)?.recap ?? []),
-          ...((current.data?.data as CheckinRecap | undefined)?.recap ?? []),
-        ];
-        setStreak(streakForCheckStatus(s.data?.data ?? null, checks, today));
+    api.checkins.streak
+      .get()
+      .then(({ data }) => {
+        if (alive) setStreak(data?.data ?? null);
       })
       .catch(() => {});
     return () => {
