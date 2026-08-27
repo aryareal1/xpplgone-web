@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { cn } from '@fe/lib/utils';
 import type { Lesson, TimeSlot } from '../../../../../data/subject-schedule';
 
-// Gaya "slab" dipakai bersama oleh ketiga item timeline.
+// The "slab" style is shared by all three timeline item types.
 const NODE =
   'absolute top-2 left-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border-4 transition-all md:left-4 md:h-10 md:w-10';
 

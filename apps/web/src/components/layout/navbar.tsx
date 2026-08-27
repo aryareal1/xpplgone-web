@@ -74,7 +74,7 @@ export default function NavBar() {
               priority
               className="rounded-lg"
             />
-            <span className="font-display text-brand-navy text-xl font-extrabold tracking-tight uppercase dark:text-white">
+            <span className="font-display text-brand-navy text-lg font-extrabold tracking-tight uppercase sm:text-xl dark:text-white">
               {SITE_NAME}
             </span>
           </Link>
@@ -90,9 +90,9 @@ export default function NavBar() {
             <Link
               href="/habit"
               title={`Streak ${streak.streak} hari`}
-              className="border-brand-yellow bg-pastel-yellow text-brand-navy duo-card duo-press flex h-11 items-center gap-1.5 rounded-full px-3.5 font-extrabold [--duo-depth:3px] [--duo-shade:#e0a800] dark:bg-amber-400/20 dark:text-amber-200"
+              className="border-brand-yellow bg-pastel-yellow text-brand-navy duo-card duo-press flex h-11 items-center gap-1.5 rounded-full px-3 font-extrabold [--duo-depth:3px] [--duo-shade:#e0a800] sm:px-3.5 dark:bg-amber-400/20 dark:text-amber-200"
             >
-              <FlameIcon className="size-4.5 text-amber-600" />
+              <FlameIcon className="size-4 text-amber-600 sm:size-4.5" />
               <span className="text-base tabular-nums">{streak.streak}</span>
               <span className="sr-only">hari streak</span>
             </Link>

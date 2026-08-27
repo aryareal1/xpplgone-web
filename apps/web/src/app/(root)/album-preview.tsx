@@ -1,13 +1,13 @@
 'use client';
 
+import SectionHeader from '@fe/components/section-header';
+import { AspectRatio } from '@fe/components/ui/aspect-ratio';
 import { motion as m } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import SectionHeader from '@fe/components/section-header';
-import { AspectRatio } from '@fe/components/ui/aspect-ratio';
 import { albums } from '../../../data/albums';
 
-// Empat album terakhir, urutan terbaru dulu. Datanya tetap dari sumber yang ada.
+// The last four albums, newest first. Data still comes from the existing source.
 const recent = albums.slice(-4).reverse();
 
 export default function AlbumPreview() {
@@ -40,7 +40,7 @@ export default function AlbumPreview() {
                     src={a.cover}
                     alt={`Album ${a.title}`}
                     fill
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover object-center"
                     sizes="(max-width: 768px) 50vw, 25vw"
                   />
                 </AspectRatio>

@@ -17,8 +17,8 @@ export default function Home() {
             title="Tugas"
             desc="Tetap tenang! Kita pasti dapat menyelesaikan semuanya."
           />
-          {/* Belum ada sumber data tugas di aplikasi, jadi tampilkan keadaan
-              kosong yang jujur ketimbang contoh palsu. */}
+          {/* No task data source exists in the app yet, so show an honest
+              empty state instead of fake examples. */}
           <p className="text-muted-foreground border-border bg-card rounded-3xl border-2 border-dashed px-6 py-10 text-center font-bold uppercase">
             Belum ada tugas yang tercatat.
           </p>

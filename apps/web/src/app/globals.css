@@ -13,7 +13,7 @@
   --color-gray-875: oklch(0.2325 0.03 263);
 }
 
-/* Palet maskot XI RPL: biru + kuning + navy, plus pastel untuk aksen seksi. */
+/* XI RPL mascot palette: blue + yellow + navy, plus pastels for section accents. */
 @theme inline {
   --color-brand-blue: #1e88e5;
   --color-brand-yellow: #ffc93c;
@@ -27,8 +27,8 @@
 }
 
 /*
- * Bahasa bentuk ala Duolingo: garis tebal, bayangan padat tanpa blur, dan
- * tombol/kartu yang bisa "ditekan". Warna tetap dari palet maskot.
+ * Duolingo-style shape language: thick borders, solid blur-free shadows, and
+ * pressable buttons/cards. Colors stay from the mascot palette.
  */
 @utility duo-card {
   border-width: 2px;
@@ -49,6 +49,83 @@
   &:active {
     --duo-depth: 1px;
     transform: translateY(3px);
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 45%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:double-button,
+::-webkit-scrollbar-button:vertical:decrement,
+::-webkit-scrollbar-button:vertical:increment,
+::-webkit-scrollbar-button:horizontal:decrement,
+::-webkit-scrollbar-button:horizontal:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+@utility scrollbar-minimal {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.7);
   }
 }
 
@@ -191,16 +268,16 @@
   }
 }
 
-/* Hormati preferensi pengguna: matikan animasi dekoratif. */
+/* Respect user preference: disable decorative animation. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    /* biome-ignore-start lint/complexity/noImportantStyles: harus mengalahkan utility animasi Tailwind */
+    /* biome-ignore-start lint/complexity/noImportantStyles: must override Tailwind animation utilities */
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-    /* biome-ignore-end lint/complexity/noImportantStyles: selesai */
+    /* biome-ignore-end lint/complexity/noImportantStyles: done */
   }
 }

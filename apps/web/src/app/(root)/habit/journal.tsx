@@ -67,7 +67,7 @@ import { HabitCalendar, HabitStats, InfoHint } from './widgets';
 const MAX_PHOTO = 5 * 1024 * 1024;
 const SAVE_DELAY = 500;
 
-// Unggah bukti ke S3 dan kembalikan nama filenya; server yang mengompres.
+// Upload proof to S3 and return its filename; the server compresses.
 async function uploadPhoto(file: File) {
   if (!file.type.startsWith('image/'))
     throw new Error('File harus berupa gambar.');
@@ -79,7 +79,7 @@ async function uploadPhoto(file: File) {
   return filename;
 }
 
-// Hapus bukti yang tidak lagi dirujuk jurnal, supaya file di S3 tidak menumpuk.
+// Delete proofs the journal no longer references, so files don't pile up in S3.
 function dropProofs(prev: Journal, next: Journal) {
   for (const field of PROOF_FIELDS) {
     const gone = prev[field];
@@ -117,8 +117,8 @@ export default function HabitJournal() {
   const selected = parseDate(date) ?? today;
   const editable = date === todayStr;
 
-  // Jurnal adalah halaman privat. Simpan tujuan awal agar pengguna kembali ke
-  // tanggal yang sedang dibuka setelah login.
+  // The journal is a private page. Save the original destination so users return
+  // to the date they had open after logging in.
   useEffect(() => {
     if (userLoading || user) return;
     const query = params.toString();
@@ -126,7 +126,7 @@ export default function HabitJournal() {
     router.replace(`/login?r=${encodeURIComponent(destination)}`);
   }, [params, pathname, router, user, userLoading]);
 
-  // Jurnal dan check-in tanggal terpilih; 404 dari server berarti hari kosong.
+  // Journal and check-in for the selected date; a 404 from the server means an empty day.
   useEffect(() => {
     if (userLoading || !user) return;
     let alive = true;
@@ -161,7 +161,7 @@ export default function HabitJournal() {
     );
   }, [date]);
 
-  // Rekap bulan dan streak; `version` naik tiap simpanan sukses supaya segar.
+  // Monthly recap and streak; `version` bumps on each successful save to stay fresh.
   useEffect(() => {
     if (userLoading || !user) return;
     let alive = true;
@@ -223,8 +223,8 @@ export default function HabitJournal() {
     [],
   );
 
-  // Ubah state lalu kirim seluruh jurnal hari ini, ditunda agar mengetik tidak
-  // memicu satu request per huruf.
+  // Update state, then send the whole day's journal — debounced so typing
+  // doesn't fire a request per keystroke.
   const update = useCallback((fn: (prev: Journal) => Journal) => {
     const prev = dataRef.current;
     const next = fn(prev);
@@ -260,7 +260,7 @@ export default function HabitJournal() {
     }
   };
 
-  // Absen hari ini lewat endpoint check-in, bukan lewat jurnal.
+  // Check in today via the check-in endpoint, not through the journal.
   const checkIn = async () => {
     const clicked = new Date();
     if (attendanceWindow(clicked) === 'closed') {
@@ -856,7 +856,7 @@ function Tick({ show }: { show: boolean }) {
   );
 }
 
-/** Ya / Tidak / belum dijawab. Clicking the active choice clears it back to null. */
+/** Yes / No / unanswered. Clicking the active choice clears it back to null. */
 function TriState({
   value,
   disabled,

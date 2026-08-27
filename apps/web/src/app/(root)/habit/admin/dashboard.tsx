@@ -135,7 +135,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!members) return;
-    // Kelas kosong: tidak ada yang perlu dimuat.
+    // Empty class: nothing to load.
     if (!members.length) {
       setRowsLoading(false);
       return;
@@ -570,6 +570,7 @@ function MemberDetail({
   const [row, setRow] = useState<MemberDetailData | null>(null);
   const [day, setDay] = useState<number | null>(null);
   const [detail, setDetail] = useState<MemberDay | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [proof, setProof] = useState<{
     label: string;
     filename: string;
@@ -588,14 +589,22 @@ function MemberDetail({
     };
   }, [member.id, month]);
 
-  // Rincian per tanggal diambil terpisah supaya rekap bulan tetap ringan.
+  // Per-day details are fetched separately so the monthly recap stays light.
   useEffect(() => {
-    if (day === null) return setDetail(null);
+    if (day === null) {
+      setDetail(null);
+      setDetailLoading(false);
+      return;
+    }
+
     let alive = true;
+    setDetail(null);
+    setDetailLoading(true);
     const date = fmtDate(new Date(month.getFullYear(), month.getMonth(), day));
     fetchMemberDay(member.id, date)
       .then((d) => alive && setDetail(d))
-      .catch(() => {});
+      .catch(() => alive && setDetail(null))
+      .finally(() => alive && setDetailLoading(false));
     return () => {
       alive = false;
     };
@@ -765,6 +774,7 @@ function MemberDetail({
             <DayDetail
               day={detail}
               picked={day !== null}
+              loading={detailLoading}
               date={
                 day === null
                   ? null
@@ -783,11 +793,13 @@ function MemberDetail({
 function DayDetail({
   day,
   picked,
+  loading,
   date,
   onProofOpen,
 }: {
   day: MemberDay | null;
   picked: boolean;
+  loading: boolean;
   date: Date | null;
   onProofOpen: (proof: { label: string; filename: string }) => void;
 }) {
@@ -797,6 +809,8 @@ function DayDetail({
         Belum ada tanggal yang dipilih.
       </p>
     );
+
+  if (loading) return <DayDetailSkeleton />;
 
   if (!day)
     return (
@@ -918,7 +932,33 @@ function DayDetail({
   );
 }
 
-// Bukti foto disimpan sebagai key S3, jadi tautannya dibangun dari fileUrl.
+function DayDetailSkeleton() {
+  const blocks = ['ibadah', 'hadir', 'olahraga', 'belajar'] as const;
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {blocks.map((block) => (
+        <div
+          key={block}
+          className="rounded-xl bg-secondary p-4 dark:bg-secondary/40"
+        >
+          <div className="mb-4 flex items-center gap-2">
+            <Skeleton className="size-4 rounded-full" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <div className="space-y-2.5">
+            <Skeleton className="h-3.5 w-4/5" />
+            <Skeleton className="h-3.5 w-3/5" />
+            <Skeleton className="h-3.5 w-2/3" />
+          </div>
+        </div>
+      ))}
+      <Skeleton className="h-3.5 w-56 sm:col-span-2" />
+    </div>
+  );
+}
+
+// Photo proofs are stored as S3 keys, so the URL is built from fileUrl.
 function Proofs({
   items,
   onOpen,

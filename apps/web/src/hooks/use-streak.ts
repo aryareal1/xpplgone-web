@@ -9,8 +9,8 @@ import {
 } from '../../data/habit-data';
 
 /**
- * Streak yang tampil di header. Memakai endpoint dan aturan yang sama dengan
- * halaman jurnal supaya angkanya tidak pernah berbeda.
+ * The streak shown in the header. Uses the same endpoint and rules as the
+ * journal page so the numbers never differ.
  */
 export function useStreak(enabled: boolean) {
   const [streak, setStreak] = useState<StreakData | null>(null);

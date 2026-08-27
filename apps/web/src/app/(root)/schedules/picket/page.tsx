@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { picketSchedule } from '../../../../../data/picket-schedule';
 import { PicketCard } from './picket-card';
 
-// Jumlah baris papan = hari dengan petugas terbanyak.
+// Board row count = the day with the most members.
 const SLOTS = Math.max(...picketSchedule.map((d) => d.members.length));
 const ROWS = Array.from({ length: SLOTS }, (_, i) => i + 1);
 const TOTAL = picketSchedule.reduce((n, d) => n + d.members.length, 0);
@@ -30,21 +30,9 @@ export default function PicketSchedule() {
             title="Jadwal Piket"
             desc={['Kelas XI RPL - SMKN 1 Kandeman']}
           />
-
-          <div className="border-border bg-card duo-card flex items-center gap-4 rounded-2xl p-4">
-            <div className="border-border bg-pastel-purple text-brand-navy flex size-11 items-center justify-center rounded-xl border-2 dark:bg-violet-500/20 dark:text-white">
-              <Users2 className="size-5" />
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs font-extrabold tracking-wide uppercase">
-                Total Petugas
-              </p>
-              <p className="text-foreground font-extrabold">{TOTAL} Siswa</p>
-            </div>
-          </div>
         </motion.div>
 
-        {/* Papan piket: kolom = hari, baris = urutan petugas. */}
+        {/* Picket board: columns = days, rows = duty order. */}
         <div className="border-border bg-card duo-card hidden overflow-hidden rounded-3xl md:block">
           <table className="w-full table-fixed border-collapse">
             <caption className="sr-only">
@@ -121,7 +109,7 @@ export default function PicketSchedule() {
           </table>
         </div>
 
-        {/* Mobile: papan lima kolom terlalu sempit, jadi ditumpuk per hari. */}
+        {/* Mobile: a five-column board is too narrow, so stack it per day. */}
         <div className="flex flex-col gap-5 md:hidden">
           {picketSchedule.map((item, index) => (
             <PicketCard key={item.day} item={item} index={index} />

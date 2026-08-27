@@ -41,12 +41,12 @@ const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
 const api = treaty<App>(API_URL, {
   fetch: { credentials: 'include' },
   fetcher,
-  // Eden mengubah string mirip tanggal jadi Date, termasuk kolom `date` yang
-  // di skema bertipe string. Dimatikan supaya respons sama dengan tipenya.
+  // Eden coerces date-like strings into Date, including the `date` column which
+  // is typed as a string in the schema. Disabled so responses match their types.
   parseDate: false,
 });
 
-// Nama file dari POST /s3/upload jadi URL yang bisa dipakai <img src>.
+// Turn a filename from POST /s3/upload into a URL usable in <img src>.
 export const fileUrl = (name: string) =>
   /^https?:\/\//.test(name) ? name : `${API_URL}/s3/${name}`;
 

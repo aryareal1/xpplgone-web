@@ -11,7 +11,7 @@ export interface Lesson {
   teacher: string;
   room?: string;
   color: string;
-  /** Isian sel untuk tampilan tabel jadwal (opsional, timeline hanya pakai `color`). */
+  /** Cell content for the timetable grid (optional; the timeline only uses `color`). */
   bg?: string;
   startTime: string;
   endTime: string;
@@ -23,7 +23,7 @@ export interface Day {
   lessons: Lesson[];
 }
 
-/** Jumlah kolom jam pelajaran pada tabel jadwal (Jam 0 tampil sebagai event di timeline). */
+/** Period count in the timetable grid (Period 0 shows as an event in the timeline). */
 export const TIMETABLE_PERIODS = 11;
 
 export interface TimetableCell {
@@ -32,13 +32,13 @@ export interface TimetableCell {
   lesson: Lesson | null;
 }
 
-/** 'Jam 6-10' -> [6, 10]; 'Jam 5' -> [5, 5]. */
+/** Period ranges: 'Jam 6-10' -> [6, 10]; 'Jam 5' -> [5, 5]. */
 export function periodSpan(time: string): [number, number] {
   const [start, end] = (time.match(/\d+/g) ?? []).map(Number);
   return start ? [start, end ?? start] : [0, 0];
 }
 
-/** Satu baris tabel: sel pelajaran ber-colSpan diselingi sel kosong. */
+/** One table row: lesson cells with colSpan, interspersed with empty cells. */
 export function timetableCells(lessons: Lesson[]): TimetableCell[] {
   const starts = new Map<number, TimetableCell>();
   for (const lesson of lessons) {
@@ -124,7 +124,7 @@ export const scheduleData: Day[] = [
         teacher: 'Yuli Rahayu, S.Pd.',
         room: 'R 1',
         color: 'border-orange-400',
-        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
+        bg: 'bg-[#ff9966]',
         startTime: '07:40',
         endTime: '09:00',
       },
@@ -134,7 +134,7 @@ export const scheduleData: Day[] = [
         teacher: 'Laely Hilalliyah, S.Fil.I, M.Pd.',
         room: 'R 1',
         color: 'border-pink-400',
-        bg: 'bg-pink-200/70 dark:bg-pink-500/20',
+        bg: 'bg-[#f58bea]',
         startTime: '09:30',
         endTime: '11:30',
       },
@@ -144,7 +144,7 @@ export const scheduleData: Day[] = [
         teacher: 'Yunida, S.Si., M.Pd.',
         room: 'R 1',
         color: 'border-amber-400',
-        bg: 'bg-amber-200/70 dark:bg-amber-500/20',
+        bg: 'bg-[#f8bb99]',
         startTime: '12:30',
         endTime: '15:25',
       },
@@ -160,7 +160,7 @@ export const scheduleData: Day[] = [
         teacher: 'Alfian Faiz, S.Pd.',
         room: 'Lab RPL',
         color: 'border-green-500',
-        bg: 'bg-green-200/70 dark:bg-green-500/20',
+        bg: 'bg-[#91ff60]',
         startTime: '07:00',
         endTime: '14:15',
       },
@@ -170,7 +170,7 @@ export const scheduleData: Day[] = [
         teacher: 'Sigit Purnomo, S.Pd.',
         room: 'Lab RPL',
         color: 'border-sky-400',
-        bg: 'bg-sky-200/70 dark:bg-sky-500/20',
+        bg: 'bg-[#c9e3f0]',
         startTime: '14:15',
         endTime: '15:25',
       },
@@ -186,7 +186,7 @@ export const scheduleData: Day[] = [
         teacher: 'Alfian Faiz, S.Pd.',
         room: 'Lab RPL',
         color: 'border-green-500',
-        bg: 'bg-green-200/70 dark:bg-green-500/20',
+        bg: 'bg-[#91ff60]',
         startTime: '07:00',
         endTime: '09:00',
       },
@@ -196,7 +196,7 @@ export const scheduleData: Day[] = [
         teacher: 'Abdul Adjis, S.Kom.',
         room: 'Lab RPL',
         color: 'border-violet-500',
-        bg: 'bg-violet-200/70 dark:bg-violet-500/20',
+        bg: 'bg-[#ad8bea]',
         startTime: '09:30',
         endTime: '14:15',
       },
@@ -206,7 +206,7 @@ export const scheduleData: Day[] = [
         teacher: 'Santi Ihtiarini, S.Pd.',
         room: 'Lab RPL',
         color: 'border-yellow-400',
-        bg: 'bg-yellow-200/70 dark:bg-yellow-500/20',
+        bg: 'bg-[#ffffbf]',
         startTime: '14:15',
         endTime: '15:25',
       },
@@ -222,7 +222,7 @@ export const scheduleData: Day[] = [
         teacher: 'Chanifah Ulfah, S.Pd.',
         room: 'R 1',
         color: 'border-blue-500',
-        bg: 'bg-blue-200/70 dark:bg-blue-500/20',
+        bg: 'bg-[#0bb7e8]',
         startTime: '07:00',
         endTime: '09:00',
       },
@@ -232,7 +232,7 @@ export const scheduleData: Day[] = [
         teacher: 'Solekha, S.Pd.',
         room: 'R 1',
         color: 'border-amber-700',
-        bg: 'bg-amber-300/70 dark:bg-amber-700/25',
+        bg: 'bg-[#743700]',
         startTime: '09:30',
         endTime: '10:50',
       },
@@ -242,7 +242,7 @@ export const scheduleData: Day[] = [
         teacher: 'Maria Ulfa, S.Pd.',
         room: 'R 1',
         color: 'border-sky-400',
-        bg: 'bg-sky-200/70 dark:bg-sky-500/20',
+        bg: 'bg-[#58b2df]',
         startTime: '10:50',
         endTime: '13:05',
       },
@@ -252,7 +252,7 @@ export const scheduleData: Day[] = [
         teacher: 'Yuli Rahayu, S.Pd.',
         room: 'R 1',
         color: 'border-orange-400',
-        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
+        bg: 'bg-[#ff9966]',
         startTime: '13:05',
         endTime: '14:15',
       },
@@ -262,7 +262,7 @@ export const scheduleData: Day[] = [
         teacher: 'Suharti, S.Pd.',
         room: 'R 1',
         color: 'border-emerald-400',
-        bg: 'bg-emerald-200/70 dark:bg-emerald-500/20',
+        bg: 'bg-[#98ef8d]',
         startTime: '14:15',
         endTime: '15:25',
       },
@@ -278,7 +278,7 @@ export const scheduleData: Day[] = [
         teacher: 'Anggara Indra Prasetyadi, S.Pd.',
         room: 'R 1',
         color: 'border-orange-400',
-        bg: 'bg-orange-200/70 dark:bg-orange-500/20',
+        bg: 'bg-[#c89bea]',
         startTime: '07:45',
         endTime: '09:05',
       },
@@ -288,7 +288,7 @@ export const scheduleData: Day[] = [
         teacher: 'Nur Anisa Nika Ismawati, S.Pd.',
         room: 'R 1',
         color: 'border-rose-700',
-        bg: 'bg-rose-300/70 dark:bg-rose-700/25',
+        bg: 'bg-[#a83539]',
         startTime: '09:25',
         endTime: '11:15',
       },
@@ -298,7 +298,7 @@ export const scheduleData: Day[] = [
         teacher: 'Yeni Sri Utami, S.Pd.',
         room: 'R 1',
         color: 'border-yellow-400',
-        bg: 'bg-yellow-200/70 dark:bg-yellow-500/20',
+        bg: 'bg-[#ffff00]',
         startTime: '12:30',
         endTime: '13:55',
       },

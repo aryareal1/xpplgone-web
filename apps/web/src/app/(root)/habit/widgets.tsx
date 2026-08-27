@@ -224,7 +224,7 @@ export function HabitStats({
 
   const average = recap?.average_score ?? averageScore(scores);
   const count = streak?.streak ?? 0;
-  // Server mengirim tanggal absen terakhir, jadi hari ini aman bila sama.
+  // The server sends the last check-in date, so today is safe when it matches.
   const since = streak?.since ? toLocalDate(streak.since) : null;
   const todayDone = !!since && sameDay(since, new Date());
   const atRisk = !todayDone && count > 0;

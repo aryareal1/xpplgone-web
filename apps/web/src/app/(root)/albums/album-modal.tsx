@@ -1,10 +1,10 @@
 'use client';
 
+import { cn } from '@fe/lib/utils';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { type MouseEvent, memo, useMemo, type WheelEvent } from 'react';
-import { cn } from '@fe/lib/utils';
 import type { Album } from '../../../../data/albums';
 
 interface AlbumModalProps {
@@ -41,8 +41,8 @@ const Thumbnail = memo(function Thumbnail({
       className={cn(
         'relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border-2 transition-all',
         isActive
-          ? 'scale-95 border-indigo-500 opacity-100'
-          : 'border-transparent opacity-40 hover:scale-105 hover:opacity-100',
+          ? 'border-indigo-500 opacity-100'
+          : 'border-transparent opacity-40 hover:opacity-100',
       )}
       type="button"
     >
@@ -96,10 +96,10 @@ export const AlbumModal = memo(function AlbumModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex flex-col bg-brand-navy/95 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex flex-col bg-black/65"
         >
           {/* Header */}
-          <div className="z-50 border-b border-white/10 bg-brand-navy/50 backdrop-blur-md">
+          <div className="z-50 border-b border-white/15 bg-black/50 shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
             <div className="mx-auto max-w-[1920px] px-4 py-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between">
                 <div className="text-white">
@@ -133,7 +133,7 @@ export const AlbumModal = memo(function AlbumModal({
                 e.stopPropagation();
                 onPrev();
               }}
-              className="absolute left-4 z-20 rounded-full p-3 text-white transition-all hover:scale-110 hover:bg-black/40 sm:left-8"
+              className="absolute left-4 z-20 rounded-full p-3 text-white transition-colors hover:bg-black/40 sm:left-8"
               type="button"
             >
               <ChevronLeft className="h-8 w-8" />
@@ -173,7 +173,7 @@ export const AlbumModal = memo(function AlbumModal({
                 e.stopPropagation();
                 onNext();
               }}
-              className="absolute right-4 z-20 rounded-full p-3 text-white transition-all hover:scale-110 hover:bg-black/40 sm:right-8"
+              className="absolute right-4 z-20 rounded-full p-3 text-white transition-colors hover:bg-black/40 sm:right-8"
               type="button"
             >
               <ChevronRight className="h-8 w-8" />
@@ -181,8 +181,8 @@ export const AlbumModal = memo(function AlbumModal({
           </div>
 
           {/* Thumbnail Strip */}
-          <div className="z-50 border-t border-white/10 bg-brand-navy/80 py-4 backdrop-blur-md">
-            <div className="mx-auto max-w-7xl overflow-x-auto px-4">
+          <div className="z-50 border-t border-white/15 bg-black/75 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <div className="scrollbar-minimal mx-auto max-w-7xl overflow-x-auto px-4">
               <div className="flex min-w-max justify-center gap-3 sm:justify-start">
                 {selectedAlbum.photos.map((photo, idx) => (
                   <Thumbnail

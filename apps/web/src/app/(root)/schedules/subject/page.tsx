@@ -114,7 +114,7 @@ export default function TimelineSchedule() {
   const dayWeekend = useMemo(() => (today === 6 ? 'Sabtu' : 'Minggu'), [today]);
   const isGrid = viewMode === 'grid';
 
-  // Statistik diturunkan dari data jadwal supaya tidak basi saat jadwal berubah.
+  // Stats are derived from the schedule data so they never go stale when it changes.
   const stats = useMemo(() => {
     const all = scheduleData.flatMap((d) => d.lessons);
     const subjects = new Set(all.map((l) => l.subject));

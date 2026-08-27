@@ -12,7 +12,6 @@ import {
   ChevronRightIcon,
   CrownIcon,
   FlameIcon,
-  ListOrderedIcon,
   RotateCcwIcon,
   TrophyIcon,
 } from 'lucide-react';
@@ -25,9 +24,8 @@ import {
   type LeaderboardEntry,
   MONTHS,
 } from '../../../../data/habit-data';
-import { InfoHint } from '../habit/widgets';
 
-/** Warna podium: emas, perak, perunggu untuk tiga peringkat teratas. */
+/** Podium colors: gold, silver, bronze for the top three ranks. */
 const MEDALS = [
   {
     tile: 'border-brand-yellow bg-pastel-yellow [--duo-shade:#e0a800]',
@@ -37,29 +35,29 @@ const MEDALS = [
     points: 'text-3xl',
   },
   {
-    tile: 'border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-800/60 [--duo-shade:#a8b6c5]',
-    badge: 'bg-slate-300 text-slate-700',
+    tile: 'border-slate-300 bg-slate-100 [--duo-shade:#a8b6c5]',
+    badge: 'bg-slate-300 text-brand-navy',
     avatar: 'size-16 text-base',
     minH: 'sm:min-h-54',
     points: 'text-2xl',
   },
   {
-    tile: 'border-[#eab68a] bg-[#ffe3cf] dark:border-[#a06a3f] dark:bg-[#43291a]/50 [--duo-shade:#cd8b52]',
-    badge: 'bg-[#e0995f] text-white',
+    tile: 'border-[#eab68a] bg-[#ffe3cf] [--duo-shade:#cd8b52]',
+    badge: 'bg-[#e0995f] text-brand-navy',
     avatar: 'size-14 text-base',
     minH: 'sm:min-h-48',
     points: 'text-2xl',
   },
 ];
 
-// Posisi kolom podium di desktop: perak kiri, emas tengah, perunggu kanan.
+// Podium column positions on desktop: silver left, gold center, bronze right.
 const PODIUM_PLACE = [
   'sm:col-start-2 sm:row-start-1',
   'sm:col-start-1 sm:row-start-1',
   'sm:col-start-3 sm:row-start-1',
 ];
 
-// Inisial nama untuk lingkaran avatar tanpa foto.
+// Name initials for avatar circles without a photo.
 const initials = (name: string) =>
   name
     .split(/\s+/)
@@ -74,7 +72,7 @@ function BoardAvatar({
   className,
 }: {
   name: string;
-  /** URL/foto profil siswa dari `GET /users/students`. */
+  /** Student profile URL/photo from `GET /users/students`. */
   avatarUrl?: string | null;
   className?: string;
 }) {
@@ -101,9 +99,20 @@ function BoardAvatar({
   );
 }
 
-function StreakPill({ value }: { value: number }) {
+function StreakPill({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
   return (
-    <span className="flex shrink-0 items-center gap-0.5 text-xs font-bold text-muted-foreground">
+    <span
+      className={cn(
+        'flex shrink-0 items-center gap-0.5 text-xs font-bold text-muted-foreground',
+        className,
+      )}
+    >
       <FlameIcon className="size-3.5 text-amber-500" aria-hidden />
       {value}
       <span className="sr-only">hari streak</span>
@@ -168,10 +177,14 @@ function PodiumCard({
         {entry.rank}
       </span>
 
-      <BoardAvatar name={entry.name} avatarUrl={avatarUrl} className={medal.avatar} />
+      <BoardAvatar
+        name={entry.name}
+        avatarUrl={avatarUrl}
+        className={medal.avatar}
+      />
 
       <p
-        className="max-w-full truncate text-sm font-extrabold text-brand-navy dark:text-white"
+        className="max-w-full truncate text-sm font-extrabold text-brand-navy"
         title={entry.name}
       >
         {entry.name}
@@ -180,16 +193,16 @@ function PodiumCard({
       <p className="flex items-baseline justify-center gap-1">
         <span
           className={cn(
-            'font-black tabular-nums text-brand-navy dark:text-white',
+            'font-black tabular-nums text-brand-navy',
             medal.points,
           )}
         >
           {entry.points}
         </span>
-        <span className="text-xs font-bold text-muted-foreground">poin</span>
+        <span className="text-xs font-bold text-brand-navy">poin</span>
       </p>
 
-      <StreakPill value={entry.streak} />
+      <StreakPill value={entry.streak} className="text-brand-navy" />
 
       {me && (
         <span className="absolute top-2 right-2 rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-black tracking-wide text-white uppercase">
@@ -222,7 +235,7 @@ export default function LeaderboardBoard() {
   const router = useRouter();
   const reduce = useReducedMotion();
   const { user, loading: userLoading } = useUser();
-  // Foto profil siswa diambil dari GET /users/students.
+  // Student profile photos come from GET /users/students.
   const [students] = useStudents();
   const avatars = useMemo(
     () => new Map(students.map((s) => [s.id, s.avatar_url ?? null])),
@@ -234,13 +247,13 @@ export default function LeaderboardBoard() {
   const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
   const [failed, setFailed] = useState(false);
 
-  // Halaman privat: arahkan pengunjung anonim ke login seperti jurnal.
+  // Private page: send anonymous visitors to login, like the journal.
   useEffect(() => {
     if (userLoading || user) return;
-    router.replace('/login?r=%2Fhabit%2Fleaderboard');
+    router.replace('/login?r=%2Fleaderboard');
   }, [router, user, userLoading]);
 
-  // Muat ulang papan tiap bulan berganti; dipanggil ulang juga oleh tombol coba lagi.
+  // Reload the board when the month changes; also re-invoked by the retry button.
   const load = useCallback(() => {
     setEntries(null);
     setFailed(false);
@@ -272,8 +285,9 @@ export default function LeaderboardBoard() {
 
   const top = entries?.slice(0, 3) ?? [];
   const self = entries?.find((e) => e.user_id === user?.id);
-  // `failed` menampilkan kartu coba lagi, jadi daftar kosong aman di sini.
+  // `failed` renders the retry card, so an empty list is safe here.
   const list = entries ?? [];
+  const remaining = list.filter((entry) => entry.rank > 3);
 
   if (userLoading || !user || (entries === null && !failed)) {
     return (
@@ -288,14 +302,14 @@ export default function LeaderboardBoard() {
 
   return (
     <div className="mx-auto max-w-360 px-4 py-8 pb-16 sm:px-6">
-      {/* Sambutan berwarna dengan pil kuning ala spanduk utama */}
+      {/* Colored greeting with a yellow pill, like the main banner */}
       <m.header
         initial={reduce ? false : { opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative mb-8 overflow-hidden rounded-[2rem] border-2 border-brand-blue/25 bg-pastel-blue/50 p-6 sm:p-8 dark:border-blue-400/20 dark:bg-blue-500/10"
       >
-        {/* biome-ignore lint/a11y/noSvgWithoutTitle: lingkaran dekoratif murni, disembunyikan dari pembaca layar */}
+        {/* biome-ignore lint/a11y/noSvgWithoutTitle: purely decorative circle, hidden from screen readers */}
         <svg
           className="pointer-events-none absolute -top-24 -right-24 size-72 text-white/60 dark:text-white/10"
           viewBox="0 0 600 600"
@@ -451,86 +465,63 @@ export default function LeaderboardBoard() {
               </m.div>
             )}
 
-            <section className="mt-8">
-              <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-foreground">
-                <ListOrderedIcon
-                  className="size-5 text-brand-blue"
-                  aria-hidden
-                />
-                Peringkat Lengkap
-                <InfoHint
-                  label="Peringkat Lengkap"
-                  text="Urutan seluruh siswa berdasarkan poin bulan terpilih. Bila poin sama, yang ditentukan adalah streak absen lebih panjang, lalu NIS terkecil."
-                />
-              </h2>
-
-              <div className="duo-card mt-3 overflow-hidden rounded-3xl border-2 border-border/70 bg-card">
-                <ul className="divide-y divide-border/70 dark:divide-border">
-                  {list.map((entry) => {
-                    const me = entry.user_id === user.id;
-                    const medal =
-                      entry.rank <= 3 ? MEDALS[entry.rank - 1] : null;
-                    return (
-                      <li key={entry.user_id}>
-                        <div
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-3 transition-colors sm:px-5',
-                            me
-                              ? 'bg-pastel-blue/70 dark:bg-blue-500/15'
-                              : 'hover:bg-secondary/50 dark:hover:bg-secondary/50',
-                          )}
-                        >
-                          {medal ? (
-                            <span
-                              className={cn(
-                                'grid size-8 shrink-0 place-items-center rounded-full border-2 border-white/70 text-sm font-black shadow-sm',
-                                medal.badge,
-                              )}
-                            >
-                              {entry.rank}
-                            </span>
-                          ) : (
+            {remaining.length > 0 && (
+              <section className="mt-8">
+                <div className="duo-card overflow-hidden rounded-3xl border-2 border-border/70 bg-card">
+                  <ul className="divide-y divide-border/70 dark:divide-border">
+                    {remaining.map((entry) => {
+                      const me = entry.user_id === user.id;
+                      return (
+                        <li key={entry.user_id}>
+                          <div
+                            className={cn(
+                              'flex items-center gap-3 px-4 py-3 transition-colors sm:px-5',
+                              me
+                                ? 'bg-pastel-blue/70 dark:bg-blue-500/15'
+                                : 'hover:bg-secondary/50 dark:hover:bg-secondary/50',
+                            )}
+                          >
                             <span className="w-8 shrink-0 text-center text-sm font-black tabular-nums text-muted-foreground">
                               {entry.rank}
                             </span>
-                          )}
 
-                          <BoardAvatar
-                            name={entry.name}
-                            avatarUrl={
-                              avatars.get(entry.user_id) ?? entry.avatar_url
-                            }
-                            className="size-10 text-xs"
-                          />
+                            <BoardAvatar
+                              name={entry.name}
+                              avatarUrl={
+                                avatars.get(entry.user_id) ?? entry.avatar_url
+                              }
+                              className="size-10 text-xs"
+                            />
 
-                          <span
-                            className="min-w-0 truncate text-sm font-bold text-foreground"
-                            title={entry.name}
-                          >
-                            {entry.name}
-                          </span>
-                          {me && (
-                            <span className="shrink-0 rounded-full bg-brand-blue px-1.5 py-0.5 text-[10px] font-black tracking-wide text-white uppercase">
-                              Kamu
+                            <span
+                              className="min-w-0 truncate text-sm font-bold text-foreground"
+                              title={entry.name}
+                            >
+                              {entry.name}
                             </span>
-                          )}
+                            {me && (
+                              <span className="shrink-0 rounded-full bg-brand-blue px-1.5 py-0.5 text-[10px] font-black tracking-wide text-white uppercase">
+                                Kamu
+                              </span>
+                            )}
 
-                          <span className="ml-auto flex shrink-0 items-center gap-3">
-                            <span className="hidden min-[420px]:block">
-                              <StreakPill value={entry.streak} />
+                            <span className="ml-auto flex shrink-0 items-center gap-3">
+                              <span className="hidden min-[420px]:block">
+                                <StreakPill value={entry.streak} />
+                              </span>
+                              <span className="min-w-14 text-right text-sm font-extrabold tabular-nums text-foreground">
+                                {entry.points}
+                                <span className="sr-only"> poin</span>
+                              </span>
                             </span>
-                            <span className="min-w-14 text-right text-sm font-extrabold tabular-nums text-foreground">
-                              {entry.points}
-                              <span className="sr-only"> poin</span>
-                            </span>
-                          </span>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </section>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </section>
+            )}
           </>
         )}
       </div>

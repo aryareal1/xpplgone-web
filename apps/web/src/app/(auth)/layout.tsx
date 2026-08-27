@@ -31,7 +31,7 @@ export default async function RootLayout({
         <Analytics />
       </head>
       <body
-        className={`antialiased ${fredoka.variable} ${dmSans.variable} flex h-dvh items-center justify-center`}
+        className={`antialiased ${fredoka.variable} ${dmSans.variable} flex min-h-dvh items-center justify-center`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Suspense>{children}</Suspense>

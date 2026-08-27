@@ -34,7 +34,8 @@ export default function LoginPage() {
           {SITE_NAME}
         </h1>
       </header>
-      <Card className="border-border duo-card w-80 scale-120 rounded-3xl">
+      {/* w-[min(88vw,20rem)]: on small screens the card shrinks instead of overflowing; scale-120 used to make it 384px, wider than a 320px viewport */}
+      <Card className="border-border duo-card w-[min(88vw,20rem)] scale-100 rounded-3xl lg:scale-120">
         <CardHeader>
           <CardTitle className="text-lg font-extrabold">
             Login ke {SITE_NAME}

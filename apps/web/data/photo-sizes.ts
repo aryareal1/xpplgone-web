@@ -1,5 +1,5 @@
-/** Dimensi asli tiap foto album, dibaca sekali dari file di `public/`.
- *  Dipakai kolase /albums supaya tinggi tile mengikuti rasio foto aslinya. */
+/** Original dimensions of each album photo, read once from files in `public/`.
+ *  Used by the /albums collage so tile height follows the photo's real ratio. */
 export const photoSizes: Record<string, [number, number]> = {
   '/images/albums/mpls/mpls-2.webp': [4032, 3024],
   '/images/albums/mpls/mpls-1.webp': [4032, 3024],

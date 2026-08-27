@@ -1,8 +1,10 @@
 'use client';
 
-import { ImageIcon } from 'lucide-react';
+import SectionHeader from '@fe/components/section-header';
+import { ArrowLeftIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import {
   type MouseEvent,
   useCallback,
@@ -10,7 +12,6 @@ import {
   useState,
   type WheelEvent,
 } from 'react';
-import SectionHeader from '@fe/components/section-header';
 import { type Album, albums } from '../../../../data/albums';
 import { PhotoTile } from './photo-tile';
 
@@ -19,12 +20,21 @@ const AlbumModal = dynamic(
   { ssr: false },
 );
 
-// Semua foto dipecah jadi tile sendiri; urutannya tetap mengikuti album.
-const tiles = albums.flatMap((album) =>
-  album.photos.map((photo, photoIndex) => ({ album, photo, photoIndex })),
-);
+// The combined album keeps the same album/photo order as the main source.
+// When video media is added, this collection becomes where it aggregates too.
+const allPhotos = albums.flatMap((album) => album.photos);
+const allAlbum: Album = {
+  id: 0,
+  title: 'Semua Foto',
+  date: 'Semua momen',
+  location: 'Semua album',
+  cover: allPhotos[allPhotos.length - 1] ?? '',
+  photos: allPhotos,
+};
+const albumCards = allPhotos.length ? [allAlbum, ...albums] : [];
 
 export default function AlbumLayout() {
+  const [activeAlbum, setActiveAlbum] = useState<Album | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
@@ -33,7 +43,7 @@ export default function AlbumLayout() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 
-  const openAlbum = useCallback((album: Album, photoIndex = 0) => {
+  const openPhoto = useCallback((album: Album, photoIndex = 0) => {
     setSelectedAlbum(album);
     setCurrentImageIndex(photoIndex);
   }, []);
@@ -187,19 +197,89 @@ export default function AlbumLayout() {
           </p>
         </motion.div>
 
-        {/* Kolase masonry: tinggi tile ikut rasio asli foto, tanpa jarak */}
-        <div className="border-border bg-secondary duo-card columns-2 gap-0 overflow-hidden rounded-2xl sm:columns-3 lg:columns-4">
-          {tiles.map((tile, index) => (
-            <PhotoTile
-              key={tile.photo}
-              album={tile.album}
-              photo={tile.photo}
-              photoIndex={tile.photoIndex}
-              index={index}
-              onClick={openAlbum}
-            />
-          ))}
-        </div>
+        {activeAlbum ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setActiveAlbum(null)}
+              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring mb-5 inline-flex cursor-pointer items-center gap-2 rounded-lg text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <ArrowLeftIcon className="size-4" /> Semua album
+            </button>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-foreground md:text-3xl dark:text-white">
+                {activeAlbum.title}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {activeAlbum.photos.length} foto · {activeAlbum.date}
+              </p>
+            </div>
+            <div className="border-border bg-secondary duo-card columns-2 gap-0 overflow-hidden rounded-2xl sm:columns-3 lg:columns-4">
+              {activeAlbum.photos.map((photo, photoIndex) => {
+                const sourceAlbum =
+                  activeAlbum.id === 0
+                    ? albums.find((album) => album.photos.includes(photo))
+                    : activeAlbum;
+
+                return (
+                  <PhotoTile
+                    key={photo}
+                    album={activeAlbum}
+                    captionAlbum={sourceAlbum}
+                    photo={photo}
+                    photoIndex={photoIndex}
+                    index={photoIndex}
+                    onClick={openPhoto}
+                  />
+                );
+              })}
+            </div>
+          </>
+        ) : albumCards.length ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+            {albumCards.map((album, index) => (
+              <motion.button
+                key={album.id}
+                type="button"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ delay: Math.min(index, 8) * 0.05 }}
+                onClick={() => setActiveAlbum(album)}
+                aria-label={`Buka album ${album.title}, ${album.photos.length} foto`}
+                className="group focus-visible:ring-ring duo-card duo-press overflow-hidden rounded-2xl text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <div className="relative aspect-4/5 overflow-hidden bg-secondary">
+                  {album.cover ? (
+                    <Image
+                      src={album.cover}
+                      alt={`Sampul album ${album.title}`}
+                      fill
+                      className="object-cover object-center"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      priority={index < 4}
+                    />
+                  ) : null}
+                </div>
+                <div className="p-3 sm:p-4">
+                  <h3 className="text-sm font-extrabold tracking-wide text-foreground uppercase sm:text-base dark:text-white">
+                    {album.title}
+                  </h3>
+                  <p className="mt-1 text-xs font-bold text-muted-foreground">
+                    {album.photos.length} foto
+                  </p>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {album.date}
+                  </p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground border-border bg-card duo-card rounded-3xl px-6 py-8 text-center font-medium">
+            Belum ada album. Momen pertama menunggu untuk diabadikan!
+          </p>
+        )}
 
         {/* Slideshow Modal - dynamically imported */}
         {selectedAlbum && (

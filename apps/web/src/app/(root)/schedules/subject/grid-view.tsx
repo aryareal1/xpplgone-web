@@ -18,7 +18,7 @@ const PERIODS = Array.from({ length: TIMETABLE_PERIODS }, (_, i) => i + 1);
 export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
   return (
     <>
-      {/* Tabel jadwal ala papan kelas: baris = hari, kolom = jam ke-. */}
+      {/* Class-board-style timetable: rows = days, columns = periods. */}
       <div className="border-border bg-card duo-card hidden overflow-hidden rounded-3xl md:block">
         <table className="w-full table-fixed border-collapse">
           <caption className="sr-only">
@@ -42,7 +42,7 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
           </thead>
           <tbody>
             {scheduleData.map((day, dayIndex) => {
-              // Baris terakhir tidak perlu garis bawah, sudah ada tepi kartu.
+              // The last row doesn't need a bottom border; the card edge covers it.
               const rowLine =
                 dayIndex < scheduleData.length - 1 && 'border-b-2';
 
@@ -73,14 +73,14 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
                           rowLine,
                         )}
                       >
-                        <p className="text-foreground text-center text-sm leading-tight font-extrabold text-balance">
+                        <p className="text-center text-sm leading-tight font-extrabold text-black text-balance">
                           {cell.lesson.subject}
                         </p>
-                        <p className="text-muted-foreground mt-1 text-center text-[11px] leading-tight font-bold text-balance">
+                        <p className="mt-1 text-center text-[11px] leading-tight font-bold text-black text-balance">
                           {cell.lesson.teacher}
                         </p>
                         {cell.lesson.room && (
-                          <p className="text-muted-foreground mt-2 flex items-center gap-1 text-[10px] font-extrabold uppercase">
+                          <p className="mt-2 flex items-center gap-1 text-[10px] font-extrabold text-black uppercase">
                             <MapPin className="size-2.5 shrink-0" />
                             {cell.lesson.room}
                           </p>
@@ -103,7 +103,7 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
         </table>
       </div>
 
-      {/* Mobile: tabel 11 kolom tidak terbaca, jadi ditumpuk per hari. */}
+      {/* Mobile: an 11-column table is unreadable, so stack it per day. */}
       <div className="flex flex-col gap-5 md:hidden">
         {scheduleData.map((day, dayIndex) => (
           <motion.section
@@ -132,7 +132,7 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
                 )}
               >
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground text-[10px] font-extrabold uppercase">
+                  <span className="text-[10px] font-extrabold text-black uppercase">
                     {lesson.time}
                   </span>
                   {lesson.room && (
@@ -142,10 +142,10 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
                     </span>
                   )}
                 </div>
-                <h4 className="text-foreground text-base leading-tight font-extrabold">
+                <h4 className="text-base leading-tight font-extrabold text-black">
                   {lesson.subject}
                 </h4>
-                <p className="text-muted-foreground text-[11px] font-bold">
+                <p className="text-[11px] font-bold text-black">
                   {lesson.teacher}
                 </p>
               </div>

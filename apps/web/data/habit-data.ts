@@ -5,7 +5,7 @@ import type { LeaderboardModel } from '@be/modules/leaderboard/model';
 export type Journal = JournalModel['Journal'];
 export type JournalBody = JournalModel['upsertBody'];
 
-/** Tiga keadaan jawaban modul: ya, tidak, belum dijawab. */
+/** The three module answer states: yes, no, unanswered. */
 export type Answer = Journal['did_sport'];
 export type JournalRecap = JournalModel['recapResponse']['data'];
 export type JournalStats = JournalModel['statsResponse']['data'];
@@ -20,7 +20,7 @@ export type StreakData = CheckinsModel['streakResponse']['data'];
 export type LeaderboardEntry =
   LeaderboardModel['response']['data']['entries'][number];
 
-/** Kolom salat, urut sesuai tampilan. `field` menunjuk kolom jurnal di server. */
+/** Prayer columns, in display order. `field` points to the journal column on the server. */
 export const IBADAH = [
   { label: 'Salat Duha', field: 'prayed_dhuha' },
   { label: 'Salat Tahajud', field: 'prayed_tahajud' },
@@ -28,7 +28,7 @@ export const IBADAH = [
   { label: "Salat Ba'diah Isya", field: 'prayed_badiyah_isya' },
 ] as const satisfies readonly { label: string; field: keyof Journal }[];
 
-/** Kolom yang isinya nama file di S3, dipakai untuk membersihkan bukti lepas. */
+/** Columns holding S3 filenames, used to clean up orphaned proofs. */
 export const PROOF_FIELDS = [
   'sport_proof_url',
   'study_start_proof_url',
@@ -70,38 +70,38 @@ export const SPORT_TYPES = [
 export const OPEN_HOUR = 6;
 export const LATE_HOUR = 7;
 
-/** Weekend: modul kehadiran berganti jadi bangun pagi, batas 06:00. */
+/** Weekend: the attendance module becomes wake-up, deadline 06:00. */
 export const WAKE_HOUR = 6;
 
-/** Bangun pagi lewat jam ini tercatat kesorean, lalu kemalaman. */
+/** Wake-up after this hour is recorded as afternoon, then as night. */
 export const AFTERNOON_HOUR = 15;
 export const NIGHT_HOUR = 18;
 
 export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 
-// Tipe check-in mengikuti hari: Sabtu dan Minggu jadi bangun pagi.
+// Check-in type follows the day: Saturday and Sunday become wake-up.
 export const checkinType = (d: Date): CheckinType =>
   isWeekend(d) ? 'morning' : 'school';
 
-/** Batas telat per tipe, angka yang sama dipakai server. */
+/** Late limit per type; the server uses the same numbers. */
 export const LATE_HOURS: Record<CheckinType, number> = {
   school: LATE_HOUR,
   morning: WAKE_HOUR,
 };
 
-// Jam absen sebagai Date, null kalau hari itu belum tercatat.
+// Check-in time as a Date, null when the day isn't recorded yet.
 export const checkinAt = (c: Check | null) =>
   c?.checked_in_at ? new Date(c.checked_in_at) : null;
 
-// Absen lewat batas jam tipenya, dasar label terlambat/kesiangan.
+// Check-in past its type's hour limit — the basis of the late label.
 export function isLateCheck(c: Check | null) {
   const at = checkinAt(c);
   return !!at && !!c && at.getHours() >= LATE_HOURS[c.type ?? checkinType(at)];
 }
 
 /**
- * Streak ditentukan di frontend dari status check-in yang diterima dari API.
- * Check-in telat tetap hadir, namun selalu mematikan streak yang ditampilkan.
+ * The streak is computed on the frontend from the check-in status the API returns.
+ * A late check-in still counts as present, but always kills the displayed streak.
  */
 export const streakForCheckStatus = (
   streak: StreakData | null,
@@ -119,8 +119,8 @@ export const streakForCheckStatus = (
     );
   };
 
-  // Telat pada hari apa pun, atau weekend yang lewat tanpa Bangun Pagi,
-  // memutus streak. Hari ini baru dihitung gagal setelah lewat pukul 06:00.
+  // Late on any day, or a weekend without Wake-Up, breaks the streak.
+  // Today only counts as failed once it's past 06:00.
   const lastBreak = checks
     .filter((check) => check.date <= todayDate)
     .filter(
@@ -155,7 +155,7 @@ export const streakForCheckStatus = (
 
 export type AttendanceWindow = 'closed' | 'open' | 'late';
 
-// Status jendela absen saat ini, dipakai untuk mengunci tombol.
+// Current attendance window status, used to lock the button.
 export const attendanceWindow = (d: Date): AttendanceWindow =>
   isWeekend(d)
     ? d.getHours() < WAKE_HOUR
@@ -168,8 +168,8 @@ export const attendanceWindow = (d: Date): AttendanceWindow =>
         : 'late';
 
 /**
- * Label untuk catatan yang sudah lewat batas, dihitung dari jam check-in.
- * Bangun pagi bertingkat: kesiangan, lalu kesorean (15:00), lalu kemalaman (18:00).
+ * Label for a record past its deadline, computed from the check-in time.
+ * Wake-up tiers: late, then afternoon (15:00), then night (18:00).
  */
 export const lateLabel = (at: Date) =>
   !isWeekend(at)
@@ -180,7 +180,7 @@ export const lateLabel = (at: Date) =>
         ? 'Kesorean'
         : 'Kesiangan';
 
-// Satu sumber teks untuk jurnal, statistik, dan dasbor admin.
+// Single source of text for the journal, stats, and admin dashboard.
 export function attendanceCopy(d: Date) {
   const w = isWeekend(d);
   return {
@@ -195,7 +195,7 @@ export function attendanceCopy(d: Date) {
   };
 }
 
-/** `api` memetakan modul UI ke nama rata-rata yang dipakai server. */
+/** `api` maps each UI module to the average name the server uses. */
 export const MODULES = [
   {
     key: 'ibadah',
@@ -272,7 +272,7 @@ export const sameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 
-/** Jurnal kosong: tiap kolom `null`, sama seperti baris yang belum diisi. */
+/** Empty journal: every column `null`, same as an unfilled row. */
 export const emptyJournal = (): Journal => ({
   prayed_dhuha: null,
   prayed_tahajud: null,
@@ -295,11 +295,11 @@ export const emptyJournal = (): Journal => ({
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-/** `YYYY-MM-DD`, bentuk yang diminta dan dikembalikan tiap endpoint. */
+/** `YYYY-MM-DD`, the format every endpoint expects and returns. */
 export const fmtDate = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-/** `YYYY-MM`, bentuk tiap query `month`. */
+/** `YYYY-MM`, the format of each `month` query. */
 export const fmtMonth = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 
@@ -319,15 +319,15 @@ export const fmtTime = (at: Date | string) =>
     minute: '2-digit',
   })} WIB`;
 
-// `YYYY-MM-DD` dari server jadi Date lokal, jam nol.
+// `YYYY-MM-DD` from the server into a local Date at midnight.
 export const toLocalDate = (date: string) => new Date(`${date}T00:00:00`);
 
-// Ambil tanggal (1..31) dari `YYYY-MM-DD`.
+// Get the day of month (1..31) from `YYYY-MM-DD`.
 export const dayOf = (date: string) => Number(date.slice(8, 10));
 
 /**
- * Modul selesai, cerminan `moduleDone` di server: bukti wajib ada, alasan saja
- * tidak menaikkan skor.
+ * Module done, mirroring `moduleDone` on the server: proof is required, reason
+ * alone doesn't raise the score.
  */
 export const moduleStatus = (j: Journal | null, c: Check | null) => ({
   ibadah: !!j && IBADAH.every(({ field }) => j[field] === true),
@@ -342,17 +342,17 @@ export const moduleStatus = (j: Journal | null, c: Check | null) => ({
 export const level = (j: Journal | null, c: Check | null) =>
   Object.values(moduleStatus(j, c)).filter(Boolean).length;
 
-/** Skor server 0..100 jadi 0..4 modul, satuan yang dipakai peta panas. */
+/** Server score 0..100 into a 0..4 module level, the unit the heatmap uses. */
 export const scoreLevel = (score: number) => Math.round(score / 25);
 
-// Ubah `scores` dari recap jadi peta tanggal -> level, untuk grid kalender.
+// Map `scores` from the recap into a date -> level map for the calendar grid.
 export function levelsByDay(scores: DayScore[]) {
   const out = new Map<number, number>();
   for (const s of scores) out.set(dayOf(s.date), scoreLevel(s.score));
   return out;
 }
 
-// Ubah `scores` jadi seri grafik harian.
+// Turn `scores` into a daily chart series.
 export const dailySeries = (scores: DayScore[]) =>
   scores.map((s) => ({ day: dayOf(s.date), value: s.score }));
 
@@ -361,7 +361,7 @@ export const averageScore = (scores: DayScore[]) =>
     ? Math.round(scores.reduce((a, s) => a + s.score, 0) / scores.length)
     : 0;
 
-// Petakan rata-rata per modul dari nama server ke kunci yang dipakai UI.
+// Map each module average from its server name to the key the UI uses.
 export const moduleStats = (
   avg: ModuleAverages,
 ): Record<ModuleKey, number> => ({
@@ -380,7 +380,7 @@ export const EMPTY_MODULE_AVERAGES: ModuleAverages = {
 
 const blank = (s: string) => (s.trim() ? s.trim() : null);
 
-/** Rapikan input teks sebelum dikirim, string kosong disimpan sebagai `null`. */
+/** Trim text input before sending; empty strings are stored as `null`. */
 export const toJournalBody = (j: Journal): JournalBody => ({
   ...j,
   sport_type: j.sport_type && blank(j.sport_type),

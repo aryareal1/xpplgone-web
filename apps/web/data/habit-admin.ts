@@ -21,7 +21,7 @@ export type AdminRole = Extract<
   'developer' | 'teacher' | 'homeroom_teacher'
 >;
 
-/** Sama dengan `ADMIN_ROLES` di server, penentu akses menu dasbor. */
+/** Same as `ADMIN_ROLES` on the server; decides dashboard menu access. */
 export const ADMIN_ROLES = [
   'developer',
   'teacher',
@@ -42,7 +42,7 @@ export const MODULE_HEX: Record<ModuleKey, string> = {
 type ScoreBucket =
   keyof JournalModel['statsResponse']['data']['score_distribution'];
 
-/** Urutan tetap, supaya batang sebaran tidak ikut urutan kunci dari server. */
+/** Fixed order, so the distribution bars don't follow the server's key order. */
 const BUCKETS = [
   '0-39',
   '40-59',
@@ -57,13 +57,13 @@ const BUCKET_LABEL: Record<ScoreBucket, string> = {
   '80-100': '80–100%',
 };
 
-// Semua anggota berperan siswa, dipakai sebagai baris tabel dasbor.
+// Every member counts as a student, used as dashboard table rows.
 export async function fetchMembers(): Promise<Member[]> {
   const { data } = await api.users.students.get();
   return data?.data ?? [];
 }
 
-/** Rekap sekelas: kartu ringkas, tren harian, sebaran skor. */
+/** Class recap: summary cards, daily trend, score distribution. */
 export async function fetchClassSummary(month: Date) {
   const { data } = await api.journals.stats.get({
     query: { month: fmtMonth(month) },
@@ -97,8 +97,8 @@ export type MemberRow = {
 };
 
 /**
- * Satu baris per anggota. Dua endpoint sekaligus: skor modul dari jurnal, telat
- * dan absen dari check-in.
+ * One row per member. Two endpoints at once: module scores from the journal, late
+ * and absent from check-ins.
  */
 export async function fetchMemberRows(
   members: Member[],
@@ -136,7 +136,7 @@ export async function fetchMemberRows(
   });
 }
 
-/** Halaman detail satu anggota: rekap bulan, rekap check-in, dan streak. */
+/** One member's detail page: monthly recap, check-in recap, and streak. */
 export async function fetchMemberDetail(id: string, month: Date) {
   const query = { month: fmtMonth(month) };
   const [journal, checkin, streak] = await Promise.all([
@@ -167,7 +167,7 @@ export async function fetchMemberDetail(id: string, month: Date) {
 
 export type MemberDetail = Awaited<ReturnType<typeof fetchMemberDetail>>;
 
-/** Catatan satu anggota pada satu tanggal, untuk kartu rincian hari. */
+/** One member's record on one date, for the day-detail card. */
 export async function fetchMemberDay(id: string, date: string) {
   const [journal, checkin] = await Promise.all([
     api.users({ id }).journals({ date }).get(),

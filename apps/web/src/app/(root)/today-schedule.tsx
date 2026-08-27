@@ -23,7 +23,7 @@ const fmtDay = (d: Date) =>
   });
 
 export default function TodaySchedule() {
-  // Tanggal dihitung di klien saja supaya render server tidak beda dari klien.
+  // The date is computed client-side only, so the server render never differs from the client.
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function TodaySchedule() {
             const active =
               !!clock && clock >= l.startTime && clock <= l.endTime;
             const done = !!clock && clock > l.endTime;
-            // Progres jam pelajaran yang sedang berjalan, dari data waktu asli.
+            // Progress of the running lesson, from the real time data.
             const pct =
               active && clock
                 ? Math.min(
@@ -76,51 +76,56 @@ export default function TodaySchedule() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: i * 0.05 }}
                 className={cn(
-                  'bg-card duo-card duo-press flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border-l-[10px] px-5 py-4',
+                  'bg-card duo-card duo-press flex flex-col gap-3 rounded-2xl border-l-[10px] p-4 sm:p-5',
                   l.color,
                   active &&
                     'bg-pastel-blue/50 [--duo-depth:6px] dark:bg-blue-500/15',
                   done && 'opacity-55',
                 )}
               >
-                <span className="text-brand-navy w-24 shrink-0 font-mono text-base font-extrabold tabular-nums dark:text-white">
-                  {l.startTime}
-                  <span className="text-muted-foreground block font-sans text-xs font-bold">
-                    {l.endTime}
-                  </span>
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-base font-extrabold md:text-lg">
-                    {l.subject}
-                  </span>
-                  <span className="text-muted-foreground text-sm font-medium">
-                    {l.teacher}
-                  </span>
-                </span>
-                <span className="flex items-center gap-2">
-                  {l.room && (
-                    <span className="bg-secondary text-secondary-foreground border-border flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold uppercase">
-                      <MapPinIcon className="size-3.5" /> {l.room}
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-1 items-start gap-3.5 sm:items-center">
+                    <span className="text-brand-navy w-20 shrink-0 font-mono text-sm font-extrabold tabular-nums sm:w-24 sm:text-base dark:text-white">
+                      {l.startTime}
+                      <span className="text-muted-foreground block font-sans text-xs font-bold">
+                        {l.endTime}
+                      </span>
                     </span>
-                  )}
-                  {active && (
-                    <span className="bg-brand-blue duo-card flex items-center gap-1 rounded-full border-transparent px-3 py-1 text-xs font-extrabold tracking-wide text-white uppercase [--duo-depth:3px] [--duo-shade:#1565c0]">
-                      <ClockIcon className="size-3.5" /> Sekarang
-                    </span>
-                  )}
-                  {done && (
-                    <span
-                      title="Sudah selesai"
-                      className="bg-pastel-green flex size-7 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                    >
-                      <CheckIcon className="size-4" strokeWidth={3} />
-                      <span className="sr-only">Sudah selesai</span>
-                    </span>
-                  )}
-                </span>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="text-base font-extrabold leading-tight sm:leading-normal md:text-lg">
+                        {l.subject}
+                      </span>
+                      <span className="text-muted-foreground text-xs font-medium leading-tight sm:leading-normal sm:text-sm">
+                        {l.teacher}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 sm:self-center">
+                    {l.room && (
+                      <span className="bg-secondary text-secondary-foreground border-border flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold uppercase">
+                        <MapPinIcon className="size-3.5" /> {l.room}
+                      </span>
+                    )}
+                    {active && (
+                      <span className="bg-brand-blue duo-card flex shrink-0 items-center gap-1 rounded-full border-transparent px-3 py-1 text-xs font-extrabold tracking-wide uppercase text-white [--duo-depth:3px] [--duo-shade:#1565c0]">
+                        <ClockIcon className="size-3.5" /> Sekarang
+                      </span>
+                    )}
+                    {done && (
+                      <span
+                        title="Sudah selesai"
+                        className="bg-pastel-green flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                      >
+                        <CheckIcon className="size-4" strokeWidth={3} />
+                        <span className="sr-only">Sudah selesai</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
 
                 {active && (
-                  <span className="bg-secondary border-border mt-1 h-3 w-full overflow-hidden rounded-full border-2">
+                  <span className="bg-secondary border-border mt-0.5 h-2.5 w-full overflow-hidden rounded-full border-2 sm:h-3">
                     <span
                       className="bg-brand-yellow block h-full rounded-full transition-[width] duration-500"
                       style={{ width: `${pct}%` }}
