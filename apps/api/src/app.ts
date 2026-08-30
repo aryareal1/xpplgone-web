@@ -94,7 +94,13 @@ const app = new Elysia()
     leaderboard,
     storage,
   ])
-  .get('/', ({ redirect }) => redirect('/docs'), { detail: { hide: true } });
+  .get('/', ({ redirect }) => redirect('/docs'), { detail: { hide: true } })
+  .get('/health', () => ({ success: true, message: 'API is healthy' }), {
+    detail: {
+      summary: 'Health',
+      description: 'Check the health of the API',
+    },
+  });
 
 export default app;
 export type App = typeof app;

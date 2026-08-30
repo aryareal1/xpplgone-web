@@ -10,6 +10,10 @@ import {
 } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 
+const S3_TIMEOUT_MS = 15_000;
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+const MAX_IMAGE_PIXELS = 40_000_000;
+
 const s3 = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
   region: process.env.S3_REGION || 'us-east-1',
@@ -31,11 +35,22 @@ function ensureBucket(): Promise<void> {
 
   bucketReady = (async () => {
     try {
-      await s3.send(new HeadBucketCommand({ Bucket: bucket }));
-    } catch {
-      await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+      await s3.send(new HeadBucketCommand({ Bucket: bucket }), {
+        abortSignal: AbortSignal.timeout(S3_TIMEOUT_MS),
+      });
+    } catch (error) {
+      const status = (error as { $metadata?: { httpStatusCode?: number } })
+        .$metadata?.httpStatusCode;
+      // Some Silo/MinIO setups return 403 for a valid bucket HEAD request.
+      if (status !== 403 && status !== 404) throw error;
+      await s3.send(new CreateBucketCommand({ Bucket: bucket }), {
+        abortSignal: AbortSignal.timeout(S3_TIMEOUT_MS),
+      });
     }
-  })();
+  })().catch((error) => {
+    bucketReady = null;
+    throw error;
+  });
 
   return bucketReady;
 }
@@ -60,7 +75,10 @@ export async function compress(file: File): Promise<{
   mime: string;
 }> {
   const input = new Uint8Array(await file.arrayBuffer());
-  const image = sharp(input, { animated: true })
+  const image = sharp(input, {
+    animated: true,
+    limitInputPixels: MAX_IMAGE_PIXELS,
+  })
     .rotate()
     .resize({ width: IMAGE_MAX_WIDTH, withoutEnlargement: true });
 
@@ -83,14 +101,17 @@ export async function compress(file: File): Promise<{
 export const Storage = {
   /** Upload a file to bucket; returns the generated filename. */
   async upload(file: File): Promise<string> {
+    if (file.size > MAX_UPLOAD_BYTES) throw new Error('Upload too large');
     await ensureBucket();
 
-    let buffer: Uint8Array = new Uint8Array(await file.arrayBuffer());
+    let buffer: Uint8Array;
     let contentType = file.type || undefined;
     if (file.type.startsWith('image/')) {
       const compressed = await compress(file);
       buffer = compressed.buffer;
       contentType = compressed.mime;
+    } else {
+      buffer = new Uint8Array(await file.arrayBuffer());
     }
 
     const filename = `${randomUUID()}${extname(file.name)}`;
@@ -102,6 +123,7 @@ export const Storage = {
         ContentLength: buffer.byteLength,
         ContentType: contentType,
       }),
+      { abortSignal: AbortSignal.timeout(S3_TIMEOUT_MS) },
     );
     return filename;
   },
@@ -112,6 +134,7 @@ export const Storage = {
     try {
       const { Body, ContentType } = await s3.send(
         new GetObjectCommand({ Bucket: bucket, Key: filename }),
+        { abortSignal: AbortSignal.timeout(S3_TIMEOUT_MS) },
       );
       return {
         body: Body,
@@ -128,7 +151,9 @@ export const Storage = {
   /** Delete a file. `DeleteObject` is idempotent: no error whether or not the key exists. */
   async remove(filename: string): Promise<boolean> {
     await ensureBucket();
-    await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: filename }));
+    await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: filename }), {
+      abortSignal: AbortSignal.timeout(S3_TIMEOUT_MS),
+    });
     return true;
   },
 };

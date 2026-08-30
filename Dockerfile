@@ -14,12 +14,18 @@ RUN bun install --frozen-lockfile
 COPY --from=api-prune /app/out/full .
 COPY --from=api-prune /app/tsconfig.json .
 RUN bun run --cwd apps/api build
+RUN mkdir -p /app/runtime/node_modules \
+  && cp -rL node_modules/.bun/node_modules/sharp /app/runtime/node_modules/sharp \
+  && cp -rL node_modules/.bun/node_modules/@img /app/runtime/node_modules/@img \
+  && cp -rL node_modules/.bun/node_modules/detect-libc /app/runtime/node_modules/detect-libc \
+  && cp -rL node_modules/.bun/node_modules/semver /app/runtime/node_modules/semver
 
 # runner
 FROM oven/bun:slim AS api
 WORKDIR /app
 ENV NODE_ENV=production PORT=3611
 COPY --from=api-build /app/apps/api/dist/index.js .
+COPY --from=api-build /app/runtime/node_modules ./node_modules
 CMD ["bun", "index.js"]
 
 # ── web ─────────────────────────────────────────────
