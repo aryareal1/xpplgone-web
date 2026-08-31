@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRightIcon, SearchIcon, TrendingUpIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, SearchIcon, TrendingUpIcon } from 'lucide-react';
 import { motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -12,6 +12,7 @@ import { useUser } from '@fe/hooks/use-user';
 import { cn } from '@fe/lib/utils';
 import {
   type ClassSummary,
+  downloadRecapPdf,
   fetchClassSummary,
   fetchMemberRows,
   fetchMembers,
@@ -51,6 +52,14 @@ export default function AdminDashboard() {
   });
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('score');
+  const [exporting, setExporting] = useState(false);
+
+  const exportPdf = () => {
+    setExporting(true);
+    downloadRecapPdf(month)
+      .catch(() => alert('Gagal mengunduh PDF. Coba lagi.'))
+      .finally(() => setExporting(false));
+  };
 
   const allowed = isAdminRole(user?.role);
   const selectedId = params.get('member');
@@ -135,6 +144,11 @@ export default function AdminDashboard() {
               {month.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </p>
           </div>
+          <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={exportPdf} disabled={exporting}>
+            <DownloadIcon className="size-4" />
+            {exporting ? 'Menyiapkan…' : 'Export PDF'}
+          </Button>
           <div className="flex items-center gap-1 rounded-xl border border-border p-1 dark:border-border">
             <button type="button" aria-label="Bulan sebelumnya" onClick={() => stepMonth(-1)}
               className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
@@ -152,6 +166,7 @@ export default function AdminDashboard() {
             <button type="button" aria-label="Bulan berikutnya" onClick={() => stepMonth(1)}
               className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"
             ><ChevronRightIcon className="size-4" /></button>
+          </div>
           </div>
         </m.header>
 

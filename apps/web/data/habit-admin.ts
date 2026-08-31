@@ -3,7 +3,7 @@ import type { JournalModel } from '@be/modules/journal/model';
 import type { UserModel } from '@be/modules/user/model';
 
 type Student = UserModel['Student'];
-import api from '@fe/lib/api';
+import api, { API_URL } from '@fe/lib/api';
 import {
   type Check,
   dailySeries,
@@ -61,6 +61,20 @@ const BUCKET_LABEL: Record<ScoreBucket, string> = {
 export async function fetchMembers(): Promise<Member[]> {
   const { data } = await api.users.students.get();
   return data?.data ?? [];
+}
+
+/** Downloads the class recap PDF from GET /journals/pdf for the given month. */
+export async function downloadRecapPdf(month: Date) {
+  const res = await fetch(`${API_URL}/journals/pdf?month=${fmtMonth(month)}`, {
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error(`PDF export failed (${res.status})`);
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `journal-recap-${fmtMonth(month)}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 /** Class recap: summary cards, daily trend, score distribution. */
