@@ -1,6 +1,6 @@
-import { t } from 'elysia';
 import { r } from '@be/lib/schema';
 import type { DeepUnwrap } from '@be/lib/utils';
+import { t } from 'elysia';
 
 const Journal = t.Object({
   prayed_dhuha: t.Nullable(t.Boolean()),
@@ -119,6 +119,10 @@ export const JournalModel = {
 
   idParam: t.Object({ id: t.String() }),
   userInvalid: r.Failed('User not found'),
+
+  pdfQuery: t.Object({
+    month: t.String({ pattern: '^\\d{4}-(0[1-9]|1[0-2])$' }),
+  }),
 };
 
 export type JournalModel = {

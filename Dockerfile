@@ -24,7 +24,7 @@ RUN mkdir -p /app/runtime/node_modules \
 FROM oven/bun:slim AS api
 WORKDIR /app
 ENV NODE_ENV=production PORT=3611
-COPY --from=api-build /app/apps/api/dist/index.js .
+COPY --from=api-build /app/apps/api/dist .
 COPY --from=api-build /app/runtime/node_modules ./node_modules
 CMD ["bun", "index.js"]
 

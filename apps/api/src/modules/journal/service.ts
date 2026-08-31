@@ -1,6 +1,6 @@
+import { toDateStr, wibHour } from '@be/lib/utils';
 import { checkinsTable, db, habitJournalsTable } from '@xirpl/db';
 import { and, between, eq, gte, inArray, lte, sql } from 'drizzle-orm';
-import { toDateStr, wibHour } from '@be/lib/utils';
 import { User } from '../user/service';
 import type { JournalModel } from './model';
 
@@ -9,6 +9,27 @@ type CheckinRow = typeof checkinsTable.$inferSelect;
 
 const DAY_MS = 86_400_000;
 const RETRO = 180; // streak window in days
+
+/** Journal modules, in the order the dashboard and the PDF list them. */
+const MODULE_KEYS = ['checkins', 'prays', 'sports', 'studies'] as const;
+
+/** PDF score buckets (the dashboard's four buckets split into five). */
+const SCORE_BUCKETS = [
+  { min: 0, max: 20 },
+  { min: 21, max: 40 },
+  { min: 41, max: 60 },
+  { min: 61, max: 80 },
+  { min: 81, max: 100 },
+] as const;
+
+/** `YYYY-MM` -> `Agustus 2026`. */
+const monthLabel = (month: string) => {
+  const [y = 0, m = 0] = month.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('id-ID', {
+    month: 'long',
+    year: 'numeric',
+  });
+};
 
 /** Late if check-in hour in WIB is at/after this, per type. */
 const LATE_HOURS: Record<'school' | 'morning', number> = {
@@ -51,6 +72,12 @@ const monthlySummary = (
   const cap = elapsedDays(month);
   const days: { date: string; score: number }[] = [];
   const counts = { checkins: 0, prays: 0, sports: 0, studies: 0 };
+  const moduleDays = {
+    checkins: [] as number[],
+    prays: [] as number[],
+    sports: [] as number[],
+    studies: [] as number[],
+  };
   let perfect = 0;
   let late = 0;
   let sum = 0;
@@ -66,10 +93,11 @@ const monthlySummary = (
         Number(m.sports) +
         Number(m.studies)) *
       25;
-    counts.checkins += Number(m.checkins);
-    counts.prays += Number(m.prays);
-    counts.sports += Number(m.sports);
-    counts.studies += Number(m.studies);
+    for (const k of ['checkins', 'prays', 'sports', 'studies'] as const) {
+      if (!m[k]) continue;
+      counts[k]++;
+      moduleDays[k].push(d);
+    }
     sum += score;
     if (score === 100) perfect++;
     const c = checkins.get(date);
@@ -81,6 +109,7 @@ const monthlySummary = (
     days,
     score: cap ? Math.round(sum / n) : 0,
     counts,
+    moduleDays,
     perfect,
     late,
     pct: (v: number) => Math.round((v / n) * 100),
@@ -442,4 +471,156 @@ export const Journal = {
 
     return { month, students };
   },
+
+  /**
+   * Everything the recap PDF needs, in one pass: class overview, per-day class
+   * average, module share, score buckets and a per-student breakdown with the
+   * days each module was completed.
+   *
+   * Reuses the same rate/streak/late/score rules as `getStats`, so the PDF can
+   * never drift from the dashboard.
+   */
+  async getMonthlyRecap(month: string) {
+    const students = await User.getStudents();
+    const ids = students.map((s) => s.id);
+    const { first, last } = monthBounds(month);
+    const retroStart = toDateStr(
+      new Date(
+        new Date(`${toDateStr()}T00:00:00`).getTime() - (RETRO - 1) * DAY_MS,
+      ),
+    );
+
+    const [jrows, crows, hrows] = await Promise.all([
+      ids.length
+        ? db
+            .select()
+            .from(habitJournalsTable)
+            .where(
+              and(
+                inArray(habitJournalsTable.user_id, ids),
+                between(habitJournalsTable.date, first, last),
+              ),
+            )
+        : [],
+      ids.length
+        ? db
+            .select()
+            .from(checkinsTable)
+            .where(
+              and(
+                inArray(checkinsTable.user_id, ids),
+                between(checkinsTable.date, first, last),
+              ),
+            )
+        : [],
+      ids.length
+        ? db
+            .select()
+            .from(checkinsTable)
+            .where(
+              and(
+                inArray(checkinsTable.user_id, ids),
+                gte(checkinsTable.date, retroStart),
+                lte(checkinsTable.date, last),
+              ),
+            )
+        : [],
+    ]);
+
+    const jByUser = new Map<string, Map<string, JournalRow>>();
+    for (const r of jrows) {
+      if (!jByUser.has(r.user_id)) jByUser.set(r.user_id, new Map());
+      jByUser.get(r.user_id)!.set(r.date, r);
+    }
+    const cByUser = new Map<string, Map<string, CheckinRow>>();
+    for (const r of crows) {
+      if (!cByUser.has(r.user_id)) cByUser.set(r.user_id, new Map());
+      cByUser.get(r.user_id)!.set(r.date, r);
+    }
+    const onTime = new Map<string, Set<string>>();
+    for (const r of hrows) {
+      if (isLate(r.checked_in_at, r.type)) continue;
+      if (!onTime.has(r.user_id)) onTime.set(r.user_id, new Set());
+      onTime.get(r.user_id)!.add(r.date);
+    }
+
+    const todayMs = new Date(`${toDateStr()}T00:00:00`).getTime();
+    const rows = students.map((s) => {
+      const m = monthlySummary(
+        month,
+        jByUser.get(s.id) ?? new Map(),
+        cByUser.get(s.id) ?? new Map(),
+      );
+      const set = onTime.get(s.id) ?? new Set();
+      const done: boolean[] = [];
+      for (let i = 0; i < RETRO; i++)
+        done.push(set.has(toDateStr(new Date(todayMs - i * DAY_MS))));
+      return { student: s, summary: m, streak: streakFrom(done) };
+    });
+
+    const days = elapsedDays(month);
+    const n = rows.length || 1;
+    /** Class mean of a per-student value. */
+    const mean = (f: (r: (typeof rows)[number]) => number) =>
+      Math.round(rows.reduce((a, r) => a + f(r), 0) / n);
+    const [year = 0, monthNo = 0] = month.split('-').map(Number);
+
+    const totals = { checkins: 0, prays: 0, sports: 0, studies: 0 };
+    for (const r of rows)
+      for (const k of MODULE_KEYS) totals[k] += r.summary.counts[k];
+    const totalDone = MODULE_KEYS.reduce((a, k) => a + totals[k], 0) || 1;
+
+    const buckets: { min: number; max: number; count: number }[] =
+      SCORE_BUCKETS.map((b) => ({ ...b, count: 0 }));
+    for (const r of rows) {
+      const b =
+        buckets.find((x) => r.summary.score <= x.max) ?? buckets.at(-1)!;
+      b.count++;
+    }
+
+    return {
+      month: {
+        year,
+        month: monthNo,
+        label: monthLabel(month),
+        days: new Date(year, monthNo, 0).getDate(),
+        elapsed: days,
+      },
+      overview: {
+        rate: mean((r) => r.summary.score),
+        checkins: totals.checkins,
+        late: rows.reduce((a, r) => a + r.summary.late, 0),
+        needAttention: rows.filter((r) => r.summary.score < 50).length,
+      },
+      dailyTrend: Array.from({ length: days }, (_, i) => {
+        const date = `${month}-${String(i + 1).padStart(2, '0')}`;
+        const sum = rows.reduce(
+          (a, r) =>
+            a + (r.summary.days.find((d) => d.date === date)?.score ?? 0),
+          0,
+        );
+        return { day: i + 1, value: Math.round(sum / n) };
+      }),
+      modules: MODULE_KEYS.map((key) => ({
+        key,
+        value: Math.round((totals[key] / totalDone) * 1000) / 10,
+      })),
+      scoreDistribution: buckets,
+      students: rows.map((r) => ({
+        id: r.student.id,
+        nis: r.student.nis,
+        name: r.student.name,
+        modules: MODULE_KEYS.map((key) => ({
+          key,
+          days: r.summary.moduleDays[key],
+        })),
+        rate: r.summary.score,
+        streaks: r.streak,
+      })),
+    };
+  },
 };
+
+export type MonthlyJournalRecap = Awaited<
+  ReturnType<typeof Journal.getMonthlyRecap>
+>;

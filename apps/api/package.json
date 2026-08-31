@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/pdfkit": "^0.17.6"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1105.0",
@@ -23,6 +24,8 @@
     "better-elysia-oauth2": "^1.0.0",
     "drizzle-orm": "^1.0.0-rc.4",
     "elysia": "^1.4.29",
-    "sharp": "^0.35.3"
+    "pdfkit": "^0.20.2",
+    "sharp": "^0.35.3",
+    "svg-for-pdfkit": "^0.2.1"
   }
 }

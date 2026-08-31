@@ -1,8 +1,9 @@
-import Elysia from 'elysia';
 import { toDateStr } from '@be/lib/utils';
+import Elysia from 'elysia';
 import { requireAdmin } from '../auth/middleware';
 import { User } from '../user/service';
 import { JournalModel } from './model';
+import { renderJournalRecap } from './pdf/journal-recap';
 import { Journal } from './service';
 
 export const journalAdmin = new Elysia({ tags: ['Journals'] })
@@ -163,6 +164,30 @@ export const journalAdmin = new Elysia({ tags: ['Journals'] })
           response: {
             200: JournalModel.studentsResponse,
           },
+        },
+      )
+
+      // GET /journals/pdf
+      .get(
+        '/pdf',
+        async ({ query }) => {
+          const recap = await Journal.getMonthlyRecap(query.month);
+          const pdf = await renderJournalRecap(recap);
+          return new Response(pdf, {
+            headers: {
+              'content-type': 'application/pdf',
+              'content-disposition': `attachment; filename="journal-recap-${query.month}.pdf"`,
+              'content-length': String(pdf.byteLength),
+            },
+          });
+        },
+        {
+          detail: {
+            summary: 'Download Monthly Journal Recap PDF',
+            description:
+              'Generate and download the monthly journal recap as a PDF: a class-wide overview page followed by a per-student recap.',
+          },
+          query: JournalModel.pdfQuery,
         },
       ),
   );
