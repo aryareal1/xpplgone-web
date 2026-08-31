@@ -41,9 +41,8 @@ export const studentTimeline = (
     );
   }).join('');
 
-  // Reference labels the first few days then only the last one.
-  const marks = [1, 2, 3, 4].filter((d) => d < days);
-  if (days >= 1) marks.push(days);
+  // Every day number, left to right; 31 labels fit on the track pitch.
+  const marks = Array.from({ length: days }, (_, i) => i + 1);
   const labels = marks
     .map(
       (d) =>
