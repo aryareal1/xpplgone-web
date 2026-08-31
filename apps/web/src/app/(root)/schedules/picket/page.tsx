@@ -1,121 +1,50 @@
 'use client';
 
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import SectionHeader from '@fe/components/section-header';
 import { cn } from '@fe/lib/utils';
-import { CalendarDays, Users2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { MotionConfig, motion } from 'motion/react';
 
 import { picketSchedule } from '../../../../../data/picket-schedule';
 import { PicketCard } from './picket-card';
 
-// Board row count = the day with the most members.
-const SLOTS = Math.max(...picketSchedule.map((d) => d.members.length));
-const ROWS = Array.from({ length: SLOTS }, (_, i) => i + 1);
-const TOTAL = picketSchedule.reduce((n, d) => n + d.members.length, 0);
-
 export default function PicketSchedule() {
   return (
-    <div className="bg-background min-h-screen p-4 transition-colors duration-300 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.8,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
-        >
-          <SectionHeader
-            title="Jadwal Piket"
-            desc={['Kelas XI RPL - SMKN 1 Kandeman']}
-          />
-        </motion.div>
+    <MotionConfig reducedMotion="user">
+      <div className="bg-background min-h-screen p-4 transition-colors duration-300 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.8,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="mb-8 flex items-center justify-between gap-4"
+          >
+            <SectionHeader
+              title="Jadwal Piket"
+              desc={['Kelas XI RPL - SMKN 1 Kandeman']}
+            />
+          </motion.div>
 
-        {/* Picket board: columns = days, rows = duty order. */}
-        <div className="border-border bg-card duo-card hidden overflow-hidden rounded-3xl md:block">
-          <table className="w-full table-fixed border-collapse">
-            <caption className="sr-only">
-              Jadwal piket satu minggu, kolom hari dan baris urutan petugas
-            </caption>
-            <thead>
-              <tr>
-                <th className="border-border bg-secondary text-muted-foreground w-16 border-b-2 p-3 text-xs font-extrabold uppercase">
-                  No
-                </th>
-                {picketSchedule.map((day) => (
-                  <th
-                    key={day.day}
-                    scope="col"
-                    className={cn(
-                      'border-border text-foreground border-b-2 border-l-2 p-3 text-base font-extrabold tracking-wide uppercase',
-                      day.lightColor,
-                    )}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <CalendarDays
-                        className={cn('size-4 shrink-0', day.iconColor)}
-                      />
-                      {day.day}
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {ROWS.map((no) => (
-                <motion.tr
-                  key={no}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: no * 0.04, duration: 0.3 }}
-                >
-                  <th
-                    scope="row"
-                    className={cn(
-                      'border-border bg-secondary text-muted-foreground p-3 text-sm font-extrabold tabular-nums',
-                      no < SLOTS && 'border-b-2',
-                    )}
-                  >
-                    {no}
-                  </th>
-                  {picketSchedule.map((day) => {
-                    const member = day.members[no - 1];
-                    return (
-                      <td
-                        key={day.day}
-                        className={cn(
-                          'border-border border-l-2 p-3 text-center',
-                          no < SLOTS && 'border-b-2',
-                          member ? day.lightColor : 'bg-secondary/40',
-                        )}
-                      >
-                        {member ? (
-                          <span className="text-foreground text-sm font-bold">
-                            {member}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground text-sm font-bold">
-                            &mdash;
-                            <span className="sr-only">Kosong</span>
-                          </span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile: a five-column board is too narrow, so stack it per day. */}
-        <div className="flex flex-col gap-5 md:hidden">
-          {picketSchedule.map((item, index) => (
-            <PicketCard key={item.day} item={item} index={index} />
-          ))}
+          {/* pt-12 leaves room for the mascot hanging above each card. */}
+          <div className="grid items-stretch gap-5 pt-12 sm:grid-cols-2 lg:grid-cols-6">
+            {picketSchedule.map((item) => (
+              <div
+                key={item.day}
+                className={cn(
+                  'lg:col-span-2',
+                  item.day === 'Kamis' && 'lg:col-start-2',
+                  item.day === 'Jumat' && 'lg:col-start-4',
+                )}
+              >
+                <PicketCard item={item} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 }

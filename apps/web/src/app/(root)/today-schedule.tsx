@@ -33,14 +33,30 @@ export default function TodaySchedule() {
   }, []);
 
   const day = now?.getDay();
-  const lessons = day && day >= 1 && day <= 5 ? scheduleData[day - 1] : null;
+  const hour = now?.getHours();
+  // 6PM+ show next day's schedule, except Fri/Sat (next day no school).
+  // Sunday (getDay()=0) counts too: it previews Monday.
+  let targetDay = day;
+  let shownDate = now;
+  if (now && hour !== undefined && hour >= 18 && day !== undefined && day <= 4) {
+    targetDay = day + 1;
+    shownDate = new Date(now);
+    shownDate.setDate(shownDate.getDate() + 1);
+  }
+  const lessons =
+    targetDay && targetDay >= 1 && targetDay <= 5
+      ? scheduleData[targetDay - 1]
+      : null;
   const clock = now?.toTimeString().slice(0, 5);
+  // Evening preview shows tomorrow's lessons — today's clock must not
+  // mark them "done".
+  const isToday = targetDay === day;
 
   return (
     <section id="today-schedule">
       <SectionHeader
-        title="Jadwal Hari Ini"
-        desc={now ? fmtDay(now) : 'Memuat hari ini...'}
+        title={isToday ? 'Jadwal Hari Ini' : 'Jadwal Besok'}
+        desc={now ? fmtDay(shownDate ?? now) : 'Memuat hari ini...'}
       />
 
       {!now ? (
@@ -53,8 +69,8 @@ export default function TodaySchedule() {
         <ol className="flex flex-col gap-3">
           {lessons.lessons.map((l, i) => {
             const active =
-              !!clock && clock >= l.startTime && clock <= l.endTime;
-            const done = !!clock && clock > l.endTime;
+              isToday && !!clock && clock >= l.startTime && clock <= l.endTime;
+            const done = isToday && !!clock && clock > l.endTime;
             // Progress of the running lesson, from the real time data.
             const pct =
               active && clock
@@ -138,12 +154,16 @@ export default function TodaySchedule() {
         </ol>
       ) : (
         <div className="border-border bg-card duo-card flex flex-col items-center gap-2 rounded-3xl px-6 py-10 text-center">
-          <XiRplMascot size={180} className="h-auto w-full max-w-[180px]" />
+          <XiRplMascot
+            pose="sleep"
+            size={180}
+            className="h-auto w-full max-w-[180px]"
+          />
           <p className="text-lg font-extrabold uppercase">
             Tidak ada jadwal hari ini.
           </p>
           <p className="text-muted-foreground text-sm font-medium">
-            Selamat berakhir pekan! Istirahat dulu, besok ngoding lagi.
+            RPL tidur udah weekend, besok ngoding lagi.
           </p>
         </div>
       )}

@@ -1,5 +1,6 @@
 'use client';
 
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import SectionHeader from '@fe/components/section-header';
 import { ArrowLeftIcon } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -171,32 +172,21 @@ export default function AlbumLayout() {
         }}
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
       >
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+        <div className="flex items-center justify-between gap-4">
           <SectionHeader
             title="Album"
             desc={['Kelas XI RPL - SMKN 1 Kandeman', 'Galeri Momen & Kenangan']}
+          />
+          <XiRplMascot
+            pose="cozy"
+            size={150}
+            className="h-auto w-28 shrink-0 sm:w-36"
           />
         </div>
       </motion.div>
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-        {/* Intro Text */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mb-10 text-center"
-        >
-          <h2 className="mb-2 text-2xl font-bold text-foreground md:text-3xl dark:text-white">
-            Foto Kita Adalah Kenangan Kita
-          </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground dark:text-muted-foreground">
-            Bernostalgialah dengan momen-momen indah yang telah kita lalui
-            bersama
-          </p>
-        </motion.div>
-
         {activeAlbum ? (
           <>
             <button
@@ -276,9 +266,16 @@ export default function AlbumLayout() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground border-border bg-card duo-card rounded-3xl px-6 py-8 text-center font-medium">
-            Belum ada album. Momen pertama menunggu untuk diabadikan!
-          </p>
+          <div className="border-border bg-card duo-card flex flex-col items-center gap-3 rounded-3xl px-6 py-8 text-center">
+            <XiRplMascot
+              pose="cozy"
+              size={160}
+              className="h-auto w-full max-w-[160px]"
+            />
+            <p className="text-muted-foreground font-medium">
+              Belum ada album. Momen pertama menunggu untuk diabadikan!
+            </p>
+          </div>
         )}
 
         {/* Slideshow Modal - dynamically imported */}

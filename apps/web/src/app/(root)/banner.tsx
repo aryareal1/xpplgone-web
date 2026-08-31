@@ -184,9 +184,10 @@ export default function Banner() {
                 </div>
 
                 {/* Overlapping Mascot on bottom right */}
-                <div className="pointer-events-none absolute -bottom-8 -right-6 z-30 w-44 sm:-bottom-10 sm:-right-8 sm:w-56 md:-bottom-12 md:-right-10 md:w-64 lg:w-72">
+                <div className="pointer-events-none absolute -bottom-6 -right-4 z-30 w-[52%] sm:-bottom-8 sm:-right-6 md:-bottom-10 md:-right-8">
                   <XiRplMascot
                     size={360}
+                    withLaptop
                     className="h-auto w-full drop-shadow-[0_15px_25px_rgba(0,0,0,0.35)]"
                   />
                 </div>

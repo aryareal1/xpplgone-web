@@ -1,6 +1,11 @@
 'use client';
 
 import XiRplMascot from '@fe/components/mascot/Mascot';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@fe/components/ui/avatar';
 import { Button } from '@fe/components/ui/button';
 import { Skeleton } from '@fe/components/ui/skeleton';
 import { useStudents } from '@fe/hooks/use-students';
@@ -57,14 +62,13 @@ const PODIUM_PLACE = [
   'sm:col-start-3 sm:row-start-1',
 ];
 
-// Name initials for avatar circles without a photo.
+// Name initial for avatar circles without a photo.
 const initials = (name: string) =>
   name
     .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join('');
+    .filter(Boolean)[0]
+    ?.charAt(0)
+    .toUpperCase() ?? '';
 
 function BoardAvatar({
   name,
@@ -76,26 +80,31 @@ function BoardAvatar({
   avatarUrl?: string | null;
   className?: string;
 }) {
-  return avatarUrl ? (
-    <img
-      src={fileUrl(avatarUrl)}
-      alt={`Avatar ${name}`}
-      loading="lazy"
+  return (
+    <Avatar
       className={cn(
-        'shrink-0 rounded-full border-2 border-white/80 object-cover',
-        className,
-      )}
-    />
-  ) : (
-    <span
-      aria-hidden
-      className={cn(
-        'grid shrink-0 place-items-center rounded-full border-2 border-white/80 bg-white font-black text-brand-blue dark:border-white/20 dark:bg-secondary',
+        'after:border-brand-navy/20 dark:after:border-white/20',
         className,
       )}
     >
-      {initials(name)}
-    </span>
+      {avatarUrl ? (
+        <AvatarImage
+          src={fileUrl(avatarUrl)}
+          alt={`Avatar ${name}`}
+          loading="lazy"
+        />
+      ) : null}
+      <AvatarFallback
+        // Radix swaps in the fallback once the image fails/misses.
+        delayMs={avatarUrl ? 600 : undefined}
+        className={cn(
+          'bg-white font-black text-brand-blue dark:bg-secondary',
+          className,
+        )}
+      >
+        {initials(name)}
+      </AvatarFallback>
+    </Avatar>
   );
 }
 
@@ -154,18 +163,27 @@ function PodiumCard({
       )}
     >
       {place === 0 && (
-        <m.div
-          animate={
-            reduce ? undefined : { y: [0, -5, 0], rotate: [-10, -5, -10] }
-          }
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-5 left-1/2 -translate-x-1/2"
-        >
-          <CrownIcon
-            className="size-9 fill-amber-400 text-amber-600 drop-shadow-md"
-            aria-hidden
+        <>
+          <m.div
+            animate={
+              reduce ? undefined : { y: [0, -5, 0], rotate: [-10, -5, -10] }
+            }
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-5 left-1/2 -translate-x-1/2"
+          >
+            <CrownIcon
+              className="size-9 fill-amber-400 text-amber-600 drop-shadow-md"
+              aria-hidden
+            />
+          </m.div>
+          <XiRplMascot
+            pose="cheer"
+            tool="trophy"
+            toolRight="medal"
+            size={110}
+            className="pointer-events-none absolute -top-14 right-0 z-10 rotate-10 sm:-right-4"
           />
-        </m.div>
+        </>
       )}
 
       <span
@@ -217,9 +235,9 @@ function BoardSkeleton() {
   return (
     <div aria-hidden>
       <div className="grid gap-4 sm:grid-cols-3 sm:items-end">
-        <Skeleton className="order-1 h-64 rounded-3xl sm:order-none" />
-        <Skeleton className="order-2 h-54 rounded-3xl sm:order-none" />
-        <Skeleton className="order-3 h-48 rounded-3xl sm:order-none" />
+        <Skeleton className="order-1 h-64 rounded-3xl sm:order-0" />
+        <Skeleton className="order-2 h-54 rounded-3xl sm:order-0" />
+        <Skeleton className="order-3 h-48 rounded-3xl sm:order-0" />
       </div>
       <Skeleton className="mt-8 h-24 rounded-3xl" />
       <div className="mt-4 space-y-2">
@@ -415,7 +433,7 @@ export default function LeaderboardBoard() {
           <div className="flex flex-col items-center gap-3 rounded-[2rem] border-2 border-dashed border-border px-6 py-12 text-center">
             <XiRplMascot
               size={220}
-              className="h-auto w-full max-w-[200px] opacity-95"
+              className="h-auto w-full max-w-50 opacity-95"
             />
             <p className="mt-2 text-lg font-extrabold text-foreground">
               Belum ada peringkat bulan ini
@@ -443,26 +461,32 @@ export default function LeaderboardBoard() {
             </div>
 
             {self && self.rank > 3 && (
-              <m.div
-                initial={reduce ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="duo-card mt-6 flex items-center gap-3 rounded-2xl border-2 border-brand-blue/40 bg-pastel-blue/70 px-4 py-3 [--duo-shade:rgba(30,136,229,0.35)] dark:bg-blue-500/15"
+              <a
+                href="#peringkatmu"
+                aria-label={`Lihat peringkatmu, peringkat ${self.rank}`}
+                className="mt-6 block rounded-2xl focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
-                <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-black tracking-wide text-white uppercase">
-                  Kamu
-                </span>
-                <span className="text-sm font-extrabold tabular-nums text-foreground">
-                  #{self.rank}
-                </span>
-                <span className="ml-auto text-sm font-bold tabular-nums text-foreground">
-                  {self.points}{' '}
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    poin
+                <m.div
+                  initial={reduce ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="duo-card flex items-center gap-3 rounded-2xl border-2 border-brand-blue/40 bg-pastel-blue/70 px-4 py-3 [--duo-shade:rgba(30,136,229,0.35)] dark:bg-blue-500/15"
+                >
+                  <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-black tracking-wide text-white uppercase">
+                    Kamu
                   </span>
-                </span>
-                <StreakPill value={self.streak} />
-              </m.div>
+                  <span className="text-sm font-extrabold tabular-nums text-foreground">
+                    #{self.rank}
+                  </span>
+                  <StreakPill value={self.streak} className="ml-auto" />
+                  <span className="text-sm font-bold tabular-nums text-foreground">
+                    {self.points}{' '}
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      poin
+                    </span>
+                  </span>
+                </m.div>
+              </a>
             )}
 
             {remaining.length > 0 && (
@@ -472,7 +496,11 @@ export default function LeaderboardBoard() {
                     {remaining.map((entry) => {
                       const me = entry.user_id === user.id;
                       return (
-                        <li key={entry.user_id}>
+                        <li
+                          key={entry.user_id}
+                          id={me ? 'peringkatmu' : undefined}
+                          className={me ? 'scroll-mt-20' : undefined}
+                        >
                           <div
                             className={cn(
                               'flex items-center gap-3 px-4 py-3 transition-colors sm:px-5',

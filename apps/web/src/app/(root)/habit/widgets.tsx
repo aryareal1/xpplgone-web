@@ -1,5 +1,6 @@
 'use client';
 
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import {
   Card,
   CardContent,
@@ -12,7 +13,12 @@ import {
   TooltipTrigger,
 } from '@fe/components/ui/tooltip';
 import { cn } from '@fe/lib/utils';
-import { ChevronLeftIcon, ChevronRightIcon, FlameIcon, InfoIcon } from 'lucide-react';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FlameIcon,
+  InfoIcon,
+} from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import {
@@ -208,11 +214,14 @@ export function HabitStats({
   month,
   recap,
   streak,
+  everCheckedIn,
   onMonthChange,
 }: {
   month: Date;
   recap: JournalRecap | null;
   streak: StreakData | null;
+  /** Ever checked in at all, so a zero streak reads as "never started" (frozen) vs "broken" (angry). */
+  everCheckedIn: boolean;
   onMonthChange: (d: Date) => void;
 }) {
   const scores = useMemo(() => recap?.scores ?? [], [recap]);
@@ -228,6 +237,15 @@ export function HabitStats({
   const since = streak?.since ? toLocalDate(streak.since) : null;
   const todayDone = !!since && sameDay(since, new Date());
   const atRisk = !todayDone && count > 0;
+
+  // Only a successful check-in moves. Cold stays frozen; a broken streak stays angry.
+  const mood = todayDone
+    ? { pose: 'cheer' as const, moving: true, frozen: false }
+    : count > 0
+      ? { pose: 'cold' as const, moving: false, frozen: true }
+      : everCheckedIn
+        ? { pose: 'angry' as const, moving: false, frozen: false }
+        : { pose: 'cold' as const, moving: false, frozen: true };
 
   return (
     <Card>
@@ -272,27 +290,30 @@ export function HabitStats({
         <div className="mt-7 border-t border-border/70 pt-5 dark:border-border">
           <div
             className={cn(
-              'flex items-center gap-3 rounded-xl p-3',
+              'relative flex items-center justify-between gap-3 rounded-xl p-3',
               count > 0
                 ? 'bg-linear-to-r from-orange-50 to-amber-50 dark:from-orange-950/40 dark:to-amber-950/30'
                 : 'bg-secondary dark:bg-secondary/40',
             )}
           >
-            <m.div
-              initial={reduce ? false : { scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-              className={cn(
-                'flex size-11 shrink-0 items-center justify-center rounded-xl',
-                count > 0
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-secondary text-muted-foreground dark:bg-secondary',
-              )}
-            >
-              <FlameIcon className="size-5" />
-            </m.div>
-
-            <div className="min-w-0">
+            <div className="flex min-w-0 items-center gap-3">
+              <m.div
+                animate={
+                  reduce || !mood.moving
+                    ? undefined
+                    : { scale: [1, 1.12, 1], y: [0, -3, 0] }
+                }
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+                className={cn(
+                  'flex size-9 shrink-0 items-center justify-center rounded-xl',
+                  count > 0
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-secondary text-muted-foreground dark:bg-secondary',
+                )}
+              >
+                <FlameIcon className="size-5" />
+              </m.div>
+              <div className="min-w-0">
               <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-foreground dark:text-foreground">
                 {count}{' '}
                 <span className="text-sm font-medium text-muted-foreground">
@@ -310,7 +331,34 @@ export function HabitStats({
                     ? `${copy.verb} sebelum ${copy.deadline} agar streak tidak putus`
                     : `${copy.verb} sebelum ${copy.deadline} untuk memulai streak`}
               </p>
+              </div>
             </div>
+
+            <m.div
+              initial={reduce || !mood.moving ? false : { scale: 0.6, opacity: 0 }}
+              animate={
+                reduce || !mood.moving
+                  ? { scale: 1, opacity: 1 }
+                  : { scale: [1, 1.08, 1], opacity: 1, y: [0, -9, 0] }
+              }
+              transition={
+                reduce || !mood.moving
+                  ? { type: 'spring', stiffness: 400, damping: 22 }
+                  : {
+                      duration: 1.1,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }
+              }
+              className="shrink-0"
+            >
+              <XiRplMascot
+                size={72}
+                pose={mood.pose}
+                frozen={mood.frozen}
+                className="h-auto w-18"
+              />
+            </m.div>
           </div>
 
           <div className="mt-5 mb-3 flex items-baseline justify-between gap-2">

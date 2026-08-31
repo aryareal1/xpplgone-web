@@ -4,6 +4,7 @@ import { HomeIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import { ThemeProvider } from '@fe/components/theme-provider';
 import { Button } from '@fe/components/ui/button';
 
@@ -21,8 +22,13 @@ export default function GlobalNotFound() {
       <head />
       <body className="flex h-dvh flex-col items-center justify-center gap-2 antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <XiRplMascot
+            pose="search"
+            size={200}
+            className="h-auto w-full max-w-[220px]"
+          />
           <h1
-            className={`${lexend.className} bg-linear-to-r from-fuchsia-500 to-rose-500 bg-clip-text text-7xl font-bold text-transparent`}
+            className={`${lexend.className} text-brand-blue text-7xl font-bold`}
           >
             404
           </h1>

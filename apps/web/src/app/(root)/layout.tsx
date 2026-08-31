@@ -33,16 +33,18 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
 
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <Analytics />
       </head>
-      <body className={`antialiased ${fredoka.variable} ${dmSans.variable}`}>
+      <body
+        className={`min-h-svh overflow-x-clip antialiased ${fredoka.variable} ${dmSans.variable}`}
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
             <SidebarProvider defaultOpen={defaultOpen}>
               <AppSidebar />
-              <main className="min-w-0 flex-1">
+              <main className="min-h-svh min-w-0 flex-1">
                 <NavBar />
                 {children}
               </main>

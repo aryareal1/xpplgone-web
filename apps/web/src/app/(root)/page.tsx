@@ -1,4 +1,5 @@
 import SectionHeader from '@fe/components/section-header';
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import AlbumPreview from './album-preview';
 import Banner from './banner';
 import TodaySchedule from './today-schedule';
@@ -14,14 +15,19 @@ export default function Home() {
 
         <section id="assigments">
           <SectionHeader
-            title="Tugas"
-            desc="Tetap tenang! Kita pasti dapat menyelesaikan semuanya."
+            title="Informasi"
+            desc="Informasi terbaru akan segera hadir!"
           />
-          {/* No task data source exists in the app yet, so show an honest
-              empty state instead of fake examples. */}
-          <p className="text-muted-foreground border-border bg-card rounded-3xl border-2 border-dashed px-6 py-10 text-center font-bold uppercase">
-            Belum ada tugas yang tercatat.
-          </p>
+          <div className="border-border bg-card flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-6 py-10 text-center">
+            <XiRplMascot
+              pose="cozy"
+              size={160}
+              className="h-auto w-full max-w-40"
+            />
+            <p className="text-muted-foreground font-bold uppercase">
+              Belum ada informasi yang terbaru.
+            </p>
+          </div>
         </section>
       </div>
     </>

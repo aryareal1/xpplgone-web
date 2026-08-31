@@ -1,92 +1,84 @@
 'use client';
 
-import { CalendarDays, ShieldCheck, User2Icon } from 'lucide-react';
-import { motion } from 'motion/react';
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import { Card, CardContent } from '@fe/components/ui/card';
 import { cn } from '@fe/lib/utils';
+import { CalendarDays, Users2Icon } from 'lucide-react';
 import type { PicketDay } from '../../../../../data/picket-schedule';
 
 interface PicketCardProps {
   item: PicketDay;
-  index: number;
 }
 
-export function PicketCard({ item, index }: PicketCardProps) {
+export function PicketCard({ item }: PicketCardProps) {
   return (
-    <motion.div
-      key={item.day}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -8, scale: 1.015 }}
-      transition={{
-        opacity: { delay: index * 0.1, duration: 0.4 },
-        scale: { delay: index * 0.1, duration: 0.4 },
-        y: { type: 'spring', stiffness: 300, damping: 20 },
-      }}
-      className="group relative"
-    >
-      <Card className="group border-border bg-card duo-card relative h-full overflow-hidden rounded-3xl">
-        {/* Background Decorative Element */}
-        <div
-          className={cn(
-            'absolute top-0 right-0 h-32 w-32 translate-x-12 -translate-y-12 rounded-full opacity-20 transition-transform group-hover:scale-110',
-            `bg-linear-to-br ${item.color}`,
-          )}
-        />
+    // Mascot hangs outside the card, so it can't live inside `overflow-hidden`.
+    <div className="relative h-full">
+      <XiRplMascot
+        pose={item.pose}
+        tool={item.tool}
+        size={112}
+        aria-hidden
+        className="pointer-events-none absolute -top-11 -right-3 z-10 h-auto w-28"
+      />
 
-        <div className={cn('h-2.5 w-full bg-linear-to-r', item.color)} />
-
-        <div className="p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'border-border flex h-12 w-12 items-center justify-center rounded-2xl border-2',
-                  item.lightColor,
-                )}
-              >
-                <CalendarDays className={cn('h-6 w-6', item.iconColor)} />
-              </div>
-              <div>
-                <h3 className="text-foreground text-2xl font-black tracking-tight">
-                  {item.day.toUpperCase()}
-                </h3>
-              </div>
+      <Card className="border-border bg-card duo-card h-full gap-0 overflow-hidden rounded-2xl p-0">
+        <div className="border-border flex items-center justify-between gap-3 border-b-2 px-4 py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div
+              className={cn(
+                'flex size-10 shrink-0 items-center justify-center rounded-xl',
+                item.lightColor,
+              )}
+            >
+              <CalendarDays
+                className={cn('size-5', item.iconColor)}
+                aria-hidden
+              />
             </div>
-            <ShieldCheck className={cn('h-6 w-6 opacity-20', item.iconColor)} />
+            <h3 className="text-foreground min-w-0 truncate text-lg font-black tracking-tight">
+              {item.day}
+            </h3>
           </div>
-
-          <CardContent className="p-0">
-            <div className="grid grid-cols-1 gap-2.5">
-              {item.members.map((member) => (
-                <motion.div
-                  key={member}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ x: 8 }}
-                  transition={{
-                    x: { type: 'spring', stiffness: 300, damping: 20 },
-                  }}
-                  className="bg-secondary border-border flex items-center gap-3 rounded-xl border-2 p-3"
-                >
-                  <div
-                    className={cn(
-                      'h-2.5 w-2.5 shrink-0 rounded-full bg-current',
-                      item.iconColor,
-                    )}
-                  />
-                  <span className="text-foreground text-sm font-bold">
-                    {member}
-                  </span>
-                  <div className="ml-auto opacity-0 transition-opacity group-hover:opacity-100">
-                    <User2Icon className="text-muted-foreground h-3.5 w-3.5" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
+          <span
+            className={cn(
+              'text-muted-foreground flex shrink-0 items-center gap-1 text-xs font-bold',
+              item.iconColor,
+            )}
+          >
+            <Users2Icon className="size-4" aria-hidden />
+            {item.members.length}
+          </span>
         </div>
+
+        <CardContent className="p-4">
+          <ol
+            className="space-y-2"
+            aria-label={`Petugas piket hari ${item.day}`}
+          >
+            {item.members.map((member, memberIndex) => (
+              <li
+                key={member}
+                className="bg-secondary/70 flex items-center gap-3 rounded-lg px-3 py-2.5"
+              >
+                <span
+                  className={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded-md text-xs font-black tabular-nums',
+                    item.lightColor,
+                    item.iconColor,
+                  )}
+                  aria-hidden
+                >
+                  {memberIndex + 1}
+                </span>
+                <span className="text-foreground min-w-0 truncate text-sm font-semibold">
+                  {member}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

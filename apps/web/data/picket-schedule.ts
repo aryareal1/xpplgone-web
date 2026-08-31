@@ -1,3 +1,5 @@
+import type { MascotPose, MascotTool } from '@fe/components/mascot/Mascot';
+
 export interface PicketDay {
   day: string;
   members: string[];
@@ -5,6 +7,9 @@ export interface PicketDay {
   lightColor: string;
   borderColor: string;
   iconColor: string;
+  /** Mascot on the card: a different mood and tool per day. */
+  pose: MascotPose;
+  tool: MascotTool;
 }
 
 export const picketSchedule: PicketDay[] = [
@@ -24,6 +29,8 @@ export const picketSchedule: PicketDay[] = [
     lightColor: 'bg-blue-50 dark:bg-blue-950/30',
     borderColor: 'border-blue-200 dark:border-blue-900',
     iconColor: 'text-blue-600 dark:text-blue-400',
+    pose: 'cheer',
+    tool: 'broom',
   },
   {
     day: 'Selasa',
@@ -32,6 +39,8 @@ export const picketSchedule: PicketDay[] = [
     lightColor: 'bg-emerald-50 dark:bg-emerald-950/30',
     borderColor: 'border-emerald-200 dark:border-emerald-900',
     iconColor: 'text-emerald-600 dark:text-emerald-400',
+    pose: 'happy',
+    tool: 'mop',
   },
   {
     day: 'Rabu',
@@ -40,6 +49,8 @@ export const picketSchedule: PicketDay[] = [
     lightColor: 'bg-amber-50 dark:bg-amber-950/30',
     borderColor: 'border-amber-200 dark:border-amber-900',
     iconColor: 'text-amber-600 dark:text-amber-400',
+    pose: 'cozy',
+    tool: 'bucket',
   },
   {
     day: 'Kamis',
@@ -48,6 +59,8 @@ export const picketSchedule: PicketDay[] = [
     lightColor: 'bg-indigo-50 dark:bg-indigo-950/30',
     borderColor: 'border-indigo-200 dark:border-indigo-900',
     iconColor: 'text-indigo-600 dark:text-indigo-400',
+    pose: 'search',
+    tool: 'duster',
   },
   {
     day: 'Jumat',
@@ -56,5 +69,7 @@ export const picketSchedule: PicketDay[] = [
     lightColor: 'bg-rose-50 dark:bg-rose-950/30',
     borderColor: 'border-rose-200 dark:border-rose-900',
     iconColor: 'text-rose-600 dark:text-rose-400',
+    pose: 'cheer',
+    tool: 'dustpan',
   },
 ];

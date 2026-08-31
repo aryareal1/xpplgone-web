@@ -260,6 +260,11 @@
 }
 
 @layer base {
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

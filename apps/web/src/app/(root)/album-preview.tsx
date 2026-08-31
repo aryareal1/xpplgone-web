@@ -1,6 +1,7 @@
 'use client';
 
 import SectionHeader from '@fe/components/section-header';
+import XiRplMascot from '@fe/components/mascot/Mascot';
 import { AspectRatio } from '@fe/components/ui/aspect-ratio';
 import { motion as m } from 'motion/react';
 import Image from 'next/image';
@@ -57,9 +58,16 @@ export default function AlbumPreview() {
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground border-border bg-card duo-card rounded-3xl px-6 py-8 text-center font-medium">
-          Belum ada album. Momen pertama menunggu untuk diabadikan!
-        </p>
+        <div className="border-border bg-card duo-card flex flex-col items-center gap-3 rounded-3xl px-6 py-8 text-center">
+          <XiRplMascot
+            pose="cozy"
+            size={160}
+            className="h-auto w-full max-w-40"
+          />
+          <p className="text-muted-foreground font-medium">
+            Belum ada album. Momen pertama menunggu untuk diabadikan!
+          </p>
+        </div>
       )}
 
       <Link
