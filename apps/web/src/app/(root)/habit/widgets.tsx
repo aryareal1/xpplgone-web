@@ -1,6 +1,5 @@
 'use client';
 
-import XiRplMascot from '@fe/components/mascot/Mascot';
 import {
   Card,
   CardContent,
@@ -214,14 +213,11 @@ export function HabitStats({
   month,
   recap,
   streak,
-  everCheckedIn,
   onMonthChange,
 }: {
   month: Date;
   recap: JournalRecap | null;
   streak: StreakData | null;
-  /** Ever checked in at all, so a zero streak reads as "never started" (frozen) vs "broken" (angry). */
-  everCheckedIn: boolean;
   onMonthChange: (d: Date) => void;
 }) {
   const scores = useMemo(() => recap?.scores ?? [], [recap]);
@@ -229,7 +225,6 @@ export function HabitStats({
   const stats = moduleStats(recap?.average_score_each ?? EMPTY_MODULE_AVERAGES);
   const perfect = scores.filter((s) => s.score === 100).length;
   const copy = useMemo(() => attendanceCopy(new Date()), []);
-  const reduce = useReducedMotion();
 
   const average = recap?.average_score ?? averageScore(scores);
   const count = streak?.streak ?? 0;
@@ -237,17 +232,6 @@ export function HabitStats({
   const since = streak?.since ? toLocalDate(streak.since) : null;
   const todayDone = !!since && sameDay(since, new Date());
   const atRisk = !todayDone && count > 0;
-
-  // Cheer bounces, angry sulks with an anime vein pop, cold shivers; reduced motion kills all of them.
-  const shiver = { x: [0, -1.5, 1.5, -1.5, 1.5, 0] };
-  const mood = todayDone
-    ? { pose: 'cheer' as const, frozen: false, size: 72, anim: { scale: [1, 1.08, 1], y: [0, -9, 0] }, dur: 1.1 }
-    : count > 0
-      ? { pose: 'cold' as const, frozen: true, size: 72, anim: shiver, dur: 0.9 }
-      : everCheckedIn
-        // Angry has no raised arms, so its silhouette reads smaller — scale it up.
-        ? { pose: 'angry' as const, frozen: false, size: 128, anim: { rotate: [0, -1.5, 1.5, 0] }, dur: 1.6 }
-        : { pose: 'cold' as const, frozen: true, size: 72, anim: shiver, dur: 0.9 };
 
   return (
     <Card>
@@ -329,42 +313,6 @@ export function HabitStats({
               </p>
               </div>
             </div>
-
-            <m.div
-              initial={reduce ? false : { scale: 0.6, opacity: 0 }}
-              animate={reduce ? { scale: 1, opacity: 1 } : { ...mood.anim, opacity: 1 }}
-              transition={
-                reduce
-                  ? { type: 'spring', stiffness: 400, damping: 22 }
-                  : { duration: mood.dur, repeat: Infinity, ease: 'easeInOut' }
-              }
-              className="shrink-0"
-            >
-              <div className="relative">
-                {mood.pose === 'angry' && !reduce && (
-                  <m.span
-                    aria-hidden
-                    className="absolute -top-1 -right-1 text-sm"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: [0, 1.2, 1, 1, 0], opacity: [0, 1, 1, 1, 0] }}
-                    transition={{
-                      duration: 2,
-                      times: [0, 0.1, 0.2, 0.8, 0.9],
-                      repeat: Infinity,
-                      repeatDelay: 0.6,
-                    }}
-                  >
-                    💢
-                  </m.span>
-                )}
-                <XiRplMascot
-                  size={mood.size}
-                  pose={mood.pose}
-                  frozen={mood.frozen}
-                  className="h-auto"
-                />
-              </div>
-            </m.div>
           </div>
 
           <div className="mt-5 mb-3 flex items-baseline justify-between gap-2">

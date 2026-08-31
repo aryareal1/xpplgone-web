@@ -363,7 +363,6 @@ export default function HabitJournal() {
               month={month}
               recap={recap}
               streak={visibleStreak}
-              everCheckedIn={streakChecks.some((check) => !!check.checked_in_at)}
               onMonthChange={setMonth}
             />
           </aside>
