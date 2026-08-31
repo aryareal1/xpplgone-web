@@ -145,13 +145,15 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-          <Button variant="outline" pointer className="relative h-10" onClick={exportPdf} disabled={exporting}>
-            <DownloadIcon className="size-4" />
-            {exporting ? 'Menyiapkan…' : 'Export PDF'}
-            <span className="absolute -top-2 -right-2 rotate-3 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-1.5 py-px text-[10px] font-extrabold tracking-wider text-white uppercase shadow-sm">
-              New
-            </span>
-          </Button>
+          {!selected && (
+            <Button variant="outline" pointer className="relative h-10" onClick={exportPdf} disabled={exporting}>
+              <DownloadIcon className="size-4" />
+              {exporting ? 'Menyiapkan…' : 'Export PDF'}
+              <span className="absolute -top-2 -right-2 rotate-3 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-1.5 py-px text-[10px] font-extrabold tracking-wider text-white uppercase shadow-sm">
+                New
+              </span>
+            </Button>
+          )}
           <div className="flex items-center gap-1 rounded-xl border border-border p-1 dark:border-border">
             <button type="button" aria-label="Bulan sebelumnya" onClick={() => stepMonth(-1)}
               className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground dark:hover:bg-secondary dark:hover:text-foreground"

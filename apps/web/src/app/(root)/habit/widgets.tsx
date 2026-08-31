@@ -238,14 +238,16 @@ export function HabitStats({
   const todayDone = !!since && sameDay(since, new Date());
   const atRisk = !todayDone && count > 0;
 
-  // Only a successful check-in moves. Cold stays frozen; a broken streak stays angry.
+  // Cheer bounces, angry sulks with an anime vein pop, cold shivers; reduced motion kills all of them.
+  const shiver = { x: [0, -1.5, 1.5, -1.5, 1.5, 0] };
   const mood = todayDone
-    ? { pose: 'cheer' as const, moving: true, frozen: false }
+    ? { pose: 'cheer' as const, frozen: false, size: 72, anim: { scale: [1, 1.08, 1], y: [0, -9, 0] }, dur: 1.1 }
     : count > 0
-      ? { pose: 'cold' as const, moving: false, frozen: true }
+      ? { pose: 'cold' as const, frozen: true, size: 72, anim: shiver, dur: 0.9 }
       : everCheckedIn
-        ? { pose: 'angry' as const, moving: false, frozen: false }
-        : { pose: 'cold' as const, moving: false, frozen: true };
+        // Angry has no raised arms, so its silhouette reads smaller — scale it up.
+        ? { pose: 'angry' as const, frozen: false, size: 128, anim: { rotate: [0, -1.5, 1.5, 0] }, dur: 1.6 }
+        : { pose: 'cold' as const, frozen: true, size: 72, anim: shiver, dur: 0.9 };
 
   return (
     <Card>
@@ -297,13 +299,7 @@ export function HabitStats({
             )}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <m.div
-                animate={
-                  reduce || !mood.moving
-                    ? undefined
-                    : { scale: [1, 1.12, 1], y: [0, -3, 0] }
-                }
-                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              <div
                 className={cn(
                   'flex size-9 shrink-0 items-center justify-center rounded-xl',
                   count > 0
@@ -312,7 +308,7 @@ export function HabitStats({
                 )}
               >
                 <FlameIcon className="size-5" />
-              </m.div>
+              </div>
               <div className="min-w-0">
               <p className="flex items-center gap-2 text-2xl leading-none font-bold tabular-nums text-foreground dark:text-foreground">
                 {count}{' '}
@@ -335,29 +331,39 @@ export function HabitStats({
             </div>
 
             <m.div
-              initial={reduce || !mood.moving ? false : { scale: 0.6, opacity: 0 }}
-              animate={
-                reduce || !mood.moving
-                  ? { scale: 1, opacity: 1 }
-                  : { scale: [1, 1.08, 1], opacity: 1, y: [0, -9, 0] }
-              }
+              initial={reduce ? false : { scale: 0.6, opacity: 0 }}
+              animate={reduce ? { scale: 1, opacity: 1 } : { ...mood.anim, opacity: 1 }}
               transition={
-                reduce || !mood.moving
+                reduce
                   ? { type: 'spring', stiffness: 400, damping: 22 }
-                  : {
-                      duration: 1.1,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }
+                  : { duration: mood.dur, repeat: Infinity, ease: 'easeInOut' }
               }
               className="shrink-0"
             >
-              <XiRplMascot
-                size={72}
-                pose={mood.pose}
-                frozen={mood.frozen}
-                className="h-auto w-18"
-              />
+              <div className="relative">
+                {mood.pose === 'angry' && !reduce && (
+                  <m.span
+                    aria-hidden
+                    className="absolute -top-1 -right-1 text-sm"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: [0, 1.2, 1, 1, 0], opacity: [0, 1, 1, 1, 0] }}
+                    transition={{
+                      duration: 2,
+                      times: [0, 0.1, 0.2, 0.8, 0.9],
+                      repeat: Infinity,
+                      repeatDelay: 0.6,
+                    }}
+                  >
+                    💢
+                  </m.span>
+                )}
+                <XiRplMascot
+                  size={mood.size}
+                  pose={mood.pose}
+                  frozen={mood.frozen}
+                  className="h-auto"
+                />
+              </div>
             </m.div>
           </div>
 
