@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AnimatePresence, motion as m } from 'motion/react';
-import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { type Journal, type Check, type ModuleKey } from '../../../../data/habit-data';
 import {
@@ -184,12 +183,10 @@ function PhotoBox({
             onChange={(e) => onPick(e.target.files?.[0])}
           />
           {photo ? (
-            <Image
+            <img
               src={fileUrl(photo)}
               alt={label}
-              fill
-              sizes="(max-width: 640px) 100vw, 50vw"
-              className="object-contain"
+              className="absolute inset-0 size-full object-contain"
             />
           ) : (
             <>
