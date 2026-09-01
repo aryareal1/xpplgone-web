@@ -173,7 +173,7 @@ export const journalAdmin = new Elysia({ tags: ['Journals'] })
         async ({ query }) => {
           const recap = await Journal.getMonthlyRecap(query.month);
           const pdf = await renderJournalRecap(recap);
-          return new Response(pdf, {
+          return new Response(new Uint8Array(pdf), {
             headers: {
               'content-type': 'application/pdf',
               'content-disposition': `attachment; filename="journal-recap-${query.month}.pdf"`,
