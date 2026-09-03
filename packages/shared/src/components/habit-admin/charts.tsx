@@ -17,17 +17,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { cn } from '@fe/lib/utils';
-import { MODULE_HEX } from '../../../../../data/habit-admin';
-import {
-  HEAT_BG,
-  HEAT_TEXT,
-  MODULES,
-  MONTHS,
-  type ModuleKey,
-  sameDay,
-  WEEKDAYS,
-} from '../../../../../data/habit-data';
+import { cn } from '../../utils';
+import { useHabitAdmin } from './context';
+import type { ModuleKey } from './types';
 
 const AXIS = { fontSize: 11, fill: 'currentColor' };
 
@@ -146,6 +138,7 @@ export function ModuleRadar({
   stats: Record<ModuleKey, number>;
   height?: number;
 }) {
+  const { MODULES } = useHabitAdmin();
   const data = MODULES.map((m) => ({ label: m.label, value: stats[m.key] }));
 
   return (
@@ -177,6 +170,7 @@ export function ModuleBars({
   stats: Record<ModuleKey, number>;
   height?: number;
 }) {
+  const { MODULES, MODULE_HEX } = useHabitAdmin();
   const data = MODULES.map((m) => ({
     label: m.label,
     value: stats[m.key],
@@ -280,6 +274,7 @@ export function HeatCalendar({
   selected: number | null;
   onSelect: (day: number) => void;
 }) {
+  const { HEAT_BG, HEAT_TEXT, MONTHS, WEEKDAYS, sameDay } = useHabitAdmin();
   const today = useMemo(() => new Date(), []);
   const year = month.getFullYear();
   const mo = month.getMonth();

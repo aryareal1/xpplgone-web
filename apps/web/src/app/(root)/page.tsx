@@ -1,5 +1,5 @@
 import SectionHeader from '@fe/components/section-header';
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import AlbumPreview from './album-preview';
 import Banner from './banner';
 import TodaySchedule from './today-schedule';

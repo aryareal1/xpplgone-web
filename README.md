@@ -11,6 +11,8 @@ Class management system for XI RPL — daily journals (habits), daily check-ins,
 ├── packages/
 │   ├── db/           # Database schema & migrations (Drizzle, PostgreSQL)
 │   └── shared/       # Shared code & constants between apps
+├── services/
+│   └── card-checkins/ # ESP32 check-in card firmware (PlatformIO)
 ├── turbo.json        # Task runner pipeline
 ├── biome.json        # Lint & format
 └── Dockerfile        # Multi-stage build (api & web)
@@ -96,8 +98,10 @@ bun run dev:web      # Web only
 
 - **Auth** — Google OAuth login, JWT bearer token (full docs at `/docs`)
 - **Users** — class member data
+- **IoT** — device endpoints (check-in cards)
 - **Checkins** — daily check-ins (+ admin)
-- **Journals** — journal / habit tracking (+ admin)
+- **Journals** — journal / habit tracking (+ admin), PDF recap export (pdfkit)
+- **Leaderboard** — streak rankings
 - **Storage** — file uploads to S3-compatible storage
 
 ## Docker

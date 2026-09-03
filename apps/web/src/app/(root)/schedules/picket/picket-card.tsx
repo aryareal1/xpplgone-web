@@ -1,7 +1,7 @@
 'use client';
 
-import XiRplMascot from '@fe/components/mascot/Mascot';
-import { Card, CardContent } from '@fe/components/ui/card';
+import XiRplMascot from '@xirpl/shared/components/mascot';
+import { Card, CardContent } from '@xirpl/shared/components/ui/card';
 import { cn } from '@fe/lib/utils';
 import { CalendarDays, Users2Icon } from 'lucide-react';
 import type { PicketDay } from '../../../../../data/picket-schedule';

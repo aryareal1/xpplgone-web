@@ -1,13 +1,13 @@
 'use client';
 
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from '@fe/components/ui/avatar';
-import { Button } from '@fe/components/ui/button';
-import { Skeleton } from '@fe/components/ui/skeleton';
+import { Button } from '@xirpl/shared/components/ui/button';
+import { Skeleton } from '@xirpl/shared/components/ui/skeleton';
 import { useStudents } from '@fe/hooks/use-students';
 import { useUser } from '@fe/hooks/use-user';
 import api, { fileUrl } from '@fe/lib/api';

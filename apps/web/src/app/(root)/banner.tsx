@@ -8,7 +8,7 @@ import {
   type Variants,
 } from 'motion/react';
 import Image from 'next/image';
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },

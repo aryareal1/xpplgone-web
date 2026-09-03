@@ -1,9 +1,9 @@
 'use client';
 
 import { fileUrl } from '@fe/lib/api';
-import { Button } from '@fe/components/ui/button';
+import { Button } from '@xirpl/shared/components/ui/button';
 import { Checkbox } from '@fe/components/ui/checkbox';
-import { Input } from '@fe/components/ui/input';
+import { Input } from '@xirpl/shared/components/ui/input';
 import { cn } from '@fe/lib/utils';
 import {
   CheckIcon,

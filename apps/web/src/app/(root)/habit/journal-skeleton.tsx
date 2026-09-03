@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@fe/components/ui/skeleton';
+import { Skeleton } from '@xirpl/shared/components/ui/skeleton';
 
 export function HabitJournalSkeleton() {
   return (

@@ -5,7 +5,7 @@ import { LogInIcon } from 'lucide-react';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button } from '@fe/components/ui/button';
+import { Button } from '@xirpl/shared/components/ui/button';
 
 const lexend = Lexend({ subsets: ['latin'] });
 const funnel = Funnel_Display({ subsets: ['latin'] });

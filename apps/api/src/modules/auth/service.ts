@@ -27,8 +27,16 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
   .derive(({ oauth2, jwt, headers, server, request }) => ({
     auth: {
       generateUrl(redirectUrl = '/') {
+        // Only same-origin paths; `//host` and `/\host` would escape after the
+        // callback concatenates this onto webUrl.
+        const safe =
+          redirectUrl.startsWith('/') &&
+          !redirectUrl.startsWith('//') &&
+          !redirectUrl.startsWith('/\\')
+            ? redirectUrl
+            : '/';
         const url = oauth2.createURL('Google', ['openid email profile'], {
-          redirectUrl,
+          redirectUrl: safe,
         });
         url.searchParams.set('access_type', 'offline');
         url.searchParams.set('prompt', 'consent');
@@ -40,9 +48,13 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
           // TODO: implement for mobile exchange.
           return null;
         } else {
-          const { tokens, payload, openId } = await oauth2.authorize<{
-            redirectUrl: string;
-          }>('Google');
+          let authed;
+          try {
+            authed = await oauth2.authorize<{ redirectUrl: string }>('Google');
+          } catch {
+            return null;
+          }
+          const { tokens, payload, openId } = authed;
 
           const user = await db.query.usersTable.findFirst({
             where: {
@@ -117,7 +129,7 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
         }
       },
       async resolveToken(accessToken: string) {
-        const token = await jwt.verify(accessToken);
+        const token = await jwt.verify(accessToken).catch(() => null);
         if (!token) return null;
 
         const session = await db.query.sessionsTable.findFirst({
@@ -170,7 +182,7 @@ export const Auth = new Elysia({ name: 'Auth.Service' })
         return accessToken;
       },
       async revoke(accessToken: string) {
-        const token = await jwt.verify(accessToken);
+        const token = await jwt.verify(accessToken).catch(() => null);
         if (!token) return null;
 
         await db

@@ -1,0 +1,303 @@
+@import "tailwindcss";
+@source "../../../../packages/shared/src";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-gray-125: oklch(0.96 0.0025 265);
+  --color-gray-150: oklch(0.95 0.005 265);
+  --color-gray-175: oklch(0.94 0.0075 265);
+  --color-gray-825: oklch(0.2675 0.03 259);
+  --color-gray-850: oklch(0.245 0.03 261);
+  --color-gray-875: oklch(0.2325 0.03 263);
+}
+
+/* Admin palette: green (web is blue), plus pastels for section accents.
+ * brand-blue keeps its name (shared Button `special` variant uses it) but is
+ * repainted green here. */
+@theme inline {
+  --color-brand-blue: #43a047;
+  --color-brand-yellow: #ffc93c;
+  --color-brand-navy: #0a2540;
+  --color-pastel-yellow: #ffe8a3;
+  --color-pastel-blue: #bfdfff;
+  --color-pastel-pink: #ffc9de;
+  --color-pastel-green: #c8f2d0;
+  --color-pastel-purple: #d8ccff;
+  --shadow-soft: 0 4px 0 0 var(--duo-shade);
+}
+
+/*
+ * Duolingo-style shape language: thick borders, solid blur-free shadows, and
+ * pressable buttons/cards. Colors stay from the mascot palette.
+ */
+@utility duo-card {
+  border-width: 2px;
+  box-shadow: 0 var(--duo-depth, 4px) 0 0 var(--duo-shade);
+}
+
+@utility duo-press {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+
+  &:hover {
+    --duo-depth: 6px;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    --duo-depth: 1px;
+    transform: translateY(3px);
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary) 45%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:double-button,
+::-webkit-scrollbar-button:vertical:decrement,
+::-webkit-scrollbar-button:vertical:increment,
+::-webkit-scrollbar-button:horizontal:decrement,
+::-webkit-scrollbar-button:horizontal:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+@utility scrollbar-minimal {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-fredoka);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-grid: var(--grid);
+  --color-grid-header: var(--grid-header);
+  --color-grid-foreground: var(--grid-foreground);
+  --color-grid-border: var(--grid-border);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: light;
+  --radius: 1rem;
+  --duo-shade: rgb(10 37 64 / 0.15);
+  --background: #fffdf7;
+  --foreground: #0a2540;
+  --card: #ffffff;
+  --card-foreground: #0a2540;
+  --popover: #ffffff;
+  --popover-foreground: #0a2540;
+  --primary: #43a047;
+  --primary-foreground: #ffffff;
+  --secondary: #eef6e9;
+  --secondary-foreground: #0a2540;
+  --muted: #eef6e9;
+  --muted-foreground: #5b7a63;
+  --accent: #e3f5e6;
+  --accent-foreground: #1b5e20;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #d9e6cf;
+  --input: #d9e6cf;
+  --ring: #43a047;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a2540;
+  --sidebar-primary: #43a047;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3f5e6;
+  --sidebar-accent-foreground: #1b5e20;
+  --sidebar-border: #d9e6cf;
+  --sidebar-ring: #43a047;
+  --grid: oklch(0.96 0.0025 265);
+  --grid-header: oklch(0.95 0.005 265);
+  --grid-foreground: oklch(0.13 0.028 261.692);
+  --grid-border: oklch(0.87 0.01 258);
+}
+
+.dark {
+  color-scheme: dark;
+  --duo-shade: rgb(0 0 0 / 0.55);
+  --background: #121413;
+  --foreground: #f0f1f0;
+  --card: #1a1c1b;
+  --card-foreground: #f0f1f0;
+  --popover: #1a1c1b;
+  --popover-foreground: #f0f1f0;
+  --primary: #7fae85;
+  --primary-foreground: #121413;
+  --secondary: #232624;
+  --secondary-foreground: #f0f1f0;
+  --muted: #232624;
+  --muted-foreground: #aab0ac;
+  --accent: #2a2e2b;
+  --accent-foreground: #d6e3d8;
+  --destructive: oklch(0.68 0.2 22);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: #7fae85;
+  --chart-1: oklch(0.82 0.17 70);
+  --chart-2: oklch(0.7 0.17 165);
+  --chart-3: oklch(0.6 0.18 290);
+  --chart-4: oklch(0.65 0.2 30);
+  --chart-5: oklch(0.72 0.18 240);
+  --sidebar: #161817;
+  --sidebar-foreground: #f0f1f0;
+  --sidebar-primary: #7fae85;
+  --sidebar-primary-foreground: #121413;
+  --sidebar-accent: #2a2e2b;
+  --sidebar-accent-foreground: #d6e3d8;
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: #7fae85;
+
+  /* Grid */
+  --grid: oklch(0.22 0.05 277);
+  --grid-header: oklch(0.19 0.05 279);
+  --grid-foreground: oklch(0.95 0.008 250);
+  --grid-border: oklch(0.32 0.05 272);
+}
+
+@layer base {
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
+  }
+}
+
+/* Theme toggle uses a clip-path reveal from the button; freeze color
+   transitions during the snapshot so the new theme paints immediately. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.vt-active,
+.vt-active * {
+  transition: none !important;
+}
+
+/* Respect user preference: disable decorative animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: must override Tailwind animation utilities */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: done */
+  }
+}

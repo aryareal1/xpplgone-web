@@ -8,6 +8,7 @@
     "dev:full": "turbo dev --ui=tui",
     "dev:api": "bun run --cwd apps/api dev",
     "dev:web": "bun run --cwd apps/web dev",
+    "dev:admin": "bun run --cwd apps/admin dev",
     "dev:ocr": "bun run --cwd services/ocr dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
@@ -28,6 +29,7 @@
   "workspaces": [
     "apps/**",
     "!apps/web/.next/**",
+    "!apps/admin/.next/**",
     "packages/**",
     "services/**"
   ],

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import '../globals.css';
 import { Analytics } from '@fe/components/analytics';
-import { ThemeProvider } from '@fe/components/theme-provider';
+import { ThemeProvider } from '@xirpl/shared/components/theme-provider';
 import { SITE_NAME } from '@xirpl/shared';
 import { DM_Sans, Fredoka } from 'next/font/google';
 import { type ReactNode, Suspense } from 'react';

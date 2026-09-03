@@ -1,7 +1,7 @@
 'use client';
 
 import SectionHeader from '@fe/components/section-header';
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import { AspectRatio } from '@fe/components/ui/aspect-ratio';
 import { motion as m } from 'motion/react';
 import Image from 'next/image';

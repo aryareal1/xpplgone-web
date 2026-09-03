@@ -4,8 +4,8 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { PanelLeftIcon } from 'lucide-react';
 import { Slot } from 'radix-ui';
 import * as React from 'react';
-import { Button } from '@fe/components/ui/button';
-import { Input } from '@fe/components/ui/input';
+import { Button } from '@xirpl/shared/components/ui/button';
+import { Input } from '@xirpl/shared/components/ui/input';
 import { Separator } from '@fe/components/ui/separator';
 import {
   Sheet,
@@ -14,12 +14,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@fe/components/ui/sheet';
-import { Skeleton } from '@fe/components/ui/skeleton';
+import { Skeleton } from '@xirpl/shared/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@fe/components/ui/tooltip';
+} from '@xirpl/shared/components/ui/tooltip';
 import { useIsMobile } from '@fe/hooks/use-mobile';
 import { cn } from '@fe/lib/utils';
 

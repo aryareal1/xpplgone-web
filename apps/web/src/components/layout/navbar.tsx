@@ -4,6 +4,7 @@ import type { UserModel } from '@be/modules/user/model';
 
 type IProfile = UserModel['User'];
 import { SITE_NAME } from '@xirpl/shared';
+import { revealTheme } from '@xirpl/shared/utils';
 import {
   AlignLeftIcon,
   FlameIcon,
@@ -18,11 +19,12 @@ import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useStreak } from '@fe/hooks/use-streak';
+import { fmtDate } from '../../../data/habit-data';
 import { useUser } from '@fe/hooks/use-user';
 import api from '@fe/lib/api';
 import { cn } from '@fe/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Button } from '../ui/button';
+import { Button } from '@xirpl/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,9 +92,21 @@ export default function NavBar() {
             <Link
               href="/habit"
               title={`Streak ${streak.streak} hari`}
-              className="border-brand-yellow bg-pastel-yellow text-brand-navy duo-card duo-press flex h-11 items-center gap-1.5 rounded-full px-3 font-extrabold [--duo-depth:3px] [--duo-shade:#e0a800] sm:px-3.5 dark:bg-amber-400/20 dark:text-amber-200"
+              className={cn(
+                'duo-card duo-press flex h-11 items-center gap-1.5 rounded-full px-3 font-extrabold [--duo-depth:3px] sm:px-3.5',
+                streak.streak > 0 && streak.since === fmtDate(new Date())
+                  ? 'border-brand-yellow bg-pastel-yellow text-brand-navy [--duo-shade:#e0a800] dark:bg-amber-400/20 dark:text-amber-200'
+                  : 'border-muted-foreground/30 bg-muted-foreground/15 text-muted-foreground [--duo-shade:color-mix(in_srgb,var(--muted-foreground)_35%,transparent)]',
+              )}
             >
-              <FlameIcon className="size-4 text-amber-600 sm:size-4.5" />
+              <FlameIcon
+                className={cn(
+                  'size-4 sm:size-4.5',
+                  streak.streak > 0 &&
+                    streak.since === fmtDate(new Date()) &&
+                    'text-amber-600',
+                )}
+              />
               <span className="text-base tabular-nums">{streak.streak}</span>
               <span className="sr-only">hari streak</span>
             </Link>
@@ -150,7 +164,14 @@ function ThemeItem() {
         e.preventDefault();
         let n = theme === 'dark' ? 'light' : 'dark';
         if (n === systemTheme) n = 'system';
-        setTheme(n);
+        // Reveal from the item's center; onSelect carries no pointer coords.
+        const el = e.currentTarget as HTMLElement | null;
+        const { left = 0, top = 0, width = 0, height = 0 } =
+          el?.getBoundingClientRect() ?? {};
+        revealTheme(
+          { clientX: left + width / 2, clientY: top + height / 2 },
+          () => setTheme(n),
+        );
       }}
     >
       {theme === 'dark' ? <MoonIcon /> : <SunIcon />}

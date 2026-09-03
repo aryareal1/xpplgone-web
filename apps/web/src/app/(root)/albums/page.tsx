@@ -1,6 +1,6 @@
 'use client';
 
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import SectionHeader from '@fe/components/section-header';
 import { ArrowLeftIcon } from 'lucide-react';
 import { motion } from 'motion/react';

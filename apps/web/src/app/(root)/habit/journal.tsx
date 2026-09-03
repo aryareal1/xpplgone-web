@@ -1,15 +1,12 @@
 'use client';
 
-import { Button } from '@fe/components/ui/button';
 import api from '@fe/lib/api';
 import { useUser } from '@fe/hooks/use-user';
 import {
-  LayoutDashboardIcon,
   LockIcon,
   TriangleAlertIcon,
 } from 'lucide-react';
 import { motion as m, useReducedMotion } from 'motion/react';
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   useCallback,
@@ -18,7 +15,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { isAdminRole } from '../../../../data/habit-admin';
 import {
   attendanceCopy,
   attendanceWindow,
@@ -295,19 +291,6 @@ export default function HabitJournal() {
             })}
             {!editable && ' · hanya bisa dibaca'}
           </p>
-          {isAdminRole(user?.role) && (
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              pointer
-            >
-              <Link href="/habit/admin">
-                <LayoutDashboardIcon /> Dasbor Admin
-              </Link>
-            </Button>
-          )}
         </m.header>
 
         <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-[1fr_360px]">

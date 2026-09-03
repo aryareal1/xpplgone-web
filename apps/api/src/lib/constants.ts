@@ -2,6 +2,7 @@ import type { ElysiaCookie } from 'elysia/cookies';
 
 export const webUrl = process.env.WEB_URL || 'http://localhost:3600';
 export const apiUrl = process.env.API_URL || 'http://localhost:3601';
+export const adminUrl = process.env.ADMIN_URL || 'http://localhost:3620';
 
 /**
  * Default cookie properties.
@@ -14,11 +15,13 @@ export const cookieDefaults = {
   maxAge: 60 * 15,
 } as const satisfies ElysiaCookie;
 
-export const ADMIN_ROLES: ['developer', 'teacher', 'homeroom_teacher'] = [
+export const ADMIN_ROLES: [
   'developer',
   'teacher',
   'homeroom_teacher',
-];
+  'leader',
+  'vice_leader',
+] = ['developer', 'teacher', 'homeroom_teacher', 'leader', 'vice_leader'];
 export const DEV_ROLE = 'developer';
 
 /**

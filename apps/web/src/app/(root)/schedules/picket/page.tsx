@@ -1,6 +1,6 @@
 'use client';
 
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import SectionHeader from '@fe/components/section-header';
 import { cn } from '@fe/lib/utils';
 import { MotionConfig, motion } from 'motion/react';

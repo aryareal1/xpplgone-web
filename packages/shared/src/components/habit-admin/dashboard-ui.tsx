@@ -2,11 +2,11 @@
 
 import { useState, type ReactNode } from 'react';
 import { ClockIcon, ShieldAlertIcon, XIcon, type UsersIcon } from 'lucide-react';
-import { Card, CardContent } from '@fe/components/ui/card';
-import { Skeleton } from '@fe/components/ui/skeleton';
-import { fileUrl } from '@fe/lib/api';
-import { cn } from '@fe/lib/utils';
-import { InfoHint } from '../widgets';
+import { Card, CardContent } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
+import { cn } from '../../utils';
+import { InfoHint } from '../info-hint';
+import { useHabitAdmin } from './context';
 
 export function ProofModal({
   proof,
@@ -15,6 +15,7 @@ export function ProofModal({
   proof: { label: string; filename: string } | null;
   onClose: () => void;
 }) {
+  const { fileUrl } = useHabitAdmin();
   const [imgError, setImgError] = useState(false);
   if (!proof) return null;
   const imageUrl = fileUrl(proof.filename);

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["dom", "dom.iterable", "ESNext"],
     "types": ["bun"],
     "moduleDetection": "force",
     "declaration": true,

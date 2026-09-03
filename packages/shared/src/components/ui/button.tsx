@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
 import type * as React from 'react';
 
-import { cn } from '@fe/lib/utils';
+import { cn } from '../../utils';
 
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent bg-clip-padding text-sm font-bold tracking-wide whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'duo-card duo-press bg-primary text-primary-foreground uppercase [--duo-shade:#1565c0] hover:bg-primary/95 dark:[--duo-shade:#0b4f8a]',
+          'duo-card duo-press bg-primary text-primary-foreground uppercase [--duo-shade:color-mix(in_srgb,var(--primary)_70%,black)] hover:bg-primary/95 dark:[--duo-shade:color-mix(in_srgb,var(--primary)_55%,black)]',
         outline:
           'duo-card duo-press border-border bg-card hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:
@@ -21,7 +21,7 @@ const buttonVariants = cva(
           'duo-card duo-press bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
         link: 'text-primary underline-offset-4 hover:underline',
         special:
-          'duo-card duo-press border-[#1565c0] bg-brand-blue text-white uppercase [--duo-shade:#1565c0]',
+          'duo-card duo-press border-(--duo-shade) bg-brand-blue text-white uppercase [--duo-shade:color-mix(in_srgb,var(--color-brand-blue)_70%,black)]',
       },
       size: {
         default:

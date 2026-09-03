@@ -273,6 +273,18 @@
   }
 }
 
+/* Theme toggle uses a clip-path reveal from the button; freeze color
+   transitions during the snapshot so the new theme paints immediately. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.vt-active,
+.vt-active * {
+  transition: none !important;
+}
+
 /* Respect user preference: disable decorative animation. */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -5,23 +5,16 @@ import { motion as m, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '@fe/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@fe/components/ui/card';
-import { Input } from '@fe/components/ui/input';
-import { useUser } from '@fe/hooks/use-user';
-import { cn } from '@fe/lib/utils';
-import {
-  type ClassSummary,
-  downloadRecapPdf,
-  fetchClassSummary,
-  fetchMemberRows,
-  fetchMembers,
-  isAdminRole,
-  type Member,
-  type MemberRow,
-} from '../../../../../data/habit-admin';
-import { MONTHS } from '../../../../../data/habit-data';
-import { InfoHint } from '../widgets';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { cn } from '../../utils';
+import type { ClassSummary, Member, MemberRow } from './types';
+
+/** The dashboard can be mounted by the student web app or the standalone admin app. */
+const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL ?? '';
+import { InfoHint } from '../info-hint';
+import { useHabitAdmin } from './context';
 import { DistributionBars, ModuleBars, ModuleRadar, TrendArea } from './charts';
 import { MemberDetail, MemberTable, MemberTableSkeleton } from './dashboard-member';
 import { DashboardSkeleton, Guard, Stat } from './dashboard-ui';
@@ -36,6 +29,15 @@ const SORTS: { key: SortKey; label: string }[] = [
 ];
 
 export default function AdminDashboard() {
+  const {
+    useUser,
+    isAdminRole,
+    downloadRecapPdf,
+    fetchClassSummary,
+    fetchMemberRows,
+    fetchMembers,
+    MONTHS,
+  } = useHabitAdmin();
   const { user, loading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
@@ -124,7 +126,7 @@ export default function AdminDashboard() {
       <Guard
         title="Halaman khusus pengajar"
         body={user ? 'Akun kamu tidak punya akses ke dasbor ini. Hanya developer, guru, dan wali kelas yang bisa membukanya.' : 'Masuk dengan akun pengajar untuk melihat rekap kebiasaan seluruh anggota.'}
-        action={user ? <Button asChild variant="special" pointer><Link href="/habit">Ke jurnal saya</Link></Button> : <Button asChild variant="special" pointer><Link href="/login?r=/habit/admin">Masuk</Link></Button>}
+        action={user ? <Button asChild variant="special" pointer><Link href={`${WEB_URL}/habit`}>Ke jurnal saya</Link></Button> : <Button asChild variant="special" pointer><Link href={`${WEB_URL}/login?r=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '/habit/admin')}`}>Masuk</Link></Button>}
       />
     );
 

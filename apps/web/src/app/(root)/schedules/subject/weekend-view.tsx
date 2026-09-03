@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 
 export function WeekendView({ dayWeekend }: { dayWeekend: string }) {
   return (

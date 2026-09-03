@@ -62,8 +62,7 @@ export const requireAdmin = new Elysia({ name: 'Auth.requireAdmin' })
         message: 'Unauthorized',
       });
 
-    // @ts-expect-error
-    if (!ADMIN_ROLES.includes(auth.user.role))
+    if (!(ADMIN_ROLES as readonly string[]).includes(auth.user.role))
       return status(403, {
         success: false,
         message: 'Forbidden',

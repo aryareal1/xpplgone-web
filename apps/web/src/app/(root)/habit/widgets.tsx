@@ -5,18 +5,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@fe/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@fe/components/ui/tooltip';
+} from '@xirpl/shared/components/ui/card';
 import { cn } from '@fe/lib/utils';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FlameIcon,
-  InfoIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion as m, useReducedMotion } from 'motion/react';
 import { useMemo, useState } from 'react';
@@ -38,33 +32,11 @@ import {
 } from '../../../../data/habit-data';
 // ponytail: same chart the admin dashboard already ships, so the student view
 // and the teacher view can never drift apart.
-import { TrendArea } from './admin/charts';
+import { TrendArea } from '@xirpl/shared/components/habit-admin/charts';
 
-/**
- * Explains what a number means. Controlled open so a tap works on touch, where
- * Radix's hover trigger never fires.
- */
-export function InfoHint({ label, text }: { label: string; text: string }) {
-  const [open, setOpen] = useState(false);
+import { InfoHint } from '@xirpl/shared/components/info-hint';
 
-  return (
-    <Tooltip open={open} onOpenChange={setOpen}>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Info: ${label}`}
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex shrink-0 cursor-pointer items-center justify-center self-center leading-none text-muted-foreground transition-colors hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none dark:hover:text-foreground"
-        >
-          <InfoIcon className="size-4" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-64 leading-relaxed">
-        {text}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+export { InfoHint };
 
 export function HabitCalendar({
   selected,

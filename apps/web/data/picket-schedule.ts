@@ -1,4 +1,4 @@
-import type { MascotPose, MascotTool } from '@fe/components/mascot/Mascot';
+import type { MascotPose, MascotTool } from '@xirpl/shared/components/mascot';
 
 export interface PicketDay {
   day: string;

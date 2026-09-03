@@ -3,31 +3,12 @@
 import { ArrowLeftIcon, CalendarDaysIcon, ClockIcon, DumbbellIcon, FlameIcon, MoonStarIcon, NotebookPenIcon, ShieldAlertIcon } from 'lucide-react';
 import { motion as m, useReducedMotion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@fe/components/ui/card';
-import { Skeleton } from '@fe/components/ui/skeleton';
-import { cn } from '@fe/lib/utils';
-import {
-  type Member,
-  type MemberDay,
-  type MemberDetail as MemberDetailData,
-  type MemberRow,
-  fetchMemberDay,
-  fetchMemberDetail,
-} from '../../../../../data/habit-admin';
-import {
-  IBADAH,
-  MODULES,
-  MONTHS,
-  attendanceCopy,
-  checkinAt,
-  fmtDate,
-  fmtTime,
-  isLateCheck,
-  lateLabel,
-  level,
-  toLocalDate,
-} from '../../../../../data/habit-data';
-import { InfoHint } from '../widgets';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
+import { cn } from '../../utils';
+import { InfoHint } from '../info-hint';
+import { useHabitAdmin } from './context';
+import type { Member, MemberDay, MemberRow } from './types';
 import { DistributionBars, HeatCalendar, ModuleBars, ModuleRadar, TrendArea } from './charts';
 import { DashboardSkeleton, DetailBlock, Pill, ProofModal, Row, Stat } from './dashboard-ui';
 
@@ -38,6 +19,7 @@ export function MemberTable({
   rows: MemberRow[];
   onPick: (nis: number) => void;
 }) {
+  const { MODULES } = useHabitAdmin();
   if (!rows.length)
     return (
       <p className="px-4 py-10 text-center text-sm text-muted-foreground">
@@ -124,8 +106,10 @@ export function MemberDetail({
   month: Date;
   onBack: () => void;
 }) {
+  const ctx = useHabitAdmin();
+  const { fetchMemberDay, fetchMemberDetail, MODULES, MONTHS, fmtDate, toLocalDate } = ctx;
   const reduce = useReducedMotion();
-  const [row, setRow] = useState<MemberDetailData | null>(null);
+  const [row, setRow] = useState<Awaited<ReturnType<typeof fetchMemberDetail>> | null>(null);
   const [day, setDay] = useState<number | null>(null);
   const [detail, setDetail] = useState<MemberDay | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -269,6 +253,7 @@ export function DayDetail({
   date: Date | null;
   onProofOpen: (proof: { label: string; filename: string }) => void;
 }) {
+  const { IBADAH, attendanceCopy, checkinAt, fmtTime, isLateCheck, lateLabel, level } = useHabitAdmin();
   if (!picked)
     return <p className="flex h-40 items-center justify-center rounded-xl bg-secondary text-sm text-muted-foreground dark:bg-secondary/40">Belum ada tanggal yang dipilih.</p>;
   if (loading) return <DayDetailSkeleton />;

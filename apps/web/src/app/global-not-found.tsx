@@ -4,9 +4,9 @@ import { HomeIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Funnel_Display, Lexend } from 'next/font/google';
 import Link from 'next/link';
-import XiRplMascot from '@fe/components/mascot/Mascot';
-import { ThemeProvider } from '@fe/components/theme-provider';
-import { Button } from '@fe/components/ui/button';
+import XiRplMascot from '@xirpl/shared/components/mascot';
+import { ThemeProvider } from '@xirpl/shared/components/theme-provider';
+import { Button } from '@xirpl/shared/components/ui/button';
 
 const lexend = Lexend({ subsets: ['latin'] });
 const funnel = Funnel_Display({ subsets: ['latin'] });

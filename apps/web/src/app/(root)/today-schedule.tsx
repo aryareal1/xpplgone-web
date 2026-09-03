@@ -4,9 +4,9 @@ import { CheckIcon, ClockIcon, MapPinIcon } from 'lucide-react';
 import { motion as m } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import XiRplMascot from '@fe/components/mascot/Mascot';
+import XiRplMascot from '@xirpl/shared/components/mascot';
 import SectionHeader from '@fe/components/section-header';
-import { Skeleton } from '@fe/components/ui/skeleton';
+import { Skeleton } from '@xirpl/shared/components/ui/skeleton';
 import { cn } from '@fe/lib/utils';
 import { scheduleData } from '../../../data/subject-schedule';
 

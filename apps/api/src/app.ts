@@ -1,4 +1,4 @@
-import { webUrl } from '@be/lib/constants';
+import { adminUrl, webUrl } from '@be/lib/constants';
 import { cors } from '@elysia/cors';
 import openapi from '@elysia/openapi';
 import { SITE_NAME } from '@xirpl/shared';
@@ -14,7 +14,7 @@ import { storage } from './modules/storage';
 import { user } from './modules/user';
 
 const app = new Elysia()
-  .use(cors({ origin: webUrl, credentials: true }))
+  .use(cors({ origin: [webUrl, adminUrl], credentials: true }))
   .use(
     openapi({
       path: '/docs',
