@@ -12,7 +12,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated || !isAdminRole(user?.role)) {
-      const web = process.env.NEXT_PUBLIC_WEB_URL;
+      const web = process.env.NEXT_PUBLIC_WEB_URL || "http://localhost:3600";
       window.location.replace(
         `${web}/login?r=${encodeURIComponent(window.location.origin)}`,
       );
