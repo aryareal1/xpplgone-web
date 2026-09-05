@@ -10,11 +10,13 @@ import {
   ClipboardListIcon,
   Code2Icon,
   HomeIcon,
+  LayoutDashboardIcon,
   TrophyIcon,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@fe/hooks/use-user';
 import { Button } from '@xirpl/shared/components/ui/button';
 import {
   Sidebar,
@@ -52,8 +54,16 @@ const bars: Bars = [
   {
     title: 'Administrasi Kelas',
     items: [
-      { name: 'Pelajaran', icon: CalendarDaysIcon, path: '/schedules/subject' },
-      { name: 'Piket', icon: ClipboardListIcon, path: '/schedules/picket' },
+      {
+        name: 'Jadwal Pelajaran',
+        icon: CalendarDaysIcon,
+        path: '/schedules/subject',
+      },
+      {
+        name: 'Jadwal Piket',
+        icon: ClipboardListIcon,
+        path: '/schedules/picket',
+      },
     ],
   },
 ];
@@ -64,9 +74,20 @@ const active =
 const itemBase =
   'h-11 rounded-2xl border-2 border-transparent text-base font-extrabold';
 
+// Mirrors ADMIN_ROLES in apps/api (can't import across apps).
+const ADMIN_ROLES = [
+  'developer',
+  'teacher',
+  'homeroom_teacher',
+  'leader',
+  'vice_leader',
+];
+
 export default function AppSidebar() {
   const { toggleSidebar } = useSidebar();
   const path = usePathname();
+  const { user } = useUser();
+  const isAdmin = !!user?.role && ADMIN_ROLES.includes(user.role);
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -135,6 +156,29 @@ export default function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-extrabold tracking-widest uppercase">
+              Admin
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1.5">
+                <SidebarMenuItem>
+                  <SidebarMenuButton className={itemBase} asChild>
+                    <a
+                      href={
+                        process.env.NEXT_PUBLIC_ADMIN_URL ??
+                        'http://localhost:3620'
+                      }
+                    >
+                      <LayoutDashboardIcon /> Panel Admin
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter>

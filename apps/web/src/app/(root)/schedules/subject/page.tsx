@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import SectionHeader from '@fe/components/section-header';
+import PageHero from '@fe/components/page-hero';
 import { cn } from '@fe/lib/utils';
 import {
   fridaySchedule,
@@ -273,7 +273,6 @@ export default function TimelineSchedule() {
             isTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
           }`}
         >
-          {/* Schematic Header */}
           <motion.header
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -281,57 +280,54 @@ export default function TimelineSchedule() {
               duration: 0.8,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
           >
-            <SectionHeader
-              title={`Jadwal Pelajaran`}
-              desc={[
-                'Kelas XI RPL - SMKN 1 Kandeman',
-                'Semester Gasal Tahun Ajaran 2026/2027',
-              ]}
-            />
-
-            <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
-              {[
-                { label: 'Timeline', icon: LayoutList, grid: false },
-                { label: 'Semua Hari', icon: Grid3x3, grid: true },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => handleViewChange(item.grid)}
-                  className={cn(
-                    'group relative flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all duration-300 outline-none',
-                    isGrid === item.grid
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                  type="button"
-                >
-                  {isGrid === item.grid && (
-                    <motion.div
-                      layoutId="active-tab-grid"
-                      className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
-                      transition={{
-                        type: 'spring',
-                        bounce: 0.15,
-                        duration: 0.5,
-                      }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-2">
-                    <item.icon
-                      className={cn(
-                        'h-4 w-4 transition-transform group-hover:scale-110',
-                        isGrid === item.grid
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-muted-foreground',
-                      )}
-                    />
-                    <span className="text-sm font-bold">{item.label}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
+            <PageHero
+              pill="Jadwal"
+              title="Jadwal Pelajaran"
+              desc="Jadwal pelajaran mingguan Kelas XI RPL SMKN 1 Kandeman"
+            >
+              <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
+                {[
+                  { label: 'Timeline', icon: LayoutList, grid: false },
+                  { label: 'Semua Hari', icon: Grid3x3, grid: true },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => handleViewChange(item.grid)}
+                    className={cn(
+                      'group relative flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all duration-300 outline-none',
+                      isGrid === item.grid
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-muted-foreground hover:text-foreground',
+                    )}
+                    type="button"
+                  >
+                    {isGrid === item.grid && (
+                      <motion.div
+                        layoutId="active-tab-grid"
+                        className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
+                        transition={{
+                          type: 'spring',
+                          bounce: 0.15,
+                          duration: 0.5,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      <item.icon
+                        className={cn(
+                          'h-4 w-4 transition-transform group-hover:scale-110',
+                          isGrid === item.grid
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-muted-foreground',
+                        )}
+                      />
+                      <span className="text-sm font-bold">{item.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </PageHero>
           </motion.header>
 
           <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -368,7 +364,6 @@ export default function TimelineSchedule() {
           isTransitioning ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
         }`}
       >
-        {/* Timeline Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -376,64 +371,61 @@ export default function TimelineSchedule() {
             duration: 0.8,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center"
         >
-          <SectionHeader
+          <PageHero
+            pill="Jadwal"
             title="Jadwal Hari Ini"
-            desc={[
-              'Kelas XI RPL - SMKN 1 Kandeman',
-              'Semester Gasal Tahun Ajaran 2026/2027',
-            ]}
-          />
-
-          <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
-            {[
-              { label: 'Hari Ini', icon: LayoutList, grid: false },
-              { label: 'Grid', icon: Grid3x3, grid: true },
-            ].map((item) => (
-              <button
-                key={item.label}
-                onClick={() => handleViewChange(item.grid)}
-                className={cn(
-                  'group relative flex items-center gap-2 rounded-xl px-4 py-2 transition-all duration-300 outline-none',
-                  isGrid === item.grid
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
-                type="button"
-              >
-                {isGrid === item.grid && (
-                  <motion.div
-                    layoutId="active-tab-timeline"
-                    className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  <item.icon
-                    className={cn(
-                      'h-4 w-4 transition-transform group-hover:scale-110',
-                      isGrid === item.grid
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-muted-foreground',
-                    )}
-                  />
-                  <span className="text-sm font-bold">{item.label}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+            desc="Alur kegiatan kelas hari ini, dari upacara sampai jam terakhir, lengkap dengan hitung mundur."
+          >
+            <div className="flex items-center gap-1 rounded-2xl bg-secondary p-1.5 dark:bg-secondary">
+              {[
+                { label: 'Hari Ini', icon: LayoutList, grid: false },
+                { label: 'Grid', icon: Grid3x3, grid: true },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => handleViewChange(item.grid)}
+                  className={cn(
+                    'group relative flex items-center gap-2 rounded-xl px-4 py-2 transition-all duration-300 outline-none',
+                    isGrid === item.grid
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                  type="button"
+                >
+                  {isGrid === item.grid && (
+                    <motion.div
+                      layoutId="active-tab-timeline"
+                      className="absolute inset-0 rounded-xl bg-card shadow-[0_2px_0_0_var(--duo-shade)] dark:bg-secondary"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <item.icon
+                      className={cn(
+                        'h-4 w-4 transition-transform group-hover:scale-110',
+                        isGrid === item.grid
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-muted-foreground',
+                      )}
+                    />
+                    <span className="text-sm font-bold">{item.label}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </PageHero>
         </motion.header>
 
-        <div className="mt-8 mb-8 flex flex-wrap gap-4">
+        <div className="mb-8 flex flex-wrap gap-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
-            className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+            className="bg-pastel-blue text-brand-blue border-brand-blue/30 flex items-center gap-2 rounded-2xl border-2 px-4 py-2 dark:bg-blue-500/20 dark:text-blue-200"
           >
             <Calendar className="h-4 w-4" />
-            <span className="text-sm font-bold tracking-wider uppercase">
+            <span className="text-sm font-extrabold tracking-wider uppercase">
               {isWeekend ? dayWeekend : dayName}
             </span>
           </motion.div>
@@ -441,10 +433,10 @@ export default function TimelineSchedule() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
-            className="flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400"
+            className="bg-pastel-yellow text-brand-navy border-brand-navy/20 flex items-center gap-2 rounded-2xl border-2 px-4 py-2 dark:bg-amber-400/15 dark:text-amber-200"
           >
             <Clock className="h-4 w-4" />
-            <span className="text-sm font-bold whitespace-nowrap">
+            <span className="text-sm font-extrabold tabular-nums whitespace-nowrap">
               {getCurrentTimeString()} WIB
             </span>
           </motion.div>
@@ -453,10 +445,10 @@ export default function TimelineSchedule() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.4 }}
-              className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+              className="bg-pastel-green border-emerald-500/40 flex items-center gap-2 rounded-2xl border-2 px-4 py-2 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
             >
               <GraduationCap className="h-4 w-4" />
-              <span className="text-sm font-bold tracking-wider uppercase">
+              <span className="text-sm font-extrabold tracking-wider uppercase">
                 {todaySchedule?.lessons.length || 0} Mapel
               </span>
             </motion.div>
@@ -474,7 +466,6 @@ export default function TimelineSchedule() {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="mb-8 flex items-center gap-3"
             >
-              <div className="h-10 w-2 rounded-full bg-linear-to-b from-blue-600 to-indigo-600"></div>
               <h2 className="text-2xl font-bold tracking-tight uppercase">
                 {todaySchedule?.name}
               </h2>

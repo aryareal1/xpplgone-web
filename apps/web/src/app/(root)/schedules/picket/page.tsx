@@ -1,7 +1,6 @@
 'use client';
 
-import XiRplMascot from '@xirpl/shared/components/mascot';
-import SectionHeader from '@fe/components/section-header';
+import PageHero from '@fe/components/page-hero';
 import { cn } from '@fe/lib/utils';
 import { MotionConfig, motion } from 'motion/react';
 
@@ -20,11 +19,11 @@ export default function PicketSchedule() {
               duration: 0.8,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="mb-8 flex items-center justify-between gap-4"
           >
-            <SectionHeader
+            <PageHero
+              pill="Piket"
               title="Jadwal Piket"
-              desc={['Kelas XI RPL - SMKN 1 Kandeman']}
+              desc="Pembagian tugas piket kebersihan kelas setiap hari untuk Kelas XI RPL SMKN 1 Kandeman."
             />
           </motion.div>
 

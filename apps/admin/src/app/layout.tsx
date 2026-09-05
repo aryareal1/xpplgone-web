@@ -12,7 +12,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: `Admin | ${SITE_NAME}`,
-  description: `Dasbor pengajar ${SITE_NAME}`,
+  description: `Dasbor Admin ${SITE_NAME}`,
 };
 
 const fredoka = Fredoka({ variable: '--font-fredoka', subsets: ['latin'] });

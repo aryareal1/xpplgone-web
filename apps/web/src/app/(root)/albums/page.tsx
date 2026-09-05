@@ -1,7 +1,7 @@
 'use client';
 
 import XiRplMascot from '@xirpl/shared/components/mascot';
-import SectionHeader from '@fe/components/section-header';
+import PageHero from '@fe/components/page-hero';
 import { ArrowLeftIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
@@ -172,17 +172,17 @@ export default function AlbumLayout() {
         }}
         className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
       >
-        <div className="flex items-center justify-between gap-4">
-          <SectionHeader
-            title="Album"
-            desc={['Kelas XI RPL - SMKN 1 Kandeman', 'Galeri Momen & Kenangan']}
-          />
+        <PageHero
+          pill="Album"
+          title="Galeri Momen"
+          desc="Kumpulan foto Kelas XI RPL SMKN 1 Kandeman, dari kegiatan kelas sampai momen seru bareng."
+        >
           <XiRplMascot
             pose="cozy"
             size={150}
-            className="h-auto w-28 shrink-0 sm:w-36"
+            className="hidden h-auto w-28 shrink-0 sm:block sm:w-36"
           />
-        </div>
+        </PageHero>
       </motion.div>
 
       {/* Main Content */}

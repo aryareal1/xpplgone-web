@@ -117,37 +117,37 @@ export function SubjectGridView({ scheduleData }: SubjectGridViewProps) {
               <h3 className="text-brand-navy text-lg font-extrabold tracking-widest uppercase dark:text-white">
                 {day.name}
               </h3>
-              <p className="text-brand-blue text-[11px] font-extrabold uppercase dark:text-blue-200">
-                {day.subtitle}
-              </p>
             </div>
 
             {day.lessons.map((lesson) => (
               <div
                 key={lesson.time}
                 className={cn(
-                  'border-border rounded-2xl border-l-[6px] p-4',
+                  'bg-card duo-card flex flex-col gap-3 rounded-2xl border-l-[10px] p-4',
                   lesson.color,
-                  lesson.bg,
                 )}
               >
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-extrabold text-black uppercase">
-                    {lesson.time}
+                <div className="flex items-center gap-3.5">
+                  <span className="text-brand-navy w-20 shrink-0 font-mono text-sm font-extrabold tabular-nums dark:text-white">
+                    {lesson.startTime}
+                    <span className="text-muted-foreground block font-sans text-xs font-bold">
+                      {lesson.endTime}
+                    </span>
                   </span>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-base leading-tight font-extrabold">
+                      {lesson.subject}
+                    </span>
+                    <span className="text-muted-foreground text-xs leading-tight font-medium sm:text-sm">
+                      {lesson.teacher}
+                    </span>
+                  </div>
                   {lesson.room && (
-                    <span className="border-border bg-card flex items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[9px] font-extrabold uppercase">
-                      <MapPin className="size-2.5" />
-                      {lesson.room}
+                    <span className="bg-secondary text-secondary-foreground border-border flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-extrabold uppercase">
+                      <MapPin className="size-3.5" /> {lesson.room}
                     </span>
                   )}
                 </div>
-                <h4 className="text-base leading-tight font-extrabold text-black">
-                  {lesson.subject}
-                </h4>
-                <p className="text-[11px] font-bold text-black">
-                  {lesson.teacher}
-                </p>
               </div>
             ))}
           </motion.section>

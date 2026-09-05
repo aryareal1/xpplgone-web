@@ -34,8 +34,8 @@ const bars: {
     items: [
       { name: 'Beranda', icon: HomeIcon, path: '/' },
       { name: 'Kebiasaan', icon: ScrollTextIcon, path: '/habit' },
-      { name: 'Jadwal', icon: CalendarDaysIcon },
-      { name: 'Piket', icon: ClipboardListIcon },
+      { name: 'Jadwal Pelajaran', icon: CalendarDaysIcon },
+      { name: 'Jadwal Piket', icon: ClipboardListIcon },
     ],
   },
 ];
