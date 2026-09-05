@@ -81,6 +81,17 @@ services:
     depends_on:
       - api
 
+  admin:
+    image: aryareal/admin-xirpl
+    restart: unless-stopped
+    pull_policy: always
+    environment:
+      NEXT_PUBLIC_API_URL: $API_URL
+    networks:
+      - public_net
+    depends_on:
+      - api
+
   umami:
     image: ghcr.io/umami-software/umami:latest
     restart: unless-stopped

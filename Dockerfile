@@ -55,3 +55,30 @@ COPY --from=web-build /app/apps/web/.next/standalone .
 COPY --from=web-build /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=web-build /app/apps/web/public ./apps/web/public
 CMD ["bun", "apps/web/server.js"]
+
+# ── admin ───────────────────────────────────────────
+# pruner
+FROM oven/bun AS admin-prune
+WORKDIR /app
+COPY . .
+RUN bunx turbo prune @xirpl/admin --docker --production
+
+# builder
+FROM oven/bun AS admin-build
+WORKDIR /app
+ARG API_URL=https://api-xirpl.tigasearah.my.id WEB_URL=https://xirpl.tigasearah.my.id
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=$API_URL NEXT_PUBLIC_WEB_URL=$WEB_URL
+COPY --from=admin-prune /app/out/json .
+RUN bun install --frozen-lockfile
+COPY --from=admin-prune /app/out/full .
+COPY --from=admin-prune /app/tsconfig.json .
+RUN bun run --cwd apps/admin build
+
+# runner
+FROM oven/bun:slim AS admin
+WORKDIR /app
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3620
+COPY --from=admin-build /app/apps/admin/.next/standalone .
+COPY --from=admin-build /app/apps/admin/.next/static ./apps/admin/.next/static
+CMD ["bun", "apps/admin/server.js"]

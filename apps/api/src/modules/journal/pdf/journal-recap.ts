@@ -24,6 +24,10 @@ export const renderJournalRecap = async (recap: MonthlyJournalRecap) => {
   const doc = new PDFDocument({
     size: 'A4',
     margin: 0,
+    // PDFKit eagerly loads Helvetica in its constructor, which crashes the
+    // bundled image (`#standard-fonts/*` is not inlined by bun build). We only
+    // ever draw with the fonts registered below, so start with none.
+    font: null as never,
     info: {
       Title: `${TITLE} \u2014 ${recap.month.label}`,
       Author: `${SITE_NAME} ${SCHOOL}`,
