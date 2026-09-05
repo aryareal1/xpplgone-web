@@ -4,6 +4,7 @@ import openapi from '@elysia/openapi';
 import { SITE_NAME } from '@xirpl/shared';
 import { Elysia } from 'elysia';
 import { auth } from './modules/auth';
+import { calendar } from './modules/calendar';
 import { checkins } from './modules/checkins';
 import { checkinsAdmin } from './modules/checkins/admin';
 import { iot } from './modules/iot';
@@ -49,6 +50,9 @@ const app = new Elysia()
           {
             name: 'Storage',
           },
+          {
+            name: 'Calendar',
+          },
         ],
         components: {
           securitySchemes: {
@@ -93,6 +97,7 @@ const app = new Elysia()
     journalAdmin,
     leaderboard,
     storage,
+    calendar,
   ])
   .get('/', ({ redirect }) => redirect('/docs'), { detail: { hide: true } })
   .get('/health', () => ({ success: true, message: 'API is healthy' }), {
