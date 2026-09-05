@@ -27,7 +27,7 @@ import {
   checkinAt,
   fmtTime,
   isLateCheck,
-  isWeekend,
+  isWakeDay,
   lateLabel,
 } from '../../../../data/habit-data';
 import { InfoHint } from './widgets';
@@ -394,8 +394,8 @@ export function JournalFields({
         tone="hadir"
         index={1}
         info={
-          isWeekend(selected)
-            ? 'Sabtu dan Minggu modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00, dan semuanya memutus streak.'
+          isWakeDay(selected)
+            ? 'Sabtu, Minggu, dan hari libur nasional modul ini jadi Bangun Pagi: tekan tombolnya paling lambat 06:00. Lewat jam itu tetap tercatat, tapi berstatus kesiangan, kesorean setelah 15:00, kemalaman setelah 18:00, dan semuanya memutus streak.'
             : 'Tekan tombolnya untuk absen. Dibuka 06:00, dan lewat 07:00 tercatat terlambat sehingga streak putus. Waktu absen ikut tersimpan.'
         }
         done={status.hadir}

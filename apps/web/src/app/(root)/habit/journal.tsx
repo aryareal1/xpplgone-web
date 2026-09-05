@@ -32,6 +32,7 @@ import {
   moduleStatus,
   parseDate,
   PROOF_FIELDS,
+  setHolidays,
   type StreakData,
   streakForCheckStatus,
   toJournalBody,
@@ -86,6 +87,25 @@ export default function HabitJournal() {
   const [version, setVersion] = useState(0);
   const [now, setNow] = useState(() => new Date());
   const [journalLoading, setJournalLoading] = useState(true);
+  const [holidaysLoading, setHolidaysLoading] = useState(true);
+
+  // Public holidays turn weekdays into Bangun Pagi too; fetch this and last
+  // year so the streak window (current + previous month) is covered.
+  useEffect(() => {
+    const y = new Date().getFullYear();
+    Promise.all([
+      api.calendar.holidays.get({ query: { year: String(y) } }),
+      api.calendar.holidays.get({ query: { year: String(y - 1) } }),
+    ])
+      .then(([cur, prev]) =>
+        setHolidays([
+          ...(cur.data?.data ?? []),
+          ...(prev.data?.data ?? []),
+        ].map((h) => h.date)),
+      )
+      .catch(() => {}) // offline: weekends still work
+      .finally(() => setHolidaysLoading(false));
+  }, []);
 
   const today = useMemo(() => new Date(), []);
   const todayStr = fmtDate(today);
@@ -268,7 +288,8 @@ export default function HabitJournal() {
   const status = moduleStatus(data, check);
   const visibleStreak = streakForCheckStatus(streak, streakChecks, today);
 
-  if (userLoading || !user || journalLoading) return <HabitJournalSkeleton />;
+  if (userLoading || !user || journalLoading || holidaysLoading)
+    return <HabitJournalSkeleton />;
 
   return (
     <div className="bg-background min-h-screen transition-colors duration-300">

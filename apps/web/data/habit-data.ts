@@ -79,9 +79,19 @@ export const NIGHT_HOUR = 18;
 
 export const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 
-// Check-in type follows the day: Saturday and Sunday become wake-up.
+// Public holiday dates (`YYYY-MM-DD`), loaded from GET /calendar/holidays.
+let holidays = new Set<string>();
+export const setHolidays = (dates: string[]) => {
+  holidays = new Set(dates);
+};
+
+/** Wake-up day: weekend or national holiday — attendance becomes Bangun Pagi. */
+export const isWakeDay = (d: Date) =>
+  isWeekend(d) || holidays.has(fmtDate(d));
+
+// Check-in type follows the day: weekends and holidays become wake-up.
 export const checkinType = (d: Date): CheckinType =>
-  isWeekend(d) ? 'morning' : 'school';
+  isWakeDay(d) ? 'morning' : 'school';
 
 /** Late limit per type; the server uses the same numbers. */
 export const LATE_HOURS: Record<CheckinType, number> = {
@@ -112,20 +122,20 @@ export const streakForCheckStatus = (
   const byDate = new Map(checks.map((check) => [check.date, check]));
   const onTime = (check: Check | undefined) =>
     !!check?.checked_in_at && !isLateCheck(check);
-  const isPastWeekend = (date: string) => {
+  const isPastWakeDay = (date: string) => {
     const day = toLocalDate(date);
     return (
-      isWeekend(day) && (date < todayDate || today.getHours() >= WAKE_HOUR)
+      isWakeDay(day) && (date < todayDate || today.getHours() >= WAKE_HOUR)
     );
   };
 
-  // Late on any day, or a weekend without Wake-Up, breaks the streak.
+  // Late on any day, or a wake-up day without Wake-Up, breaks the streak.
   // Today only counts as failed once it's past 06:00.
   const lastBreak = checks
     .filter((check) => check.date <= todayDate)
     .filter(
       (check) =>
-        isLateCheck(check) || (isPastWeekend(check.date) && !onTime(check)),
+        isLateCheck(check) || (isPastWakeDay(check.date) && !onTime(check)),
     )
     .map((check) => check.date)
     .sort()
@@ -157,7 +167,7 @@ export type AttendanceWindow = 'closed' | 'open' | 'late';
 
 // Current attendance window status, used to lock the button.
 export const attendanceWindow = (d: Date): AttendanceWindow =>
-  isWeekend(d)
+  isWakeDay(d)
     ? d.getHours() < WAKE_HOUR
       ? 'open'
       : 'late'
@@ -172,7 +182,7 @@ export const attendanceWindow = (d: Date): AttendanceWindow =>
  * Wake-up tiers: late, then afternoon (15:00), then night (18:00).
  */
 export const lateLabel = (at: Date) =>
-  !isWeekend(at)
+  !isWakeDay(at)
     ? 'Terlambat'
     : at.getHours() >= NIGHT_HOUR
       ? 'Kemalaman'
@@ -182,7 +192,7 @@ export const lateLabel = (at: Date) =>
 
 // Single source of text for the journal, stats, and admin dashboard.
 export function attendanceCopy(d: Date) {
-  const w = isWeekend(d);
+  const w = isWakeDay(d);
   return {
     title: w ? 'Bangun Pagi' : 'Kehadiran',
     noun: w ? 'bangun pagi' : 'kehadiran',

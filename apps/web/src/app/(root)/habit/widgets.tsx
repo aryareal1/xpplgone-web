@@ -322,7 +322,7 @@ export function HabitStats({
             </span>
             <InfoHint
               label="Per modul"
-              text="Porsi hari di bulan ini tiap modul tercatat selesai. Kehadiran memakai batas 07:00 pada hari sekolah, dan pada Sabtu serta Minggu memakai Bangun Pagi dengan batas 06:00."
+              text="Porsi hari di bulan ini tiap modul tercatat selesai. Kehadiran memakai batas 07:00 pada hari sekolah, dan pada Sabtu, Minggu, serta hari libur nasional memakai Bangun Pagi dengan batas 06:00."
             />
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
